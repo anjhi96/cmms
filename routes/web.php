@@ -1,0 +1,50 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MachineController;
+use App\Http\Controllers\PMScheduleController;
+use App\Http\Controllers\SparepartController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\PMDetailController;
+
+Route::view('/', 'welcome')->name('home');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('machines', MachineController::class);
+
+    Route::view('/dashboard', 'dashboard') ->name('dashboard');
+
+    Route::resource('pm-schedules', PMScheduleController::class)
+        ->middleware('auth');
+
+    Route::resource('spareparts', SparepartController::class)
+    ->only(['index', 'create']);
+
+    Route::get('/reports', [ReportController::class, 'index'])
+           ->name('reports.index');
+
+    Route::resource('users', UserController::class)
+        ->only(['index', 'create', 'store']);
+
+    Route::post('/pm-schedules/{id}/details', [PMDetailController::class, 'store'])
+    ->name('pm-details.store');
+
+    Route::delete('/pm-details/{id}', [PMDetailController::class, 'destroy'])
+        ->name('pm-details.destroy');
+
+    Route::post('/pm-schedules/import', [PMScheduleController::class, 'import'])
+    ->name('pm-schedules.import');
+
+    Route::get('/machines/import', [MachineController::class, 'importForm'])
+    ->name('machines.import.form');
+
+    Route::post('/machines/import', [MachineController::class, 'import'])
+        ->name('machines.import');
+});
+
+require __DIR__.'/settings.php';
+// require __DIR__.'/auth.php'; // pastikan ada

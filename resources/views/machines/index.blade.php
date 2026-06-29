@@ -138,7 +138,7 @@
                     <th class="p-3 text-left">Machine Type</th>
                     <th class="p-3 text-left">Machine Number</th>
                     <th class="p-3 text-left">Status</th>
-                    <th class="p-3 text-center">Action</th>
+                    <th class="p-3 text-left">Action</th>
                 </tr>
 
             </thead>
@@ -162,22 +162,25 @@
 
                         <td class="p-3 text-center">
 
-                            <a href="{{ route('machines.edit', $m->id) }}"
-                                class="bg-yellow-500 text-white px-3 py-1 rounded">
-                                Edit
-                            </a>
+                            <div class="flex gap-2" text-center>
 
-                            <form method="POST" action="{{ route('machines.destroy', $m->id) }}" class="inline">
+                                <a href="{{ route('machines.edit', $m->id) }}"
+                                    class="bg-yellow-500 text-white px-3 py-1 rounded">
+                                    Edit
+                                </a>
 
-                                @csrf
-                                @method('DELETE')
+                                <form method="POST" action="{{ route('machines.destroy', $m->id) }}" class="inline">
 
-                                <button class="bg-red-600 text-white px-3 py-1 rounded"
-                                    onclick="return confirm('Delete machine?')">
-                                    Delete
-                                </button>
+                                    @csrf
+                                    @method('DELETE')
 
-                            </form>
+                                    <button class="bg-red-600 text-white px-3 py-1 rounded"
+                                        onclick="return confirm('Delete machine?')">
+                                        Delete
+                                    </button>
+
+                                </form>
+                            </div>
 
                         </td>
 

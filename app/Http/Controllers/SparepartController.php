@@ -3,16 +3,108 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Sparepart;
+use App\Models\Machine;
+use App\Imports\SparepartsImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SparepartController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-         return view('spareparts.index');
+        $query = Sparepart::query();
+
+        // SEARCH
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+
+                $q->where('material_number', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+
+            });
+        }
+
+        // FILTER MACHINE TYPE
+        if ($request->filled('machine_type')) {
+            $query->where('machine_type', $request->machine_type);
+        }
+
+        // FILTER STATUS
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        // FILTER SEGMENT
+        if ($request->filled('segment')) {
+            $query->where('segment', $request->segment);
+        }
+
+        // SORT
+        switch ($request->sort) {
+
+            case 'material_asc':
+                $query->orderBy('material_number');
+                break;
+
+            case 'material_desc':
+                $query->orderBy('material_number', 'desc');
+                break;
+
+            case 'stock_asc':
+                $query->orderBy('stock');
+                break;
+
+            case 'stock_desc':
+                $query->orderBy('stock', 'desc');
+                break;
+
+            default:
+                $query->orderBy('material_number');
+        }
+
+        $spareparts = $query->paginate(20);
+
+        $machineTypes = Sparepart::select('machine_type')
+            ->whereNotNull('machine_type')
+            ->where('machine_type', '!=', '')
+            ->distinct()
+            ->orderBy('machine_type', 'asc')
+            ->pluck('machine_type');
+
+        $segments = Sparepart::select('segment')
+            ->whereNotNull('segment')
+            ->where('segment', '!=', '')
+            ->distinct()
+            ->orderBy('segment', 'asc')
+            ->pluck('segment');
+
+        return view(
+            'spareparts.index',
+            compact(
+                'spareparts',
+                'machineTypes',
+                'segments'
+            )
+        );
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:csv,xlsx,xls'
+        ]);
+
+        Excel::import(
+            new SparepartsImport(),
+            $request->file('file')
+        );
+
+        return back()->with(
+            'success',
+            'Spareparts imported successfully'
+        );
     }
 
     /**
@@ -20,7 +112,7 @@ class SparepartController extends Controller
      */
     public function create()
     {
-        return view('spareparts.create');
+        //
     }
 
     /**
@@ -28,7 +120,33 @@ class SparepartController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'material_number' => 'required|unique:spareparts,material_number',
+            'description'     => 'required',
+            'stock'           => 'numeric|min:0',
+            'rop'             => 'numeric|min:0',
+            'price'           => 'numeric|min:0',
+        ]);
+
+        Sparepart::create([
+            'material_number' => $request->material_number,
+            'location'        => $request->location,
+            'description'     => $request->description,
+            'remarks'         => $request->remarks,
+            'stock'           => $request->stock,
+            'unit'            => $request->unit,
+            'rop'             => $request->rop,
+            'mrp_type'        => $request->mrp_type,
+            'price'           => $request->price,
+            'status'          => $request->status,
+            'machine_type'    => $request->machine_type,
+            'segment'         => $request->segment,
+            'pdt'             => $request->pdt,
+        ]);
+
+        return redirect()
+            ->route('spareparts.index')
+            ->with('success', 'Sparepart added successfully');
     }
 
     /**
@@ -42,17 +160,51 @@ class SparepartController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Sparepart $sparepart)
     {
-        //
+        $machines = Machine::select('machine_type')
+            ->distinct()
+            ->orderBy('machine_type')
+            ->get();
+
+        return view(
+            'spareparts.edit',
+            compact('sparepart', 'machines')
+        );
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Sparepart $sparepart)
     {
-        //
+        $request->validate([
+            'material_number' => 'required|unique:spareparts,material_number,' . $sparepart->id,
+            'description'     => 'required',
+            'stock'           => 'required|numeric|min:0',
+            'rop'             => 'nullable|numeric|min:0',
+            'price'           => 'nullable|numeric|min:0',
+        ]);
+
+        $sparepart->update([
+            'material_number' => $request->material_number,
+            'location'        => $request->location,
+            'description'     => $request->description,
+            'remarks'         => $request->remarks,
+            'stock'           => $request->stock,
+            'unit'            => $request->unit,
+            'rop'             => $request->rop,
+            'mrp_type'        => $request->mrp_type,
+            'price'           => $request->price,
+            'status'          => $request->status,
+            'machine_type'    => $request->machine_type,
+            'segment'         => $request->segment,
+            'pdt'             => $request->pdt,
+        ]);
+
+        return redirect()
+            ->route('spareparts.index')
+            ->with('success', 'Sparepart updated successfully');
     }
 
     /**
@@ -60,6 +212,12 @@ class SparepartController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $sparepart = Sparepart::findOrFail($id);
+
+        $sparepart->delete();
+
+        return redirect()
+            ->route('spareparts.index')
+            ->with('success', 'Sparepart deleted successfully');
     }
 }

@@ -11,15 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('spareparts', function (Blueprint $table) {
-            $table->id();
-
-            $table->string('sap_number')->unique();
-            $table->string('description');
-            $table->string('location');
-
-            $table->timestamps();
-        });
+        Schema::table('pm_schedules', function (Blueprint $table) {
+        $table->date('plan_date')->nullable()->after('order_number');
+    });
     }
 
     /**
@@ -27,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('spareparts');
+        Schema::table('pm_schedules', function (Blueprint $table) {
+            //
+        });
     }
 };

@@ -10,9 +10,8 @@
 
         <!-- ACTIONS -->
         <div class="flex flex-col md:flex-row md:items-center gap-3">
-
             <!-- IMPORT FORM -->
-            <form action="{{ route('machines.import') }}" method="POST" enctype="multipart/form-data"
+            <form action="{{ route('pm-schedules.import') }}" method="POST" enctype="multipart/form-data"
                 class="flex flex-col sm:flex-row sm:items-center gap-3 bg-white p-3 rounded shadow border">
 
                 @csrf
@@ -44,16 +43,18 @@
 
             </form>
 
-            <!-- NEW BUTTON -->
-            <a href="{{ route('pm-schedules.create') }}"
-                class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded shadow text-center">
-                + New PM
-            </a>
-
         </div>
 
     </div>
 
+    {{-- ALERT ERROR --}}
+    @if ($errors->has('file'))
+        <div class="bg-red-100 text-red-700 p-3 rounded mb-3">
+            {{ $errors->first('file') }}
+        </div>
+    @endif
+
+    {{-- ALERT SUCCESS --}}
     @if (session('success'))
         <div class="bg-green-100 p-3 rounded mb-4">
             {{ session('success') }}
@@ -118,6 +119,7 @@
                     <tr>
                         <th class="p-3">Machine</th>
                         <th class="p-3">Type</th>
+                        <th class="p-3">Date</th>
                         <th class="p-3">Month</th>
                         <th class="p-3">Year</th>
                         <th class="p-3">Status</th>
@@ -137,6 +139,10 @@
 
                             <td class="p-3 text-gray-600">
                                 {{ $pm->machine_type }}
+                            </td>
+
+                            <td class="p-3 text-gray-600">
+                                {{ $pm->plan_date ? \Carbon\Carbon::parse($pm->plan_date)->format('d-m-Y') : '-' }}
                             </td>
 
                             <td class="p-3 text-gray-600">

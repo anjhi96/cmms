@@ -10,6 +10,7 @@ use App\Models\PMDetail;
 use App\Models\PMSparepart;
 use App\Imports\PMScheduleImport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\MachineProblem;
 
 class PMScheduleController extends Controller
 {
@@ -64,17 +65,10 @@ class PMScheduleController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file'
+            'file' => 'required|file|mimes:csv,txt,xlsx,xls'
         ]);
 
-        $file = $request->file('file');
-        $ext = $file->getClientOriginalExtension();
-
-        if ($ext !== 'csv') {
-            return back()->with('error', 'Only CSV file is allowed!');
-        }
-
-        Excel::import(new PMScheduleImport(), $file);
+         Excel::import(new PMScheduleImport(), $request->file('file'));
 
         return back()->with('success', 'PM Schedule imported successfully');
     }
@@ -94,6 +88,7 @@ class PMScheduleController extends Controller
             'plan_month' => 'required',
             'plan_year' => 'required',
             'due_date' => 'required|date',
+            'plan_date' => 'required|date'
         ]);
 
         $machine = Machine::findOrFail($request->machine_id);
@@ -111,6 +106,7 @@ class PMScheduleController extends Controller
             'order_number' => $request->order_number,
             'plan_month'   => $request->plan_month,
             'plan_year'    => $request->plan_year,
+            'plan_date'    => $request->plan_date,
             'due_date'     => $request->due_date,
             'last_pm'      => $lastPm,
             'pic'          => $request->pic,
@@ -125,7 +121,17 @@ class PMScheduleController extends Controller
 
     public function edit(PMSchedule $pmSchedule)
     {
-        return view('pm-schedules.edit', compact('pmSchedule'));
+        $bigProblems = MachineProblem::where(
+            'machine_type',
+            $pmSchedule->machine_type
+        )
+        ->orderBy('problem')
+        ->get();
+
+        return view('pm-schedules.edit', compact(
+            'pmSchedule',
+            'bigProblems'
+        ));
     }
 
     public function update(Request $request, PMSchedule $pmSchedule)
@@ -150,7 +156,7 @@ class PMScheduleController extends Controller
             'start_time'  => $request->start_time,
             'end_time'    => $request->end_time,
             'duration'    => $duration,
-            'big_problem' => $request->big_problem,
+            'big_problem' => 'nullable|string|max:255',
             'remarks'     => $request->remarks,
             'next_pm'     => $request->next_pm,
             'status'      => $request->status,
@@ -163,7 +169,7 @@ class PMScheduleController extends Controller
             'start_time'  => $request->start_time,
             'end_time'    => $request->end_time,
             'duration'    => $duration,
-            'big_problem' => $request->big_problem,
+            'big_problem' => 'nullable|string|max:255',
             'remarks'     => $request->remarks,
             'status'      => $request->status,
         ]);

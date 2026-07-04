@@ -11,6 +11,8 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\PMDetailController;
 use App\Http\Controllers\MachineProblemController;
 use App\Http\Controllers\MachineMeasurementController;
+use App\Http\Controllers\MachineChecklistController;
+use App\Http\Controllers\MachineProblemFindingController;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -70,6 +72,27 @@ Route::middleware(['auth'])->group(function () {
         [SparepartController::class, 'import']
     )
     ->name('spareparts.import');
+
+
+    Route::resource(
+        'machine-checklists',
+        MachineChecklistController::class
+    );
+
+    Route::post(
+        '/machine-checklists/import',
+        [MachineChecklistController::class, 'import']
+    )->name('machine-checklists.import');
+
+
+    Route::resource(
+        'machine-problem-findings',
+        MachineProblemFindingController::class
+    );
+    Route::post(
+        '/machine-problem-findings/import',
+        [MachineProblemFindingController::class, 'import']
+    )->name('machine-problem-findings.import');
 
 
 

@@ -11,6 +11,10 @@ use App\Models\PMSparepart;
 use App\Imports\PMScheduleImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\MachineProblem;
+use App\Models\MachineMeasurement;
+use App\Http\Controllers\PMScheduleController;
+use App\Imports\PMSchedulesImport;
+use App\Models\MachineProblemFinding;
 
 class PMScheduleController extends Controller
 {
@@ -68,7 +72,7 @@ class PMScheduleController extends Controller
             'file' => 'required|file|mimes:csv,txt,xlsx,xls'
         ]);
 
-         Excel::import(new PMScheduleImport(), $request->file('file'));
+        Excel::import(new PMScheduleImport(), $request->file('file'));
 
         return back()->with('success', 'PM Schedule imported successfully');
     }
@@ -128,9 +132,20 @@ class PMScheduleController extends Controller
         ->orderBy('problem')
         ->get();
 
+        $problemFindings = MachineProblemFinding::all()
+        ->groupBy(function ($item) {
+        return strtolower(trim($item->category));
+        });
+
+        $measurements = MachineMeasurement::where('machine_type', $pmSchedule->machine_type)
+            ->orderBy('measurement_item')
+            ->get();
+
         return view('pm-schedules.edit', compact(
             'pmSchedule',
-            'bigProblems'
+            'bigProblems',
+            'problemFindings',
+            'measurements'
         ));
     }
 
@@ -156,7 +171,7 @@ class PMScheduleController extends Controller
             'start_time'  => $request->start_time,
             'end_time'    => $request->end_time,
             'duration'    => $duration,
-            'big_problem' => 'nullable|string|max:255',
+            'big_problem' => $request->big_problem,
             'remarks'     => $request->remarks,
             'next_pm'     => $request->next_pm,
             'status'      => $request->status,

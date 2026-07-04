@@ -57,23 +57,16 @@
                     </button>
 
                 </form>
-                @if ($errors->has('file'))
-                    <div class="bg-red-100 text-red-700 p-3 rounded mb-3">
-                        {{ $errors->first('file') }}
-                    </div>
-                @endif
 
-                <!-- ADD BUTTON -->
-                {{-- <a href="{{ route('spareparts.create') }}"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-center">
-
-                    + Add Sparepart
-
-                </a> --}}
 
             </div>
 
         </div>
+        @if ($errors->has('file'))
+            <div class="bg-red-100 text-red-700 p-3 rounded mb-3">
+                {{ $errors->first('file') }}
+            </div>
+        @endif
 
         {{-- ALERT --}}
         @if (session('success'))
@@ -244,7 +237,7 @@
                             </td>
 
                             <td class="p-3">
-                                Rp {{ number_format($sparepart->price, 0, ',', '.') }}
+                                $ {{ number_format($sparepart->price, 0, ',', '.') }}
                             </td>
 
                             <td class="p-3" text-center>

@@ -114,43 +114,62 @@
             <h3 class="text-lg font-semibold mb-6">
                 PM Result
             </h3>
+            <div id="problem-wrapper">
+                {{-- Problem Section --}}
+                <div class="problem-row flex gap-2 mb-2">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <div>
-                    <label class="block text-sm font-medium mb-2">
-                        Big Problem
-                    </label>
-
-                    <select name="big_problem" class="w-full border rounded-lg p-3">
-
-                        <option value="">
-                            -- No Big Problem --
-                        </option>
-
+                    {{-- Problem --}}
+                    <select class="problem-select border p-2 w-1/2 rounded">
+                        <option value="">-- Select Problem --</option>
                         @foreach ($bigProblems as $problem)
                             <option value="{{ $problem->problem }}"
-                                {{ old('big_problem', $pmSchedule->big_problem) == $problem->problem ? 'selected' : '' }}>
+                                data-category="{{ strtolower(trim($problem->category)) }}">
+
                                 {{ $problem->problem }}
+
                             </option>
                         @endforeach
 
                     </select>
-                    @if ($bigProblems->isEmpty())
-                        <p class="text-sm text-gray-500 mt-2">
-                            No big problem registered for this machine type.
-                        </p>
-                    @endif
+
+                    {{-- Finding --}}
+                    <select class="finding-select border p-2 flex-1 rounded">
+
+                        <option value="">-- Finding --</option>
+
+                    </select>
+
+                    {{-- Severity --}}
+                    <select name="problems[0][severity]" class="border p-2 rounded w-1/5">
+                        <option value="">-- Severity --</option>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+
+                    </select>
+
+                    <button type="button" onclick="removeProblem(this)" class="bg-red-500 text-white px-3 rounded">
+
+                        X
+
+                    </button>
+
                 </div>
 
-                <div>
-                    <label class="block mb-2 text-sm font-medium">
-                        Remarks
-                    </label>
+            </div>
 
-                    <textarea name="remarks" rows="4" class="w-full border rounded-lg p-3"></textarea>
-                </div>
+            <button type="button" onclick="addProblem()" class="mt-2 bg-green-600 text-white px-3 py-1 rounded">
 
+                + Add Problem
+
+            </button>
+
+            <div class="gap-3 mt-5">
+                <label class="block mb-2 text-sm font-medium">
+                    Remarks
+                </label>
+
+                <textarea name="remarks" rows="3" class="w-full border rounded-lg p-3"></textarea>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
@@ -202,54 +221,100 @@
 
         </div>
 
-        <div class="flex flex-col md:flex-row gap-3 justify-end">
 
-            <button type="submit" name="status" value="IN PROGRESS"
-                class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg">
-
-                Save Draft
-
-            </button>
-
-            <button type="submit" name="status" value="DONE"
-                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
-
-                Complete PM
-
-            </button>
-
-        </div>
 
         {{-- PM Measurement --}}
-        <div class="mt-6 bg-white p-4 rounded shadow">
 
-            <h2 class="text-lg font-bold mb-4">PM Measurement</h2>
+        <div class="bg-white rounded-lg shadow p-6 mt-6">
 
-            <div id="pm-details-wrapper">
+            <h2 class="text-lg font-semibold mb-4">
+                Measurement
+            </h2>
 
-                <!-- row default -->
-                <div class="pm-row flex gap-2 mb-2">
+            <div class="overflow-x-auto">
 
-                    <input type="text" name="details[0][item]" placeholder="Measurement Item"
-                        class="border p-2 w-1/3 rounded">
+                <table class="min-w-full border">
 
-                    <input type="text" name="details[0][value]" placeholder="Value" class="border p-2 w-1/3 rounded">
+                    <thead class="bg-gray-100">
 
-                    <input type="text" name="details[0][unit]" placeholder="Unit" class="border p-2 w-1/6 rounded">
+                        <tr>
 
-                    <button type="button" onclick="removeRow(this)" class="bg-red-500 text-white px-2 rounded">
-                        X
-                    </button>
+                            <th class="border px-3 py-2 text-left">
+                                Measurement Item
+                            </th>
 
-                </div>
+                            <th class="border px-3 py-2 text-center">
+                                Standard
+                            </th>
+
+                            <th class="border px-3 py-2 text-center">
+                                Actual
+                            </th>
+
+                            <th class="border px-3 py-2 text-center">
+                                Unit
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @forelse($measurements as $i => $measurement)
+                            <tr>
+
+                                <td class="border px-3 py-2">
+
+                                    {{ $measurement->measurement_item }}
+
+                                    <input type="hidden" name="measurements[{{ $i }}][measurement_item]"
+                                        value="{{ $measurement->measurement_item }}">
+
+                                </td>
+
+                                <td class="border px-3 py-2 text-center">
+
+                                    {{ $measurement->standard ?? '-' }}
+
+                                </td>
+
+                                <td class="border px-3 py-2">
+
+                                    <input type="text" name="measurements[{{ $i }}][actual]"
+                                        class="w-full border rounded px-2 py-1">
+
+                                </td>
+
+                                <td class="border px-3 py-2 text-center">
+
+                                    {{ $measurement->unit }}
+
+                                    <input type="hidden" name="measurements[{{ $i }}][unit]"
+                                        value="{{ $measurement->unit }}">
+
+                                </td>
+
+                            </tr>
+
+                        @empty
+
+                            <tr>
+
+                                <td colspan="4" class="border text-center py-5 text-gray-500">
+
+                                    No Measurement Found
+
+                                </td>
+
+                            </tr>
+                        @endforelse
+
+                    </tbody>
+
+                </table>
 
             </div>
-
-            <button type="button" onclick="addRow()" class="mt-2 bg-blue-600 text-white px-3 py-1 rounded">
-
-                + Add Measurement
-
-            </button>
 
         </div>
 
@@ -282,47 +347,92 @@
 
         </div>
 
-        {{-- PM Details --}}
+        <div class="flex flex-col md:flex-row gap-3 justify-end">
+
+            <button type="submit" name="status" value="IN PROGRESS"
+                class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg">
+
+                Save Draft
+
+            </button>
+
+            <button type="submit" name="status" value="DONE"
+                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
+
+                Complete PM
+
+            </button>
+
+        </div>
+
         <script>
-            let index = 1;
+            let problemIndex = 1;
 
-            function addRow() {
+            function addProblem() {
 
-                const wrapper = document.getElementById('pm-details-wrapper');
+                let html = `
+        <div class="problem-row flex gap-2 mb-2">
 
-                const row = document.createElement('div');
-                row.classList.add('pm-row', 'flex', 'gap-2', 'mb-2');
+            <select
+                name="problems[${problemIndex}][problem]"
+                class="problem-select border p-2 w-1/2 rounded">
 
-                row.innerHTML = `
-        <input type="text"
-            name="details[${index}][item]"
-            placeholder="Measurement Item"
-            class="border p-2 w-1/3 rounded">
+                <option value="">-- Select Problem --</option>
 
-        <input type="text"
-            name="details[${index}][value]"
-            placeholder="Value"
-            class="border p-2 w-1/3 rounded">
+                @foreach ($bigProblems as $problem)
+                    <option value="{{ $problem->problem }}"
+                        data-category="{{ strtolower(trim($problem->category)) }}">
 
-        <input type="text"
-            name="details[${index}][unit]"
-            placeholder="Unit"
-            class="border p-2 w-1/6 rounded">
+                        {{ $problem->problem }}
 
-        <button type="button"
-            onclick="removeRow(this)"
-            class="bg-red-500 text-white px-2 rounded">
-            X
-        </button>
+                    </option>
+                @endforeach
+            </select>
+
+            <select
+                name="problems[${problemIndex}][finding]"
+                class="finding-select border p-2 flex-1 rounded">
+
+                <option value="">-- Finding --</option>
+
+            </select>
+
+            <select
+                name="problems[${problemIndex}][severity]"
+                class="border p-2 rounded w-1/5">
+
+                <option value="">-- Severity --</option>
+
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+
+            </select>
+
+            <button type="button" onclick="removeProblem(this)" class="bg-red-500 text-white px-3 rounded">
+
+                X
+
+            </button>
+
+        </div>
     `;
 
-                wrapper.appendChild(row);
+                document
+                    .getElementById('problem-wrapper')
+                    .insertAdjacentHTML('beforeend', html);
 
-                index++;
+                problemIndex++;
             }
 
-            function removeRow(button) {
-                button.parentElement.remove();
+            function removeProblem(button) {
+
+                const rows = document.querySelectorAll('.problem-row');
+
+                if (rows.length > 1) {
+                    button.parentElement.remove();
+                }
+
             }
         </script>
 
@@ -439,6 +549,43 @@
                         console.error(err);
                         problemSelect.innerHTML = '<option>Error loading data</option>';
                     });
+
+            });
+        </script>
+
+        <script>
+            const findings = @json($problemFindings);
+
+            document.addEventListener('change', function(e) {
+
+                if (!e.target.classList.contains('problem-select'))
+                    return;
+
+                const category =
+                    e.target.selectedOptions[0]
+                    .dataset.category
+                    .trim()
+                    .toLowerCase();
+
+                const findingSelect =
+                    e.target.closest('.problem-row')
+                    .querySelector('.finding-select');
+
+                findingSelect.innerHTML =
+                    '<option value="">-- Finding --</option>';
+
+                if (findings[category]) {
+
+                    findings[category].forEach(function(item) {
+
+                        findingSelect.innerHTML +=
+                            `<option value="${item.finding}">
+                    ${item.finding}
+                </option>`;
+
+                    });
+
+                }
 
             });
         </script>

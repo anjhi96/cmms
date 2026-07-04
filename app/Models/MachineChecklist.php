@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MachineMeasurement extends Model
+class MachineChecklist extends Model
 {
     protected $fillable = [
         'machine_type',
-        'measurement_item',
-        'unit',
-        'standard',
+        'section',
+        'checklist_item',
+        'section_order',
+        'item_order'
     ];
 }

@@ -43,14 +43,20 @@
 
             </form>
 
-            {{-- <!-- NEW BUTTON -->
-            <a href="{{ route('machines.create') }}"
-                class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded shadow text-center">
-                + Add Machine
-            </a> --}}
-
         </div>
     </div>
+    @if ($errors->has('file'))
+            <div class="bg-red-100 text-red-700 p-3 rounded mb-3">
+                {{ $errors->first('file') }}
+            </div>
+        @endif
+
+        {{-- ALERT --}}
+        @if (session('success'))
+            <div class="bg-green-100 text-green-700 p-3 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
 
     <form method="GET" class="mb-4 bg-white p-3 rounded shadow flex flex-wrap gap-2">
         <!-- SORT -->
@@ -127,6 +133,7 @@
         </div>
     @endif
 
+    {{-- TABLE --}}
     <div class="bg-white shadow rounded overflow-hidden">
 
         <table class="w-full">

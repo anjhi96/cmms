@@ -88,7 +88,33 @@
                 class="block px-4 py-2 rounded mb-2 transition
         {{ request()->routeIs('machine-measurements.*') ? 'bg-blue-600' : 'hover:bg-slate-700' }}">
 
-                Measurement Master
+                📏 Measurement Master
+
+            </a>
+        @endif
+
+        {{-- MASTER CHECKLIST --}}
+        @if (auth()->user()->role == 'ADMIN' || auth()->user()->role == 'coordinator')
+            <a href="{{ route('machine-checklists.index') }}"
+                class="block px-4 py-2 rounded mb-2 transition
+        {{ request()->routeIs('machine-checklists.*') ? 'bg-blue-100 text-blue-600 font-semibold' : '' }}">
+
+
+
+                ✅ Machine Checklist
+
+            </a>
+        @endif
+
+        {{-- MACHINE PROBLEM FINDINGS --}}
+        @if (auth()->user()->role == 'ADMIN' || auth()->user()->role == 'Coordinator')
+            <a href="{{ route('machine-problem-findings.index') }}"
+                class="block px-4 py-2 rounded mb-2 transition
+        {{ request()->routeIs('machine-problem-findings.*') ? 'bg-gray-700' : '' }}">
+
+
+
+                🔎 Problem Findings
 
             </a>
         @endif

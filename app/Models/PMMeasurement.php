@@ -4,21 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PMSparepart extends Model
+class PMMeasurement extends Model
 {
     protected $fillable = [
         'pm_schedule_id',
-        'sparepart_id',
-        'qty',
+        'measurement_id',
+        'value',
     ];
 
     public function pmSchedule()
     {
         return $this->belongsTo(PMSchedule::class);
-    }
-
-    public function sparepart()
-    {
-        return $this->belongsTo(Sparepart::class);
     }
 }

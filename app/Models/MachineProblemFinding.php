@@ -10,4 +10,12 @@ class MachineProblemFinding extends Model
         'category',
         'finding',
     ];
+
+    public function pmProblems()
+    {
+        return $this->hasMany(
+            PMProblem::class,
+            'machine_problem_finding_id'
+        );
+    }
 }

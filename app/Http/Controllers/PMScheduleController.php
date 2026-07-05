@@ -7,7 +7,6 @@ use App\Models\PMSchedule;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\PMDetail;
-use App\Models\PMSparepart;
 use App\Imports\PMScheduleImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\MachineProblem;
@@ -15,6 +14,10 @@ use App\Models\MachineMeasurement;
 use App\Http\Controllers\PMScheduleController;
 use App\Imports\PMSchedulesImport;
 use App\Models\MachineProblemFinding;
+use App\Models\Sparepart;
+use App\Models\PMMeasurement;
+use App\Models\PMProblem;
+use App\Models\PMSparepart;
 
 class PMScheduleController extends Controller
 {
@@ -134,23 +137,69 @@ class PMScheduleController extends Controller
 
         $problemFindings = MachineProblemFinding::all()
         ->groupBy(function ($item) {
-        return strtolower(trim($item->category));
+            return strtolower(trim($item->category));
         });
 
         $measurements = MachineMeasurement::where('machine_type', $pmSchedule->machine_type)
             ->orderBy('measurement_item')
             ->get();
 
+        $spareparts = Sparepart::select(
+            'id',
+            'material_number',
+            'description',
+            'location',
+            'remarks',
+            'unit'
+        )
+        ->orderBy('description')
+        ->get();
+
         return view('pm-schedules.edit', compact(
             'pmSchedule',
             'bigProblems',
             'problemFindings',
-            'measurements'
+            'measurements',
+            'spareparts'
         ));
     }
 
     public function update(Request $request, PMSchedule $pmSchedule)
     {
+        $request->validate([
+        'order_number' => 'required',
+
+        'actual_date' => 'required|date',
+
+        'pic' => 'required',
+
+        'start_time' => 'required',
+
+        'end_time' => 'required',
+
+        'oil_change' => 'required',
+
+        'greasing' => 'required',
+
+        'wo_zsbp' => 'required',
+        
+        'remarks' => 'required',
+
+        'problems.*.problem' => 'required',
+
+        'problems.*.finding' => 'required',
+
+        'problems.*.severity' => 'required',
+
+        'measurements.*.measurement_item' => 'required',
+
+        'measurements.*.measurement_value' => 'required',
+
+        'spareparts.*.sparepart_id' => 'required',
+
+        'spareparts.*.qty' => 'required|integer|min:1',
+
+]);
         // 1. hitung duration
         $duration = null;
 
@@ -166,54 +215,124 @@ class PMScheduleController extends Controller
             $duration = $start->diffInMinutes($end);
         }
 
-        $pmSchedule->update([
-            'actual_date' => $request->actual_date,
-            'start_time'  => $request->start_time,
-            'end_time'    => $request->end_time,
-            'duration'    => $duration,
-            'big_problem' => $request->big_problem,
-            'remarks'     => $request->remarks,
-            'next_pm'     => $request->next_pm,
-            'status'      => $request->status,
-        ]);
-
         // 2. update schedule (header)
 
         $pmSchedule->update([
+            'order_number' => $request->order_number,
+
             'actual_date' => $request->actual_date,
-            'start_time'  => $request->start_time,
-            'end_time'    => $request->end_time,
-            'duration'    => $duration,
-            'big_problem' => 'nullable|string|max:255',
-            'remarks'     => $request->remarks,
-            'status'      => $request->status,
+
+            'pic' => $request->pic,
+
+            'start_time' => $request->start_time,
+
+            'end_time' => $request->end_time,
+
+            'duration' => $duration,
+
+            'oil_change' => $request->oil_change,
+
+            'greasing' => $request->greasing,
+
+            'wo_zsbp' => $request->wo_zsbp,
+
+            'remarks' => $request->remarks,
+
+            'status' => 'IN PROGRESS',
+
         ]);
 
-        // 3. SIMPAN PM DETAIL
+        // 3. update measurements
+        PMMeasurement::where(
+            'pm_schedule_id',
+            $pmSchedule->id
+        )->delete();
+
         if ($request->details) {
+
             foreach ($request->details as $detail) {
-                PMDetail::create([
-                    'pm_schedule_id' => $pmSchedule->id,
+
+                if (empty($detail['item'])) {
+                    continue;
+                }
+
+                PMMeasurement::create([
+
+                    'pm_schedule_id'   => $pmSchedule->id,
+
                     'measurement_item' => $detail['item'],
-                    'measurement_value' => $detail['value'],
-                    'unit' => $detail['unit'] ?? null,
+
+                    'standard'         => $detail['standard'] ?? null,
+
+                    'measurement_value' => $detail['value'] ?? null,
+
+                    'unit'             => $detail['unit'] ?? null,
+
                 ]);
+
             }
+
         }
 
-        // 4. SIMPAN SPAREPART
-        if ($request->spareparts) {
-            foreach ($request->spareparts as $item) {
-                PMSparepart::create([
+        PMProblem::where(
+            'pm_schedule_id',
+            $pmSchedule->id
+        )->delete();
+
+        if ($request->problems) {
+
+            foreach ($request->problems as $problem) {
+
+                if (empty($problem['problem'])) {
+                    continue;
+                }
+
+                PMProblem::create([
+
                     'pm_schedule_id' => $pmSchedule->id,
-                    'name' => $item['name'],
-                    'qty'  => $item['qty'],
+
+                    'machine_problem_id' => $problem['problem'],
+
+                    'machine_problem_finding_id' => $problem['finding'],
+
+                    'severity' => $problem['severity'],
+
                 ]);
+
             }
+
         }
 
-        return redirect()->route('pm-schedules.index')
-            ->with('success', 'PM updated successfully');
+        PMSparepart::where(
+            'pm_schedule_id',
+            $pmSchedule->id
+        )->delete();
+
+        if ($request->spareparts) {
+
+            foreach ($request->spareparts as $item) {
+
+                if (empty($item['sparepart_id'])) {
+                    continue;
+                }
+
+                PMSparepart::create([
+
+                    'pm_schedule_id' => $pmSchedule->id,
+
+                    'sparepart_id' => $item['sparepart_id'],
+
+                    'qty' => $item['qty'] ?? 1,
+
+                ]);
+
+            }
+
+        }
+
+        return redirect()
+    ->route('pm-schedules.checklist', $pmSchedule->id)
+    ->with('success', 'PM Progress Saved');
     }
 
     public function destroy(PMSchedule $pmSchedule)

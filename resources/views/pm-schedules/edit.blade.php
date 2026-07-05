@@ -52,59 +52,119 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div>
-                    <label class="block mb-2 text-sm font-medium">
+                    <label name="order_number" class="block mb-2 text-sm font-medium">
                         Order Number
                     </label>
 
-                    <input type="text" name="order_number" class="w-full border rounded-lg p-3">
+                    <input required name="order_number" type="text" class="w-full border rounded-lg p-3">
                 </div>
 
                 <div>
-                    <label class="block mb-2 text-sm font-medium">
+                    <label name="actual_date" class="block mb-2 text-sm font-medium">
                         Actual Date
                     </label>
 
-                    <input type="date" name="actual_date" value="{{ date('Y-m-d') }}"
+                    <input required name="actual_date" type="date"
+                        value="{{ old('actual_date', $pmSchedule->actual_date ?? date('Y-m-d')) }}"
                         class="w-full border rounded-lg p-3">
                 </div>
 
                 <div>
-                    <label class="block mb-2 text-sm font-medium">
+                    <label name="pic" class="block mb-2 text-sm font-medium">
                         PIC PM
                     </label>
 
-                    <input type="text" readonly value="{{ auth()->user()->name }}"
+                    <input required name="pic" type="text" readonly
+                        value="{{ old('pic', $pmSchedule->pic ?? auth()->user()->name) }}"
                         class="w-full bg-gray-100 border rounded-lg p-3">
                 </div>
 
                 <div>
-                    <label class="block mb-2 text-sm font-medium">
+                    <label name="start_time" class="block mb-2 text-sm font-medium">
                         Start PM
                     </label>
 
-                    <input type="time" id="start_time" name="start_time" class="w-full border rounded-lg p-3">
+                    <input required name="start_time" type="time" id="start_time"
+                        value="{{ old('start_time', $pmSchedule->start_time) }}" class="w-full border rounded-lg p-3">
                 </div>
 
                 <div>
-                    <label class="block mb-2 text-sm font-medium">
+                    <label name="end_time" class="block mb-2 text-sm font-medium">
                         End PM
                     </label>
 
-                    <input type="time" id="end_time" name="end_time" class="w-full border rounded-lg p-3">
+                    <input required name="end_time" type="time" id="end_time"
+                        value="{{ old('end_time', $pmSchedule->end_time) }}" class="w-full border rounded-lg p-3">
                 </div>
 
                 <div>
-                    <label class="block mb-2 text-sm font-medium">
+                    <label name="duration" class="block mb-2 text-sm font-medium">
                         Duration (Hours)
                     </label>
 
-                    <input type="text" id="duration" readonly class="w-full border rounded-lg p-3 bg-gray-100">
+                    <input name="duration" type="text" id="duration" readonly value="{{ $pmSchedule->duration }}"
+                        class="w-full border rounded-lg p-3 bg-gray-100">
 
                     <p id="duration_error" class="text-red-500 text-sm mt-1 hidden">
                         End time cannot be earlier than start time
                     </p>
                 </div>
 
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+
+                {{-- Tampilkan hanya untuk type tertentu --}}
+                @if (in_array($pmSchedule->machine_type, ['NDE2003', 'NDB']))
+                    <div>
+                        <label class="block mb-2 text-sm font-medium">
+                            Oil Change
+                        </label>
+
+                        <select required name="oil_change" class="w-full border rounded-lg p-3">
+                            <option value="">-- Select --</option>
+                            <option value="YES">YES</option>
+                            <option value="NO">NO</option>
+
+                        </select>
+                    </div>
+                @endif
+
+                <div>
+                    <label class="block mb-2 text-sm font-medium">
+                        Greasing
+                    </label>
+
+                    <select required name="greasing" class="w-full border rounded-lg p-3">
+
+                        <option value="">-- Select --</option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block mb-2 text-sm font-medium">
+                        WO ZSBP
+                    </label>
+
+                    <select required name="wo_zsbp" class="w-full border rounded-lg p-3">
+                        <option value="">-- Select --</option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+
+                    </select>
+                </div>
+
+            </div>
+            <div class="gap-3 mt-5">
+                <label class="block mb-2 text-sm font-medium">
+                    Remarks
+                </label>
+
+                <textarea required name="remarks" rows="3" class="w-full border rounded-lg p-3"
+                    placeholder="Contoh: Kapstan 1,2 oblak, kapstan 3 bocor, ganti ring kapstan 1 dan 4, ganti nylon, ganti spindel, ganti countersheave, gant belt 1200, 1800, 1500"></textarea>
             </div>
 
         </div>
@@ -115,11 +175,12 @@
                 PM Result
             </h3>
             <div id="problem-wrapper">
+
                 {{-- Problem Section --}}
                 <div class="problem-row flex gap-2 mb-2">
 
                     {{-- Problem --}}
-                    <select class="problem-select border p-2 w-1/2 rounded">
+                    <select required name="problems[0][problem]" class="problem-select border p-2 w-1/2 rounded">
                         <option value="">-- Select Problem --</option>
                         @foreach ($bigProblems as $problem)
                             <option value="{{ $problem->problem }}"
@@ -133,14 +194,14 @@
                     </select>
 
                     {{-- Finding --}}
-                    <select class="finding-select border p-2 flex-1 rounded">
+                    <select required name="problems[0][finding]" class="finding-select border p-2 flex-1 rounded">
 
                         <option value="">-- Finding --</option>
 
                     </select>
 
                     {{-- Severity --}}
-                    <select name="problems[0][severity]" class="border p-2 rounded w-1/5">
+                    <select required name="problems[0][severity]" class="border p-2 rounded w-1/5">
                         <option value="">-- Severity --</option>
                         <option value="Low">Low</option>
                         <option value="Medium">Medium</option>
@@ -164,60 +225,7 @@
 
             </button>
 
-            <div class="gap-3 mt-5">
-                <label class="block mb-2 text-sm font-medium">
-                    Remarks
-                </label>
 
-                <textarea name="remarks" rows="3" class="w-full border rounded-lg p-3"></textarea>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-
-                {{-- Tampilkan hanya untuk type tertentu --}}
-                @if (in_array($pmSchedule->machine_type, ['NDE2003', 'NDB']))
-                    <div>
-                        <label class="block mb-2 text-sm font-medium">
-                            Oil Change
-                        </label>
-
-                        <select name="oil_change" class="w-full border rounded-lg p-3">
-
-                            <option value="">Select</option>
-                            <option value="YES">YES</option>
-                            <option value="NO">NO</option>
-
-                        </select>
-                    </div>
-                @endif
-
-                <div>
-                    <label class="block mb-2 text-sm font-medium">
-                        Greasing
-                    </label>
-
-                    <select name="greasing" class="w-full border rounded-lg p-3">
-
-                        <option value="YES">YES</option>
-                        <option value="NO">NO</option>
-
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block mb-2 text-sm font-medium">
-                        WO ZSBP
-                    </label>
-
-                    <select name="wo_zsbp" class="w-full border rounded-lg p-3">
-
-                        <option value="YES">YES</option>
-                        <option value="NO">NO</option>
-
-                    </select>
-                </div>
-
-            </div>
 
         </div>
 
@@ -277,11 +285,14 @@
 
                                     {{ $measurement->standard ?? '-' }}
 
+                                    <input type="hidden" name="measurements[{{ $i }}][standard]"
+                                        value="{{ $measurement->standard }}">
+
                                 </td>
 
                                 <td class="border px-3 py-2">
 
-                                    <input type="text" name="measurements[{{ $i }}][actual]"
+                                    <input required type="text" name="measurements[{{ $i }}][measurement_value]"
                                         class="w-full border rounded px-2 py-1">
 
                                 </td>
@@ -318,22 +329,28 @@
 
         </div>
 
+        {{-- Sparepart Usage --}}
+
         <div class="mt-6 bg-white p-4 rounded shadow">
 
-            <h2 class="text-lg font-bold mb-4">Sparepart Usage</h2>
+            <h2 class="text-lg font-bold mb-4">
+                Sparepart Usage
+            </h2>
 
             <div id="sparepart-wrapper">
 
-                <!-- row default -->
                 <div class="sparepart-row flex gap-2 mb-2">
 
-                    <input type="text" name="spareparts[0][name]" placeholder="Sparepart Name"
-                        class="border p-2 w-1/2 rounded">
+                    <select required name="spareparts[0][sparepart_id]" placeholder="Select Sparepart"
+                        class="sparepart-select border p-2 w-2/3 rounded">
+                    </select>
 
-                    <input type="number" name="spareparts[0][qty]" placeholder="Qty" class="border p-2 w-1/4 rounded">
+                    <input required type="number" name="spareparts[0][qty]" placeholder="Qty" class="border p-2 w-1/3 rounded">
 
-                    <button type="button" onclick="removeSparepart(this)" class="bg-red-500 text-white px-2 rounded">
+                    <button type="button" onclick="removeSparepart(this)" class="bg-red-500 text-white px-3 rounded">
+
                         X
+
                     </button>
 
                 </div>
@@ -343,6 +360,7 @@
             <button type="button" onclick="addSparepart()" class="mt-2 bg-green-600 text-white px-3 py-1 rounded">
 
                 + Add Sparepart
+
             </button>
 
         </div>
@@ -436,45 +454,6 @@
             }
         </script>
 
-        {{-- Sparepart Usage --}}
-        <script>
-            let spareIndex = 1;
-
-            function addSparepart() {
-
-                const wrapper = document.getElementById('sparepart-wrapper');
-
-                const row = document.createElement('div');
-                row.classList.add('sparepart-row', 'flex', 'gap-2', 'mb-2');
-
-                row.innerHTML = `
-        <input type="text"
-            name="spareparts[${spareIndex}][name]"
-            placeholder="Sparepart Name"
-            class="border p-2 w-1/2 rounded">
-
-        <input type="number"
-            name="spareparts[${spareIndex}][qty]"
-            placeholder="Qty"
-            class="border p-2 w-1/4 rounded">
-
-        <button type="button"
-            onclick="removeSparepart(this)"
-            class="bg-red-500 text-white px-2 rounded">
-            X
-        </button>
-    `;
-
-                wrapper.appendChild(row);
-
-                spareIndex++;
-            }
-
-            function removeSparepart(button) {
-                button.parentElement.remove();
-            }
-        </script>
-
         {{-- Duration Calculation --}}
         <script>
             const startInput = document.getElementById('start_time');
@@ -553,6 +532,7 @@
             });
         </script>
 
+        {{-- Problem Findings --}}
         <script>
             const findings = @json($problemFindings);
 
@@ -588,5 +568,160 @@
                 }
 
             });
+        </script>
+
+        <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+
+        <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+        <script>
+            const spareparts = @json($spareparts);
+        </script>
+
+        <script>
+            let sparepartIndex = 1;
+
+            function initTomSelect(element) {
+
+                if (element.tomselect) {
+                    element.tomselect.destroy();
+                }
+
+                new TomSelect(element, {
+
+                    valueField: 'id',
+
+                    labelField: 'material_number',
+
+                    searchField: [
+                        'location',
+                        'material_number',
+                        'description',
+                        'remarks'
+                    ],
+
+                    options: spareparts,
+
+                    create: false,
+
+                    maxOptions: 100,
+
+                    render: {
+
+                        option: function(item, escape) {
+
+                            return `
+
+                <div style="padding:8px">
+
+                    <div style="font-size:12px;color:#6b7280">
+
+                        📍 ${escape(item.location ?? '-')}
+
+                    </div>
+
+                    <div style="font-weight:700">
+
+                        ${escape(item.material_number)}
+
+                    </div>
+
+                    <div>
+
+                        ${escape(item.description)}
+
+                    </div>
+
+                    <div style="font-size:12px;color:#6b7280">
+
+                        ${escape(item.remarks ?? '-')}
+
+                    </div>
+
+                </div>
+
+                `;
+
+                        },
+
+                        item: function(item, escape) {
+
+                            return `
+
+                <div>
+
+                    ${escape(item.material_number)}
+                    -
+                    ${escape(item.description)}
+
+                </div>
+
+                `;
+
+                        }
+
+                    }
+
+                });
+
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+
+                document.querySelectorAll('.sparepart-select').forEach(function(el) {
+
+                    initTomSelect(el);
+
+                });
+
+            });
+
+            function addSparepart() {
+
+                let html = `
+
+                <div class="sparepart-row flex gap-2 mb-2">
+
+                    <select
+                        name="spareparts[${sparepartIndex}][sparepart_id]"
+                        placeholder="Select Sparepart" class="sparepart-select border p-2 w-2/3 rounded">
+                    </select>
+
+                    <input
+                        type="number"
+                        name="spareparts[${sparepartIndex}][qty]"
+                        placeholder="Qty"
+                        class="border p-3 w-1/3 rounded">
+
+                    <button
+                        type="button"
+                        onclick="removeSparepart(this)"
+                        class="bg-red-500 text-white px-3 rounded">
+
+                        X
+
+                    </button>
+
+                </div>
+
+                `;
+
+                document
+                    .getElementById('sparepart-wrapper')
+                    .insertAdjacentHTML('beforeend', html);
+
+                const selects = document.querySelectorAll('.sparepart-select');
+
+                initTomSelect(selects[selects.length - 1]);
+
+                sparepartIndex++;
+
+            }
+
+            function removeSparepart(button) {
+
+                button.closest('.sparepart-row').remove();
+
+            }
         </script>
     @endsection

@@ -10,4 +10,9 @@ class MachineProblem extends Model
     'machine_type',
     'problem'
 ];
+
+    public function pmProblems()
+    {
+        return $this->hasMany(PMProblem::class);
+    }
 }

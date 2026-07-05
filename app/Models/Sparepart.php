@@ -21,4 +21,14 @@ class Sparepart extends Model
     'segment',
     'pdt'
 ];
+
+    public function pmSchedule()
+    {
+        return $this->belongsTo(PMSchedule::class);
+    }
+
+    public function pmSpareparts()
+    {
+        return $this->hasMany(PMSparepart::class);
+    }
 }

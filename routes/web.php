@@ -94,6 +94,11 @@ Route::middleware(['auth'])->group(function () {
         [MachineProblemFindingController::class, 'import']
     )->name('machine-problem-findings.import');
 
+    Route::get(
+        '/pm-schedules/{pmSchedule}/checklist',
+        [PMChecklistController::class,'edit']
+    )->name('pm-schedules.checklist');
+
 
 
 });

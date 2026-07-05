@@ -23,7 +23,9 @@ class PMSchedule extends Model
         'start_time',
         'end_time',
         'duration',
-        'big_problem',
+        'oil_change',
+        'greasing',
+        'wo_zsbp',
         'remarks',
         'next_pm',
         'status',
@@ -47,5 +49,20 @@ class PMSchedule extends Model
     public function details()
     {
         return $this->hasMany(PMDetail::class);
+    }
+
+    public function measurements()
+    {
+        return $this->hasMany(PMMeasurement::class);
+    }
+
+    public function problems()
+    {
+        return $this->hasMany(PMProblem::class);
+    }
+
+    public function spareparts()
+    {
+        return $this->hasMany(PMSparepart::class);
     }
 }

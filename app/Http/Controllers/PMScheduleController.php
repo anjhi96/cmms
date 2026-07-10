@@ -18,6 +18,7 @@ use App\Models\Sparepart;
 use App\Models\PMMeasurement;
 use App\Models\PMProblem;
 use App\Models\PMSparepart;
+use Illuminate\Support\Facades\DB;
 
 class PMScheduleController extends Controller
 {
@@ -164,8 +165,10 @@ class PMScheduleController extends Controller
         ));
     }
 
+    
     public function update(Request $request, PMSchedule $pmSchedule)
     {
+        // VALIDASI INPUT
         $request->validate([
         'order_number' => 'required',
 
@@ -216,7 +219,6 @@ class PMScheduleController extends Controller
         }
 
         // 2. update schedule (header)
-
         $pmSchedule->update([
             'order_number' => $request->order_number,
 
@@ -252,7 +254,7 @@ class PMScheduleController extends Controller
 
             foreach ($request->details as $detail) {
 
-                if (empty($detail['item'])) {
+                if (blank($detail['item'])) {
                     continue;
                 }
 
@@ -331,9 +333,10 @@ class PMScheduleController extends Controller
         }
 
         return redirect()
-    ->route('pm-schedules.checklist', $pmSchedule->id)
-    ->with('success', 'PM Progress Saved');
+            ->route('pm-schedules.checklist', $pmSchedule->id)
+            ->with('success', 'PM Progress Saved');
     }
+    
 
     public function destroy(PMSchedule $pmSchedule)
     {

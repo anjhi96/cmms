@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\MachineProblem;
 use Illuminate\Http\Request;
 use App\Models\Machine;
+use App\Imports\MachineProblemImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MachineProblemController extends Controller
 {
@@ -80,14 +82,13 @@ class MachineProblemController extends Controller
 
         foreach ($request->problems as $problem) {
 
-            if (!$problem) {
+            if (blank($problem)) {
                 continue;
             }
 
             // 🔥 ANTI DUPLICATE CHECK
             $exists = MachineProblem::where('machine_type', $request->machine_type)
-            ->where('problem', trim($request->problem))
-            ->where('id', '!=', $machineProblem->id)
+            ->where('problem', trim($problem))
             ->exists();
 
             if ($exists) {
@@ -151,6 +152,23 @@ class MachineProblemController extends Controller
         return redirect()
             ->route('machine-problems.index')
             ->with('success', 'Problem updated successfully');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,xlsx,xls'
+        ]);
+
+        Excel::import(
+            new MachineProblemImport,
+            $request->file('file')
+        );
+
+        return back()->with(
+            'success',
+            'Machine Problems imported successfully.'
+        );
     }
 
     public function destroy(MachineProblem $machineProblem)

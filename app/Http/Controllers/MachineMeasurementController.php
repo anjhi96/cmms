@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MachineMeasurement;
 use App\Models\Machine;
+use App\Imports\MachineMeasurementImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MachineMeasurementController extends Controller
 {
@@ -182,6 +184,23 @@ class MachineMeasurementController extends Controller
         return redirect()
             ->route('machine-measurements.index')
             ->with('success', 'Measurement updated successfully');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,xlsx,xls'
+        ]);
+
+        Excel::import(
+            new MachineMeasurementImport,
+            $request->file('file')
+        );
+
+        return back()->with(
+            'success',
+            'Machine Measurements imported successfully.'
+        );
     }
 
     /**

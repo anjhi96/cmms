@@ -99,6 +99,16 @@ Route::middleware(['auth'])->group(function () {
         [PMChecklistController::class,'edit']
     )->name('pm-schedules.checklist');
 
+    Route::post(
+    '/machine-problems/import',
+    [MachineProblemController::class,'import']
+    )->name('machine-problems.import');
+
+    Route::post(
+    '/machine-measurements/import',
+    [MachineMeasurementController::class,'import']
+)->name('machine-measurements.import');
+
 
 
 });

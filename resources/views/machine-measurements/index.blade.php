@@ -28,7 +28,7 @@
 
                     <!-- Hidden Input -->
                     <input type="file" id="fileInput" name="file" accept=".csv" class="hidden"
-                        onchange="updateFileName(this)">
+                        onchange="updateFileName(this); validateFile(this)">
 
                     <!-- Custom Button -->
                     <label for="fileInput"
@@ -51,7 +51,6 @@
             </form>
 
         </div>
-        </a>
 
     </div>
 

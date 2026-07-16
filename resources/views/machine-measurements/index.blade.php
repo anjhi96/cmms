@@ -26,9 +26,9 @@
                     <!-- FILE WRAPPER -->
                     <div class="flex items-center gap-2 w-full sm:w-auto">
 
-                        <!-- Hidden Input -->
-                        <input type="file" id="fileInput" name="file" accept=".csv" class="hidden"
-                            onchange="updateFileName(this)">
+                    <!-- Hidden Input -->
+                    <input type="file" id="fileInput" name="file" accept=".csv" class="hidden"
+                        onchange="updateFileName(this)">
 
                         <!-- Custom Button -->
                         <label for="fileInput"
@@ -50,8 +50,8 @@
 
                 </form>
 
-            </div>
-            </a>
+        </div>
+        </a>
 
         </div>
 

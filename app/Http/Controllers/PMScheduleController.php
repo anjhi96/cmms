@@ -6,7 +6,6 @@ use App\Models\Machine;
 use App\Models\PMSchedule;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Models\PMDetail;
 use App\Imports\PMScheduleImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\MachineProblem;
@@ -165,7 +164,7 @@ class PMScheduleController extends Controller
         ));
     }
 
-    
+
     public function update(Request $request, PMSchedule $pmSchedule)
     {
         // VALIDASI INPUT
@@ -180,12 +179,12 @@ class PMScheduleController extends Controller
 
         'end_time' => 'required',
 
-        'oil_change' => 'required',
-
         'greasing' => 'required',
 
+        'oil_change' => 'nullable',
+
         'wo_zsbp' => 'required',
-        
+
         'remarks' => 'required',
 
         'problems.*.problem' => 'required',
@@ -217,126 +216,128 @@ class PMScheduleController extends Controller
 
             $duration = $start->diffInMinutes($end);
         }
+        DB::transaction(function () use ($request, $pmSchedule, $duration) {
+            // 2. update schedule (header)
+            $pmSchedule->update([
+                'order_number' => $request->order_number,
 
-        // 2. update schedule (header)
-        $pmSchedule->update([
-            'order_number' => $request->order_number,
+                'actual_date' => $request->actual_date,
 
-            'actual_date' => $request->actual_date,
+                'pic' => $request->pic,
 
-            'pic' => $request->pic,
+                'start_time' => $request->start_time,
 
-            'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
 
-            'end_time' => $request->end_time,
+                'duration' => $duration,
 
-            'duration' => $duration,
+                'oil_change' => $request->oil_change,
 
-            'oil_change' => $request->oil_change,
+                'greasing' => $request->greasing,
 
-            'greasing' => $request->greasing,
+                'wo_zsbp' => $request->wo_zsbp,
 
-            'wo_zsbp' => $request->wo_zsbp,
+                'remarks' => $request->remarks,
 
-            'remarks' => $request->remarks,
+                'status' => 'IN_PROGRESS',
 
-            'status' => 'IN PROGRESS',
+            ]);
 
-        ]);
+            // 3. update measurements
+            PMMeasurement::where(
+                'pm_schedule_id',
+                $pmSchedule->id
+            )->delete();
+            // dd($request->measurements);
+            if ($request->measurements) {
 
-        // 3. update measurements
-        PMMeasurement::where(
-            'pm_schedule_id',
-            $pmSchedule->id
-        )->delete();
+                foreach ($request->measurements as $measurement) {
 
-        if ($request->details) {
-
-            foreach ($request->details as $detail) {
-
-                if (blank($detail['item'])) {
-                    continue;
-                }
-
-                PMMeasurement::create([
-
-                    'pm_schedule_id'   => $pmSchedule->id,
-
-                    'measurement_item' => $detail['item'],
-
-                    'standard'         => $detail['standard'] ?? null,
-
-                    'measurement_value' => $detail['value'] ?? null,
-
-                    'unit'             => $detail['unit'] ?? null,
-
-                ]);
-
-            }
-
-        }
-
-        PMProblem::where(
-            'pm_schedule_id',
-            $pmSchedule->id
-        )->delete();
-
-        if ($request->problems) {
-
-            foreach ($request->problems as $problem) {
-
-                if (empty($problem['problem'])) {
-                    continue;
-                }
-
-                PMProblem::create([
+                    PMMeasurement::create([
 
                     'pm_schedule_id' => $pmSchedule->id,
 
-                    'machine_problem_id' => $problem['problem'],
+                    'machine_measurement_id' => $measurement['machine_measurement_id'],
 
-                    'machine_problem_finding_id' => $problem['finding'],
+                    'measurement_item' => $measurement['measurement_item'],
 
-                    'severity' => $problem['severity'],
+                    'standard' => $measurement['standard'],
+
+                    'measurement_value' => $measurement['measurement_value'],
+
+                    'unit' => $measurement['unit'],
 
                 ]);
 
-            }
-
-        }
-
-        PMSparepart::where(
-            'pm_schedule_id',
-            $pmSchedule->id
-        )->delete();
-
-        if ($request->spareparts) {
-
-            foreach ($request->spareparts as $item) {
-
-                if (empty($item['sparepart_id'])) {
-                    continue;
                 }
 
-                PMSparepart::create([
+            }
 
-                    'pm_schedule_id' => $pmSchedule->id,
+            PMProblem::where(
+                'pm_schedule_id',
+                $pmSchedule->id
+            )->delete();
+            // dd($request->problems);
+            if ($request->problems) {
 
-                    'sparepart_id' => $item['sparepart_id'],
+                foreach ($request->problems as $problem) {
 
-                    'qty' => $item['qty'] ?? 1,
+                    if (empty($problem['problem'])) {
+                        continue;
+                    }
 
-                ]);
+                    PMProblem::create([
+
+                        'pm_schedule_id' => $pmSchedule->id,
+
+                        'machine_problem_id' => $problem['problem'],
+
+                        'machine_problem_finding_id' => $problem['finding'],
+
+                        'severity' => $problem['severity'],
+
+                    ]);
+
+                }
 
             }
 
-        }
+            PMSparepart::where(
+                'pm_schedule_id',
+                $pmSchedule->id
+            )->delete();
+
+            if ($request->spareparts) {
+
+                foreach ($request->spareparts as $item) {
+
+                    if (empty($item['sparepart_id'])) {
+                        continue;
+                    }
+
+                    PMSparepart::create([
+
+                        'pm_schedule_id' => $pmSchedule->id,
+
+                        'sparepart_id' => $item['sparepart_id'],
+
+                        'qty' => $item['qty'] ?? 1,
+
+                        'unit' => $item['unit'] ?? null,
+
+                    ]);
+
+                }
+
+            }
+        });
 
         return redirect()
-            ->route('pm-schedules.checklist', $pmSchedule->id)
-            ->with('success', 'PM Progress Saved');
+        ->route('pm-schedules.checklist', $pmSchedule->id)
+        ->with('success', 'PM Progress Saved');
+
     }
-    
+
 
     public function destroy(PMSchedule $pmSchedule)
     {

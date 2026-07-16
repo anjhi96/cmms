@@ -183,8 +183,7 @@
                     <select required name="problems[0][problem]" class="problem-select border p-2 w-1/2 rounded">
                         <option value="">-- Select Problem --</option>
                         @foreach ($bigProblems as $problem)
-                            <option value="{{ $problem->problem }}"
-                                data-category="{{ strtolower(trim($problem->category)) }}">
+                            <option value="{{ $problem->id }}" data-category="{{ strtolower(trim($problem->category)) }}">
 
                                 {{ $problem->problem }}
 
@@ -276,6 +275,10 @@
 
                                     {{ $measurement->measurement_item }}
 
+                                    <input type="hidden"
+                                        name="measurements[{{ $i }}][machine_measurement_id]"
+                                        value="{{ $measurement->id }}">
+
                                     <input type="hidden" name="measurements[{{ $i }}][measurement_item]"
                                         value="{{ $measurement->measurement_item }}">
 
@@ -292,7 +295,8 @@
 
                                 <td class="border px-3 py-2">
 
-                                    <input required type="text" name="measurements[{{ $i }}][measurement_value]"
+                                    <input required type="text"
+                                        name="measurements[{{ $i }}][measurement_value]"
                                         class="w-full border rounded px-2 py-1">
 
                                 </td>
@@ -345,7 +349,8 @@
                         class="sparepart-select border p-2 w-2/3 rounded">
                     </select>
 
-                    <input required type="number" name="spareparts[0][qty]" placeholder="Qty" class="border p-2 w-1/3 rounded">
+                    <input required type="number" name="spareparts[0][qty]" placeholder="Qty"
+                        class="border p-2 w-1/3 rounded">
 
                     <button type="button" onclick="removeSparepart(this)" class="bg-red-500 text-white px-3 rounded">
 
@@ -365,24 +370,17 @@
 
         </div>
 
-        <div class="flex flex-col md:flex-row gap-3 justify-end">
+        <div class="flex justify-end">
 
-            <button type="submit" name="status" value="IN PROGRESS"
-                class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
 
-                Save Draft
-
-            </button>
-
-            <button type="submit" name="status" value="DONE"
-                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
-
-                Complete PM
+                Lanjut Isi Checklist
 
             </button>
 
         </div>
 
+        {{-- Problem  --}}
         <script>
             let problemIndex = 1;
 
@@ -396,15 +394,13 @@
                 class="problem-select border p-2 w-1/2 rounded">
 
                 <option value="">-- Select Problem --</option>
+                        @foreach ($bigProblems as $problem)
+                            <option value="{{ $problem->id }}" data-category="{{ strtolower(trim($problem->category)) }}">
 
-                @foreach ($bigProblems as $problem)
-                    <option value="{{ $problem->problem }}"
-                        data-category="{{ strtolower(trim($problem->category)) }}">
+                                {{ $problem->problem }}
 
-                        {{ $problem->problem }}
-
-                    </option>
-                @endforeach
+                            </option>
+                        @endforeach
             </select>
 
             <select
@@ -436,6 +432,7 @@
         </div>
     `;
 
+    // console.log(html);
                 document
                     .getElementById('problem-wrapper')
                     .insertAdjacentHTML('beforeend', html);
@@ -495,43 +492,6 @@
             endInput.addEventListener('change', calculateDuration);
         </script>
 
-        {{-- Machine Problem Dropdown --}}
-        <script>
-            document.getElementById('machine_type').addEventListener('change', function() {
-
-                let type = this.value;
-                let problemSelect = document.getElementById('big_problem');
-
-                // reset dropdown
-                problemSelect.innerHTML = '<option value="">Loading...</option>';
-
-                if (!type) {
-                    problemSelect.innerHTML = '<option value="">Select Problem</option>';
-                    return;
-                }
-
-                fetch(`/machine-problems/by-type/${type}`)
-                    .then(res => res.json())
-                    .then(data => {
-
-                        problemSelect.innerHTML = '<option value="">Select Problem</option>';
-
-                        data.forEach(item => {
-                            let option = document.createElement('option');
-                            option.value = item.problem;
-                            option.text = item.problem;
-                            problemSelect.appendChild(option);
-                        });
-
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        problemSelect.innerHTML = '<option>Error loading data</option>';
-                    });
-
-            });
-        </script>
-
         {{-- Problem Findings --}}
         <script>
             const findings = @json($problemFindings);
@@ -541,14 +501,13 @@
                 if (!e.target.classList.contains('problem-select'))
                     return;
 
-                const category =
-                    e.target.selectedOptions[0]
+                const category = e.target.selectedOptions[0]
                     .dataset.category
                     .trim()
                     .toLowerCase();
 
-                const findingSelect =
-                    e.target.closest('.problem-row')
+                const findingSelect = e.target
+                    .closest('.problem-row')
                     .querySelector('.finding-select');
 
                 findingSelect.innerHTML =
@@ -558,10 +517,15 @@
 
                     findings[category].forEach(function(item) {
 
-                        findingSelect.innerHTML +=
-                            `<option value="${item.finding}">
+                        findingSelect.innerHTML += `
+
+                <option value="${item.id}">
+
                     ${item.finding}
-                </option>`;
+
+                </option>
+
+            `;
 
                     });
 

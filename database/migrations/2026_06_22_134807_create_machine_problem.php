@@ -14,6 +14,7 @@ return new class () extends Migration {
             $table->id();
             $table->string('machine_type');
             $table->string('problem');
+            $table->text('category')->nullable();
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('machine_problem');
+        Schema::dropIfExists('machine_problems');
     }
 };

@@ -28,13 +28,17 @@ return new class () extends Migration {
             $table->string('order_number')->unique()->nullable();
 
             // Planning
+            $table->date('plan_date');
             $table->string('plan_month');
             $table->year('plan_year');
-            $table->date('due_date');
+            $table->date('due_date')->nullable();
             $table->date('last_pm')->nullable();
 
             // Assignment
             $table->string('pic')->nullable();
+            $table->string('oil_change')->nullable();
+            $table->string('greasing')->nullable();
+            $table->string('wo_zsbp')->nullable();
 
             // Execution
             $table->date('actual_date')->nullable();
@@ -45,7 +49,6 @@ return new class () extends Migration {
             // disimpan dalam menit
             $table->integer('duration')->nullable();
 
-            $table->text('big_problem')->nullable();
             $table->text('remarks')->nullable();
 
             // Next PM

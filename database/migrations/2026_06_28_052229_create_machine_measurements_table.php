@@ -17,6 +17,7 @@ return new class () extends Migration {
             $table->string('machine_type');
             $table->string('measurement_item');
             $table->string('unit')->nullable();
+            $table->string('standard')->nullable();
 
             $table->timestamps();
         });

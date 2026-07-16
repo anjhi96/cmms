@@ -17,6 +17,11 @@ return new class () extends Migration {
                 ->constrained()
                 ->cascadeOnDelete();
 
+            $table->foreignId('machine_measurement_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
+
             $table->string('measurement_item');
             $table->string('standard')->nullable();
             $table->string('measurement_value')->nullable();

@@ -33,21 +33,6 @@ return new class () extends Migration {
                 'High',
             ])->nullable();
 
-            $table->enum('oil_change', [
-                'YES',
-                'NO',
-            ])->nullable();
-
-            $table->enum('greasing', [
-                'YES',
-                'NO',
-            ])->nullable();
-
-            $table->enum('wo_zsbp', [
-                'YES',
-                'NO',
-            ])->nullable();
-
             $table->text('remarks')->nullable();
 
             $table->timestamps();

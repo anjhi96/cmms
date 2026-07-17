@@ -18,6 +18,7 @@ use App\Models\PMMeasurement;
 use App\Models\PMProblem;
 use App\Models\PMSparepart;
 use Illuminate\Support\Facades\DB;
+use App\Models\MachineChecklist;
 
 class PMScheduleController extends Controller
 {
@@ -333,9 +334,28 @@ class PMScheduleController extends Controller
         });
 
         return redirect()
-        ->route('pm-schedules.checklist', $pmSchedule->id)
-        ->with('success', 'PM Progress Saved');
+    ->route('pm-schedules.edit', $pmSchedule->id)
+    ->with('success', 'PM Progress Saved');
 
+    }
+
+    public function checklist(PMSchedule $pmSchedule)
+    {
+        $checklists = MachineChecklist::where(
+            'machine_type',
+            $pmSchedule->machine_type
+        )
+        ->orderBy('section_order')
+        ->orderBy('item_order')
+        ->get();
+
+        return view(
+            'pm-schedules.checklist',
+            compact(
+                'pmSchedule',
+                'checklists'
+            )
+        );
     }
 
 

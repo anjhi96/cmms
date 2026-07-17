@@ -96,8 +96,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get(
         '/pm-schedules/{pmSchedule}/checklist',
-        [PMScheduleController::class,'checklist']
+        [PMScheduleController::class, 'checklist']
     )->name('pm-schedules.checklist');
+
+    Route::post(
+        '/pm-schedules/{pmSchedule}/checklist',
+        [PMScheduleController::class, 'saveChecklist']
+    )->name('pm-schedules.checklist.save');
 
     Route::post(
         '/machine-problems/import',
@@ -108,10 +113,6 @@ Route::middleware(['auth'])->group(function () {
         '/machine-measurements/import',
         [MachineMeasurementController::class,'import']
     )->name('machine-measurements.import');
-
-    Route::get('/pm-schedules/{pmSchedule}/checklist', function () {
-        return "Checklist Page";
-    })->name('pm-schedules.checklist');
 
 
 

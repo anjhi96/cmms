@@ -65,4 +65,9 @@ class PMSchedule extends Model
     {
         return $this->hasMany(PMSparepart::class);
     }
+
+    public function checklists()
+    {
+        return $this->hasMany(PMChecklist::class);
+    }
 }

@@ -12,7 +12,6 @@ class PMProblem extends Model
         'machine_problem_id',
         'machine_problem_finding_id',
         'severity',
-        'remarks',
     ];
 
     public function pmSchedule()

@@ -19,6 +19,7 @@ use App\Models\PMProblem;
 use App\Models\PMSparepart;
 use Illuminate\Support\Facades\DB;
 use App\Models\MachineChecklist;
+use App\Models\PMChecklist;
 
 class PMScheduleController extends Controller
 {
@@ -156,12 +157,42 @@ class PMScheduleController extends Controller
         ->orderBy('description')
         ->get();
 
+// ambil data PM yang sudah ada untuk schedule ini
+        $pmMeasurements = PMMeasurement::where(
+            'pm_schedule_id',
+            $pmSchedule->id
+        )->get();
+
+
+        $pmProblems = PMProblem::with([
+            'machineProblem',
+            'machineProblemFinding'
+        ])
+        ->where(
+            'pm_schedule_id',
+            $pmSchedule->id
+        )
+        ->get();
+
+
+        $pmSpareparts = PMSparepart::with('sparepart')
+        ->where(
+            'pm_schedule_id',
+            $pmSchedule->id
+        )
+        ->get();
+
+
         return view('pm-schedules.edit', compact(
             'pmSchedule',
             'bigProblems',
             'problemFindings',
             'measurements',
-            'spareparts'
+            'spareparts',
+// existing PM data
+            'pmMeasurements',
+            'pmProblems',
+            'pmSpareparts'
         ));
     }
 
@@ -249,7 +280,6 @@ class PMScheduleController extends Controller
                 'pm_schedule_id',
                 $pmSchedule->id
             )->delete();
-            // dd($request->measurements);
             if ($request->measurements) {
 
                 foreach ($request->measurements as $measurement) {
@@ -278,7 +308,7 @@ class PMScheduleController extends Controller
                 'pm_schedule_id',
                 $pmSchedule->id
             )->delete();
-            // dd($request->problems);
+
             if ($request->problems) {
 
                 foreach ($request->problems as $problem) {
@@ -333,9 +363,79 @@ class PMScheduleController extends Controller
             }
         });
 
+        // $pmSchedule->refresh();
+
+        // $this->updatePMStatus($pmSchedule);
+
+
         return redirect()
-    ->route('pm-schedules.edit', $pmSchedule->id)
+    ->route('pm-schedules.checklist', $pmSchedule->id)
     ->with('success', 'PM Progress Saved');
+
+    }
+
+    private function updatePMStatus(PMSchedule $pmSchedule)
+    {
+
+        // belum ada PM
+        if (!$pmSchedule->actual_date) {
+
+            if (now()->greaterThan($pmSchedule->due_date)) {
+
+                $pmSchedule->update([
+                    'status' => 'MISSED'
+                ]);
+
+            } else {
+
+                $pmSchedule->update([
+                    'status' => 'OPEN'
+                ]);
+
+            }
+
+            return;
+        }
+
+
+        // cek apakah checklist sudah disimpan
+        $hasChecklist = PMChecklist::where(
+            'pm_schedule_id',
+            $pmSchedule->id
+        )->exists();
+
+
+        if (!$hasChecklist) {
+
+            $pmSchedule->update([
+                'status' => 'IN_PROGRESS'
+            ]);
+
+            return;
+
+        }
+
+
+
+        // checklist sudah ada
+        if (
+            Carbon::parse($pmSchedule->actual_date)
+            ->greaterThan(
+                Carbon::parse($pmSchedule->due_date)
+            )
+        ) {
+
+            $pmSchedule->update([
+                'status' => 'FINISHED'
+            ]);
+
+        } else {
+
+            $pmSchedule->update([
+                'status' => 'FINISHED_ON_TIME'
+            ]);
+
+        }
 
     }
 
@@ -357,6 +457,54 @@ class PMScheduleController extends Controller
             )
         );
     }
+
+    public function saveChecklist(Request $request, PMSchedule $pmSchedule)
+    {
+        DB::transaction(function () use ($request, $pmSchedule) {
+
+            // hapus checklist lama jika ada
+            PMChecklist::where(
+                'pm_schedule_id',
+                $pmSchedule->id
+            )->delete();
+
+
+            foreach ($request->checklists as $item) {
+
+                PMChecklist::create([
+
+                    'pm_schedule_id' => $pmSchedule->id,
+
+                    'machine_checklist_id' => $item['machine_checklist_id'],
+
+                    'clean' => $item['clean'] ?? 'NO',
+
+                    'lubrication' => $item['lubrication'] ?? 'NO',
+
+                    'replace' => $item['replace'] ?? 'NO',
+
+                    'check' => $item['check'] ?? 'NO',
+
+                    'remarks' => $item['remarks'] ?? null,
+
+                ]);
+
+            }
+
+        });
+
+        $pmSchedule->refresh();
+
+        $this->updatePMStatus($pmSchedule);
+
+
+        return redirect()
+            ->route('pm-schedules.index')
+            ->with('success', 'PM Checklist saved successfully');
+
+    }
+
+
 
 
     public function destroy(PMSchedule $pmSchedule)

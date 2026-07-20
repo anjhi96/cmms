@@ -1,177 +1,476 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="max-w-7xl mx-auto px-6 py-6">
 
-<div class="max-w-7xl mx-auto px-6 py-6">
+        {{-- Header --}}
+        <div class="flex justify-between items-center mb-6">
 
-    {{-- Header --}}
-    <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">
+                PM Checklist
+            </h1>
 
-        <h1 class="text-2xl font-bold text-gray-800">
-            PM Checklist
-        </h1>
+        </div>
 
-    </div>
+        {{-- Machine Information --}}
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
 
-    {{-- Machine Information --}}
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">
+                Machine Information
+            </h2>
 
-        <h2 class="text-lg font-semibold mb-4">
-            Machine Information
-        </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="text-sm text-gray-500">
+                        Machine Number
+                    </label>
 
-            <div>
-                <label class="text-sm text-gray-500">
-                    Machine Number
-                </label>
-
-                <div class="font-semibold">
-                    {{ $pmSchedule->machine_number }}
+                    <div class="font-semibold">
+                        {{ $pmSchedule->machine_number }}
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="text-sm text-gray-500">
-                    Machine Type
-                </label>
+                <div>
+                    <label class="text-sm text-gray-500">
+                        Machine Type
+                    </label>
 
-                <div class="font-semibold">
-                    {{ $pmSchedule->machine_type }}
+                    <div class="font-semibold">
+                        {{ $pmSchedule->machine_type }}
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="text-sm text-gray-500">
-                    Order Number
-                </label>
+                <div>
+                    <label class="text-sm text-gray-500">
+                        Order Number
+                    </label>
 
-                <div class="font-semibold">
-                    {{ $pmSchedule->order_number }}
+                    <div class="font-semibold">
+                        {{ $pmSchedule->order_number }}
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="text-sm text-gray-500">
-                    PIC PM
-                </label>
+                <div>
+                    <label class="text-sm text-gray-500">
+                        PIC PM
+                    </label>
 
-                <div class="font-semibold">
-                    {{ $pmSchedule->pic }}
+                    <div class="font-semibold">
+                        {{ $pmSchedule->pic }}
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="text-sm text-gray-500">
-                    Actual Date
-                </label>
+                <div>
+                    <label class="text-sm text-gray-500">
+                        Actual Date
+                    </label>
 
-                <div class="font-semibold">
-                    {{ $pmSchedule->actual_date }}
+                    <div class="font-semibold">
+                        {{ $pmSchedule->actual_date }}
+                    </div>
                 </div>
-            </div>
 
-            <div>
-                <label class="text-sm text-gray-500">
-                    Duration
-                </label>
+                <div>
+                    <label class="text-sm text-gray-500">
+                        Duration
+                    </label>
 
-                <div class="font-semibold">
-                    {{ $pmSchedule->duration }} Minutes
+                    <div class="font-semibold">
+                        {{ $pmSchedule->duration }} Minutes
+                    </div>
                 </div>
+
             </div>
 
         </div>
 
-    </div>
+        {{-- Checklist --}}
+        <form action="{{ route('pm-schedules.checklist.save', $pmSchedule) }}" method="POST">
 
-    {{-- Checklist --}}
-    <form action="{{ route('pm-schedules.checklist.save', $pmSchedule) }}" method="POST">
+            @csrf
 
-        @csrf
+            <div class="overflow-auto max-h-[75vh] bg-white rounded-lg shadow">
 
-        @php
-            $currentSection = '';
-        @endphp
+                <table class="min-w-full border-collapse">
 
-        @foreach ($checklists as $i => $item)
+                    <thead class="sticky top-0 z-20 bg-gray-100 shadow-sm">
 
-            @if ($currentSection != $item->section)
+                        <tr>
 
-                @php
-                    $currentSection = $item->section;
-                @endphp
+                            <th class="border px-3 py-3 text-left w-5/12 bg-gray-100">
+                                Checklist Item
+                            </th>
 
-                <div class="bg-blue-600 text-white px-4 py-2 rounded mt-6 mb-3 font-semibold">
+                            <th title="Clean" class="border px-3 py-3 text-center w-24">
 
-                    {{ $item->section }}
+                                <span class="hidden xl:inline">
+                                    Clean
+                                </span>
+
+                                <span class="inline xl:hidden">
+                                    CLN
+                                </span>
+
+                            </th>
+
+                            <th title="Lubrication" class="border px-3 py-3 text-center w-28">
+
+                                <span class="hidden xl:inline">
+                                    Lubrication
+                                </span>
+
+                                <span class="inline xl:hidden">
+                                    LUB
+                                </span>
+
+                            </th>
+
+                            <th title="Replace" class="border px-3 py-3 text-center w-24">
+
+                                <span class="hidden xl:inline">
+                                    Replace
+                                </span>
+
+                                <span class="inline xl:hidden">
+                                    REP
+                                </span>
+
+                            </th>
+
+                            <th title="Check" class="border px-3 py-3 text-center w-24">
+
+                                <span class="hidden xl:inline">
+                                    Check
+                                </span>
+
+                                <span class="inline xl:hidden">
+                                    CHK
+                                </span>
+
+                            </th>
+
+                            <th title="Remarks" class="border px-3 py-3 text-left bg-gray-100">
+                                <span class="hidden xl:inline">
+                                    Remarks
+                                </span>
+
+                                <span class="inline xl:hidden">
+                                    Rem..
+                                </span>
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @php
+                            $currentSection = '';
+                        @endphp
+
+                        @foreach ($checklists as $i => $item)
+                            @if ($currentSection != $item->section)
+                                @php
+                                    $currentSection = $item->section;
+                                @endphp
+
+                                <tr>
+
+
+                                    <td colspan="6" class="bg-slate-200 text-slate-800 font-semibold px-4 py-2 border">
+
+                                        {{ $item->section }}
+
+                                    </td>
+
+
+
+                                </tr>
+                            @endif
+
+                            <tr class="hover:bg-gray-50">
+
+                                <td class="border px-3 py-3">
+
+                                    {{ $item->checklist_item }}
+
+                                    <input type="hidden" name="checklists[{{ $i }}][machine_checklist_id]"
+                                        value="{{ $item->id }}">
+
+                                </td>
+
+                                {{-- CLEAN --}}
+                                <td class="border text-center">
+
+                                    <input type="hidden" name="checklists[{{ $i }}][clean]" value="NO">
+
+                                    <input type="checkbox" name="checklists[{{ $i }}][clean]" value="YES"
+                                        class="
+        h-6 w-6
+        rounded
+        border-2
+        border-slate-400
+        text-green-600
+        focus:ring-2
+        focus:ring-green-500
+        cursor-pointer
+        transition
+        duration-150
+    ">
+
+                                </td>
+
+                                {{-- LUBRICATION --}}
+                                <td class="border text-center">
+
+                                    <input type="hidden" name="checklists[{{ $i }}][lubrication]"
+                                        value="NO">
+
+                                    <input type="checkbox" name="checklists[{{ $i }}][lubrication]"
+                                        value="YES"
+                                        class="
+        h-6 w-6
+        rounded
+        border-2
+        border-slate-400
+        text-green-600
+        focus:ring-2
+        focus:ring-green-500
+        cursor-pointer
+        transition
+        duration-150
+    ">
+
+                                </td>
+
+                                {{-- REPLACE --}}
+                                <td class="border text-center">
+
+                                    <input type="hidden" name="checklists[{{ $i }}][replace]" value="NO">
+
+                                    <input type="checkbox" name="checklists[{{ $i }}][replace]" value="YES"
+                                        class="
+        h-6 w-6
+        rounded
+        border-2
+        border-slate-400
+        text-green-600
+        focus:ring-2
+        focus:ring-green-500
+        cursor-pointer
+        transition
+        duration-150
+    ">
+
+                                </td>
+
+                                {{-- CHECK --}}
+                                <td class="border text-center">
+
+                                    <input type="hidden" name="checklists[{{ $i }}][check]" value="NO">
+
+                                    <input type="checkbox" name="checklists[{{ $i }}][check]" value="YES"
+                                        class="
+        h-6 w-6
+        rounded
+        border-2
+        border-slate-400
+        text-green-600
+        focus:ring-2
+        focus:ring-green-500
+        cursor-pointer
+        transition
+        duration-150
+    ">
+
+                                </td>
+
+                                {{-- REMARKS --}}
+                                <td class="border px-3 py-2 text-center">
+
+                                    <button type="button" class="remark-btn text-gray-500 hover:text-blue-600 text-xl"
+                                        data-index="{{ $i }}" data-item="{{ $item->checklist_item }}">
+
+                                        ✏️
+
+                                    </button>
+
+                                    <input type="hidden" id="remark-{{ $i }}"
+                                        name="checklists[{{ $i }}][remarks]" value="">
+
+                                </td>
+
+                            </tr>
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="flex justify-end mt-6">
+
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded">
+
+                    Save Checklist
+
+                </button>
+
+            </div>
+
+        </form>
+
+        {{-- Remarks Modal --}}
+        <div id="remarkModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+
+                <h2 class="text-lg font-bold mb-4">
+                    Checklist Remarks
+                </h2>
+
+                <div class="mb-4">
+
+                    <label class="block text-sm text-gray-500 mb-1">
+                        Checklist Item
+                    </label>
+
+                    <div id="remarkItem" class="font-semibold bg-gray-100 rounded p-3">
+                    </div>
 
                 </div>
 
-            @endif
+                <div>
 
-            <div class="bg-white shadow rounded mb-2 p-4">
+                    <label class="block text-sm text-gray-500 mb-1">
+                        Remarks
+                    </label>
 
-                <div class="grid grid-cols-12 gap-3 items-center">
+                    <textarea id="remarkTextarea" rows="5" class="w-full border rounded-lg p-3" placeholder="Input remarks..."></textarea>
 
-                    <div class="col-span-6">
+                </div>
 
-                        {{ $item->checklist_item }}
+                <div class="flex justify-end gap-3 mt-6">
 
-                        <input
-                            type="hidden"
-                            name="checklists[{{ $i }}][machine_checklist_id]"
-                            value="{{ $item->id }}">
+                    <button type="button" id="cancelRemark" class="px-4 py-2 rounded border">
 
-                    </div>
+                        Cancel
 
-                    <div class="col-span-2">
+                    </button>
 
-                        <select
-                            name="checklists[{{ $i }}][result]"
-                            class="w-full border rounded p-2"
-                            required>
+                    <button type="button" id="saveRemark" class="px-4 py-2 rounded bg-blue-600 text-white">
 
-                            <option value="">Select</option>
-                            <option value="OK">OK</option>
-                            <option value="NG">NG</option>
-                            <option value="N/A">N/A</option>
+                        Save
 
-                        </select>
-
-                    </div>
-
-                    <div class="col-span-4">
-
-                        <input
-                            type="text"
-                            name="checklists[{{ $i }}][remarks]"
-                            class="w-full border rounded p-2"
-                            placeholder="Remarks">
-
-                    </div>
+                    </button>
 
                 </div>
 
             </div>
 
-        @endforeach
-
-        <div class="mt-8 flex justify-end">
-
-            <button
-                type="submit"
-                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded">
-
-                Save Checklist
-
-            </button>
-
         </div>
 
-    </form>
+        <script>
+            let currentRemarkIndex = null;
 
-</div>
+            const modal = document.getElementById('remarkModal');
 
-@endsection
+            const textarea = document.getElementById('remarkTextarea');
+
+            const itemLabel = document.getElementById('remarkItem');
+
+            document.querySelectorAll('.remark-btn').forEach(btn => {
+
+                btn.addEventListener('click', function() {
+
+                    currentRemarkIndex = this.dataset.index;
+
+                    itemLabel.innerText = this.dataset.item;
+
+                    textarea.value =
+                        document.getElementById(
+                            'remark-' + currentRemarkIndex
+                        ).value;
+
+                    modal.classList.remove('hidden');
+
+                    modal.classList.add('flex');
+
+                });
+
+            });
+
+            document.getElementById('cancelRemark')
+                .addEventListener('click', function() {
+
+                    modal.classList.add('hidden');
+
+                    modal.classList.remove('flex');
+
+                });
+
+            document.getElementById('saveRemark')
+                .addEventListener('click', function() {
+
+                    const input =
+                        document.getElementById(
+                            'remark-' + currentRemarkIndex
+                        );
+
+                    input.value = textarea.value;
+
+                    // Ganti warna icon kalau sudah ada remarks
+                    const button =
+                        document.querySelector(
+                            `.remark-btn[data-index="${currentRemarkIndex}"]`
+                        );
+
+                    if (textarea.value.trim() !== '') {
+
+                        button.classList.remove(
+                            'text-gray-500'
+                        );
+
+                        button.classList.add(
+                            'text-green-600'
+                        );
+
+                        button.innerHTML = '📝';
+
+                    } else {
+
+                        button.classList.remove(
+                            'text-green-600'
+                        );
+
+                        button.classList.add(
+                            'text-gray-500'
+                        );
+
+                        button.innerHTML = '✏️';
+
+                    }
+
+                    modal.classList.add('hidden');
+
+                    modal.classList.remove('flex');
+
+                });
+
+            // Klik area hitam untuk close
+            modal.addEventListener('click', function(e) {
+
+                if (e.target === modal) {
+
+                    modal.classList.add('hidden');
+
+                    modal.classList.remove('flex');
+
+                }
+
+            });
+        </script>
+    @endsection

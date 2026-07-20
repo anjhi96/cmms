@@ -71,8 +71,20 @@
         <select name="status" class="border p-2 rounded">
             <option value="">All Status</option>
             <option value="OPEN" {{ request('status') == 'OPEN' ? 'selected' : '' }}>OPEN</option>
-            <option value="IN PROGRESS" {{ request('status') == 'IN PROGRESS' ? 'selected' : '' }}>IN PROGRESS</option>
-            <option value="DONE" {{ request('status') == 'DONE' ? 'selected' : '' }}>DONE</option>
+            <option value="IN_PROGRESS" {{ request('status') == 'IN_PROGRESS' ? 'selected' : '' }}>
+                IN PROGRESS
+            </option>
+            <option value="FINISHED" {{ request('status') == 'FINISHED' ? 'selected' : '' }}>
+                FINISHED
+            </option>
+
+            <option value="FINISHED_ON_TIME" {{ request('status') == 'FINISHED_ON_TIME' ? 'selected' : '' }}>
+                FINISHED ON TIME
+            </option>
+
+            <option value="MISSED" {{ request('status') == 'MISSED' ? 'selected' : '' }}>
+                MISSED
+            </option>
         </select>
 
         <!-- MONTH (SMART ORDER) -->
@@ -154,26 +166,60 @@
                             </td>
 
                             <td class="p-3">
-                                @if ($pm->status == 'OPEN')
-                                    <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs">
-                                        OPEN
-                                    </span>
-                                @elseif($pm->status == 'DONE')
-                                    <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
-                                        DONE
-                                    </span>
-                                @else
-                                    <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">
-                                        {{ $pm->status }}
-                                    </span>
-                                @endif
+
+                                @switch($pm->status)
+                                    @case('OPEN')
+                                        <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-semibold">
+                                            OPEN
+                                        </span>
+                                    @break
+
+                                    @case('IN_PROGRESS')
+                                        <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs font-semibold">
+                                            IN PROGRESS
+                                        </span>
+                                    @break
+
+                                    @case('FINISHED')
+                                        <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-semibold">
+                                            FINISHED
+                                        </span>
+                                    @break
+
+                                    @case('FINISHED_ON_TIME')
+                                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">
+                                            FINISHED ON TIME
+                                        </span>
+                                    @break
+
+                                    @case('MISSED')
+                                        <span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-semibold">
+                                            MISSED
+                                        </span>
+                                    @break
+
+                                    @default
+                                        <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                                            {{ $pm->status }}
+                                        </span>
+                                @endswitch
+
                             </td>
 
                             <td class="p-3 text-center">
-                                <a href="{{ route('pm-schedules.edit', $pm->id) }}"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded">
-                                    Fill PM
-                                </a>
+
+                                @if ($pm->status == 'OPEN' || $pm->status == 'MISSED')
+                                    <a href="{{ route('pm-schedules.edit', $pm->id) }}"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded">
+                                        Fill PM
+                                    </a>
+                                @else
+                                    <a href="{{ route('pm-schedules.edit', $pm->id) }}"
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-3 py-1 rounded">
+                                        Edit
+                                    </a>
+                                @endif
+
                             </td>
 
                         </tr>

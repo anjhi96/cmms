@@ -363,11 +363,6 @@ class PMScheduleController extends Controller
             }
         });
 
-        // $pmSchedule->refresh();
-
-        // $this->updatePMStatus($pmSchedule);
-
-
         return redirect()
     ->route('pm-schedules.checklist', $pmSchedule->id)
     ->with('success', 'PM Progress Saved');

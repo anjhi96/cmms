@@ -64,8 +64,30 @@
     <form method="GET" class="mb-4 bg-white p-4 rounded shadow flex flex-wrap gap-2 items-center">
 
         <!-- SEARCH -->
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search machine / type..."
-            class="border p-2 rounded w-64">
+        <input title="Search machine / type..." type="text" name="search" value="{{ request('search') }}" placeholder="Search..."
+            class="border p-2 rounded w-40">
+
+        {{-- AREA --}}
+        <select name="area" class="border p-2 rounded">
+            <option value="">All Areas</option>
+            @foreach ($areas as $area)
+                <option value="{{ $area }}" {{ request('area') == $area ? 'selected' : '' }}>
+                    {{ $area }}
+                </option>
+            @endforeach
+        </select>
+
+        {{-- MACHINE TYPE --}}
+        <select name="machine_type" class="border p-2 rounded">
+            <option value="">All Machine Type</option>
+
+            @foreach ($machineTypes as $type)
+                <option value="{{ $type }}" {{ request('machine_type') == $type ? 'selected' : '' }}>
+                    {{ $type }}
+                </option>
+            @endforeach
+
+        </select>
 
         <!-- STATUS -->
         <select name="status" class="border p-2 rounded">
@@ -129,9 +151,11 @@
                 <!-- HEADER -->
                 <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
                     <tr>
+                        <th class="p-3">Area</th>
                         <th class="p-3">Machine</th>
                         <th class="p-3">Type</th>
                         <th class="p-3">Date</th>
+                        <th class="p-3">Due Date</th>
                         <th class="p-3">Month</th>
                         <th class="p-3">Year</th>
                         <th class="p-3">Status</th>
@@ -145,6 +169,10 @@
                     @foreach ($schedules as $pm)
                         <tr class="hover:bg-gray-50 transition">
 
+                            <td class="p-3 text-gray-600">
+                                {{ $pm->area }}
+                            </td>
+
                             <td class="p-3 font-medium text-gray-800">
                                 {{ $pm->machine_number }}
                             </td>
@@ -155,6 +183,10 @@
 
                             <td class="p-3 text-gray-600">
                                 {{ $pm->plan_date ? \Carbon\Carbon::parse($pm->plan_date)->format('d-m-Y') : '-' }}
+                            </td>
+
+                            <td class="p-3 text-gray-600">
+                                {{ $pm->due_date ? \Carbon\Carbon::parse($pm->due_date)->format('d-m-Y') : '-' }}
                             </td>
 
                             <td class="p-3 text-gray-600">

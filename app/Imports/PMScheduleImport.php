@@ -49,7 +49,10 @@ class PMScheduleImport implements ToCollection
                 continue; // skip kalau sudah ada
             }
 
-            PMSchedule::create([
+            PMSchedule::updateOrCreate([
+                'machine_number' => $machineNumber,
+                'plan_date'      => $planDate
+            ], [
                 'machine_id'     => $machine->id,
                 'machine_number' => $row[0],
                 'machine_type'   => $row[1],
@@ -57,6 +60,7 @@ class PMScheduleImport implements ToCollection
                 'plan_year'      => $row[2],
                 'plan_month'     => $row[3],
                 'plan_date'      => $row[4], // 🔥 NEW
+                'due_date'       => $row[4] ? \Carbon\Carbon::parse($row[4])->addDays(14) : null,
                 'status'         => $row[5] ?? 'OPEN',
             ]);
         }

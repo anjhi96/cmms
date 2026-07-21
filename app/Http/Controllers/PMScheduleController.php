@@ -35,6 +35,16 @@ class PMScheduleController extends Controller
             });
         }
 
+        // FILTER AREA
+        if ($request->filled('area')) {
+            $query->where('area', $request->area);
+        }
+
+        // FILTER MACHINE TYPE
+        if ($request->filled('machine_type')) {
+            $query->where('machine_type', $request->machine_type);
+        }
+
         // FILTER STATUS
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -64,10 +74,26 @@ class PMScheduleController extends Controller
             ->orderBy('plan_year', 'desc')
             ->pluck('plan_year');
 
+        // GET UNIQUE AREAS
+        $areas = PMSchedule::select('area')
+            ->whereNotNull('area')
+            ->distinct()
+            ->orderBy('area')
+            ->pluck('area');
+
+        // GET UNIQUE MACHINE TYPES
+        $machineTypes = PMSchedule::select('machine_type')
+            ->whereNotNull('machine_type')
+            ->distinct()
+            ->orderBy('machine_type')
+            ->pluck('machine_type');
+
         return view('pm-schedules.index', compact(
             'schedules',
             'months',
-            'years'
+            'years',
+            'machineTypes',
+            'areas'
         ));
     }
 
@@ -91,12 +117,13 @@ class PMScheduleController extends Controller
 
     public function store(Request $request)
     {
+
+        $dueDate = Carbon::parse($request->plan_date)->addDays(14);
         $request->validate([
             'machine_id' => 'required|exists:machines,id',
             'order_number' => 'required|unique:pm_schedules',
             'plan_month' => 'required',
             'plan_year' => 'required',
-            'due_date' => 'required|date',
             'plan_date' => 'required|date'
         ]);
 
@@ -105,6 +132,7 @@ class PMScheduleController extends Controller
             ->where('status', 'DONE')
             ->latest('actual_date')
             ->value('actual_date');
+
 
         PMSchedule::create([
             'machine_id'     => $machine->id,
@@ -116,7 +144,7 @@ class PMScheduleController extends Controller
             'plan_month'   => $request->plan_month,
             'plan_year'    => $request->plan_year,
             'plan_date'    => $request->plan_date,
-            'due_date'     => $request->due_date,
+            'due_date'     => $dueDate,
             'last_pm'      => $lastPm,
             'pic'          => $request->pic,
 
@@ -157,7 +185,7 @@ class PMScheduleController extends Controller
         ->orderBy('description')
         ->get();
 
-// ambil data PM yang sudah ada untuk schedule ini
+        // ambil data PM yang sudah ada untuk schedule ini
         $pmMeasurements = PMMeasurement::where(
             'pm_schedule_id',
             $pmSchedule->id
@@ -189,7 +217,7 @@ class PMScheduleController extends Controller
             'problemFindings',
             'measurements',
             'spareparts',
-// existing PM data
+            // existing PM data
             'pmMeasurements',
             'pmProblems',
             'pmSpareparts'
@@ -444,11 +472,18 @@ class PMScheduleController extends Controller
         ->orderBy('item_order')
         ->get();
 
+        $pmChecklists = PMChecklist::where(
+        'pm_schedule_id',
+        $pmSchedule->id
+        )->get()
+        ->keyBy('machine_checklist_id');
+
         return view(
             'pm-schedules.checklist',
             compact(
                 'pmSchedule',
-                'checklists'
+                'checklists',
+                'pmChecklists'
             )
         );
     }

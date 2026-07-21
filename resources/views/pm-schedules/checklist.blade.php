@@ -67,7 +67,7 @@
                     </label>
 
                     <div class="font-semibold">
-                        {{ $pmSchedule->actual_date }}
+                        {{ $pmSchedule->actual_date ? \Carbon\Carbon::parse($pmSchedule->actual_date)->format('d-m-Y') : '-' }}
                     </div>
                 </div>
 
@@ -77,7 +77,7 @@
                     </label>
 
                     <div class="font-semibold">
-                        {{ $pmSchedule->duration }} Minutes
+                        {{ $pmSchedule->duration_formatted }}
                     </div>
                 </div>
 
@@ -171,21 +171,23 @@
                         @endphp
 
                         @foreach ($checklists as $i => $item)
+                            @php
+                                $oldChecklist = $pmChecklists[$item->id] ?? null;
+                            @endphp
+
                             @if ($currentSection != $item->section)
                                 @php
                                     $currentSection = $item->section;
                                 @endphp
 
-                                <tr>
 
+                                <tr>
 
                                     <td colspan="6" class="bg-slate-200 text-slate-800 font-semibold px-4 py-2 border">
 
                                         {{ $item->section }}
 
                                     </td>
-
-
 
                                 </tr>
                             @endif
@@ -207,6 +209,7 @@
                                     <input type="hidden" name="checklists[{{ $i }}][clean]" value="NO">
 
                                     <input type="checkbox" name="checklists[{{ $i }}][clean]" value="YES"
+                                        {{ $oldChecklist?->clean == 'YES' ? 'checked' : '' }}
                                         class="
         h-6 w-6
         rounded
@@ -229,7 +232,7 @@
                                         value="NO">
 
                                     <input type="checkbox" name="checklists[{{ $i }}][lubrication]"
-                                        value="YES"
+                                        value="YES" {{ $oldChecklist?->lubrication == 'YES' ? 'checked' : '' }}
                                         class="
         h-6 w-6
         rounded
@@ -251,6 +254,7 @@
                                     <input type="hidden" name="checklists[{{ $i }}][replace]" value="NO">
 
                                     <input type="checkbox" name="checklists[{{ $i }}][replace]" value="YES"
+                                        {{ $oldChecklist?->replace == 'YES' ? 'checked' : '' }}
                                         class="
         h-6 w-6
         rounded
@@ -272,6 +276,7 @@
                                     <input type="hidden" name="checklists[{{ $i }}][check]" value="NO">
 
                                     <input type="checkbox" name="checklists[{{ $i }}][check]" value="YES"
+                                        {{ $oldChecklist?->check == 'YES' ? 'checked' : '' }}
                                         class="
         h-6 w-6
         rounded
@@ -290,15 +295,17 @@
                                 {{-- REMARKS --}}
                                 <td class="border px-3 py-2 text-center">
 
-                                    <button type="button" class="remark-btn text-gray-500 hover:text-blue-600 text-xl"
+                                    <button type="button"
+                                        class="remark-btn {{ $oldChecklist?->remarks ? 'text-green-600' : 'text-gray-500' }} text-gray-500 hover:text-blue-600 text-xl"
                                         data-index="{{ $i }}" data-item="{{ $item->checklist_item }}">
 
-                                        ✏️
+                                        {{ $oldChecklist?->remarks ? '📝' : '✏️' }}
 
                                     </button>
 
                                     <input type="hidden" id="remark-{{ $i }}"
-                                        name="checklists[{{ $i }}][remarks]" value="">
+                                        name="checklists[{{ $i }}][remarks]"
+                                        value="{{ $oldChecklist?->remarks ?? '' }}">
 
                                 </td>
 

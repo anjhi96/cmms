@@ -64,22 +64,35 @@ class PMSchedule extends Model
     }
 
     public function measurements()
-    {
-        return $this->hasMany(PMMeasurement::class);
-    }
+{
+    return $this->hasMany(
+        PMMeasurement::class,
+        'pm_schedule_id'
+    );
+}
+
 
     public function problems()
-    {
-        return $this->hasMany(PMProblem::class);
-    }
+{
+    return $this->hasMany(
+        PMProblem::class,
+        'pm_schedule_id'
+    );
+}
 
     public function spareparts()
-    {
-        return $this->hasMany(PMSparepart::class);
-    }
+{
+    return $this->hasMany(
+        PMSparepart::class,
+        'pm_schedule_id'
+    );
+}
 
     public function checklists()
-    {
-        return $this->hasMany(PMChecklist::class);
-    }
+{
+    return $this->hasMany(
+        PMChecklist::class,
+        'pm_schedule_id'
+    );
+}
 }

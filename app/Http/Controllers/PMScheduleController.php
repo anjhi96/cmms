@@ -60,9 +60,13 @@ class PMScheduleController extends Controller
             $query->where('plan_year', $request->plan_year);
         }
 
-        $schedules = $query->latest()->paginate(20)->withQueryString();
+        $schedules = $query
+            ->orderBy('plan_date', 'asc')
+            ->orderBy('machine_number', 'asc')
+            ->paginate(20)
+            ->withQueryString();
 
-        // 🔥 SMART MONTH ORDER (FIX URUTAN)
+        // Month
         $months = [
             'January','February','March','April','May','June',
             'July','August','September','October','November','December'
@@ -237,29 +241,29 @@ class PMScheduleController extends Controller
 
         'start_time' => 'required',
 
-        'end_time' => 'required',
+        'end_time' => 'nullable',
 
-        'greasing' => 'required',
+        'greasing' => 'nullable',
 
         'oil_change' => 'nullable',
 
-        'wo_zsbp' => 'required',
+        'wo_zsbp' => 'nullable',
 
-        'remarks' => 'required',
+        'remarks' => 'nullable',
 
-        'problems.*.problem' => 'required',
+        'problems.*.problem' => 'nullable',
 
-        'problems.*.finding' => 'required',
+        'problems.*.finding' => 'nullable',
 
-        'problems.*.severity' => 'required',
+        'problems.*.severity' => 'nullable',
 
-        'measurements.*.measurement_item' => 'required',
+        'measurements.*.measurement_item' => 'nullable',
 
-        'measurements.*.measurement_value' => 'required',
+        'measurements.*.measurement_value' => 'nullable',
 
-        'spareparts.*.sparepart_id' => 'required',
+        'spareparts.*.sparepart_id' => 'nullable',
 
-        'spareparts.*.qty' => 'required|integer|min:1',
+        'spareparts.*.qty' => 'nullable|integer|min:1',
 
 ]);
         // 1. hitung duration
@@ -462,6 +466,41 @@ class PMScheduleController extends Controller
 
     }
 
+    private function validatePMCompleted(PMSchedule $pmSchedule)
+    {
+        $errors = [];
+
+        if (blank($pmSchedule->oil_change)) {
+            $errors[] = 'Oil Change';
+        }
+
+        if (blank($pmSchedule->greasing)) {
+            $errors[] = 'Greasing';
+        }
+
+        if (blank($pmSchedule->wo_zsbp)) {
+            $errors[] = 'WO ZSBP';
+        }
+
+        if (blank($pmSchedule->remarks)) {
+            $errors[] = 'Remarks';
+        }
+
+        if (!$pmSchedule->problems()->exists()) {
+            $errors[] = 'Problem';
+        }
+
+        if (!$pmSchedule->measurements()->exists()) {
+            $errors[] = 'Measurement';
+        }
+
+        if (!$pmSchedule->spareparts()->exists()) {
+            $errors[] = 'Sparepart';
+        }
+
+        return $errors;
+    }
+
     public function checklist(PMSchedule $pmSchedule)
     {
         $checklists = MachineChecklist::where(
@@ -490,6 +529,20 @@ class PMScheduleController extends Controller
 
     public function saveChecklist(Request $request, PMSchedule $pmSchedule)
     {
+
+        $errors = $this->validatePMCompleted($pmSchedule);
+
+        if (!empty($errors)) {
+
+            return redirect()
+                ->route('pm-schedules.edit', $pmSchedule->id)
+                ->with(
+                    'warning',
+                    'Fill PM belum lengkap : '.implode(', ', $errors)
+                );
+
+        }
+
         DB::transaction(function () use ($request, $pmSchedule) {
 
             // hapus checklist lama jika ada
@@ -533,9 +586,6 @@ class PMScheduleController extends Controller
             ->with('success', 'PM Checklist saved successfully');
 
     }
-
-
-
 
     public function destroy(PMSchedule $pmSchedule)
     {

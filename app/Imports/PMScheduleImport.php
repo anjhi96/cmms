@@ -35,9 +35,15 @@ class PMScheduleImport implements ToCollection
 
             // normalize date
             try {
-                $planDate = Carbon::parse($row[4])->format('Y-m-d');
+                $planDate = Carbon::createFromFormat(
+                    'd-m-y',
+                    trim($row[4])
+                );
+
             } catch (\Exception $e) {
-                $planDate = null;
+
+                continue;
+
             }
 
             // 🚨 CHECK DUPLICATE (INI INTI FIX)
@@ -51,7 +57,7 @@ class PMScheduleImport implements ToCollection
 
             PMSchedule::updateOrCreate([
                 'machine_number' => $machineNumber,
-                'plan_date'      => $planDate
+                'plan_date' => $planDate->format('Y-m-d'),
             ], [
                 'machine_id'     => $machine->id,
                 'machine_number' => $row[0],
@@ -59,9 +65,10 @@ class PMScheduleImport implements ToCollection
                 'area'           => $machine->area,
                 'plan_year'      => $row[2],
                 'plan_month'     => $row[3],
-                'plan_date'      => $row[4], // 🔥 NEW
-                'due_date'       => $row[4] ? \Carbon\Carbon::parse($row[4])->addDays(14) : null,
-                'status'         => $row[5] ?? 'OPEN',
+                'plan_date'      => $planDate->format('Y-m-d'),
+                'due_date'       => $planDate->copy()->addDays(14)->format('Y-m-d'),
+                'order_number'   => $row[5],
+                'status'         => $row[6] ?? 'OPEN',
             ]);
         }
     }

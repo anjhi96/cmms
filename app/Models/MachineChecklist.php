@@ -11,6 +11,8 @@ class MachineChecklist extends Model
         'section',
         'checklist_item',
         'section_order',
-        'item_order'
+        'item_order',
+        'maintenance_type'
+        
     ];
 }

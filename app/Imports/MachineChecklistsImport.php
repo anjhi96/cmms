@@ -23,8 +23,9 @@ class MachineChecklistsImport implements ToCollection
                     'checklist_item' => trim($row[3]),
                 ],
                 [
+                    'maintenance_type' => strtolower(trim($row[4] ?? 'check')),
                     'section_order' => (int) $row[2],
-                    'item_order'    => (int) $row[4],
+                    'item_order'    => (int) $row[5],
                 ]
             );
 

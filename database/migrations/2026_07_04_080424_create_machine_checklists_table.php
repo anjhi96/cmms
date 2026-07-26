@@ -27,6 +27,14 @@ return new class extends Migration
             // Checklist Item
             $table->string('checklist_item');
 
+            $table->enum('maintenance_type', [
+                'check',
+                'clean',
+                'lubrication',
+                'replace',
+            ])
+            ->default('check');
+
             // Urutan Item dalam Section
             $table->unsignedInteger('item_order')->default(1);
 

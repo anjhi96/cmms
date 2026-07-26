@@ -20,6 +20,17 @@ return new class () extends Migration {
             $table->string('description')->nullable();
             $table->string('status')->default('ACTIVE');
 
+            $table->unsignedInteger('pm_cycle_value')
+                ->nullable();
+
+            $table->enum('pm_cycle_unit', [
+                'DAY',
+                'WEEK',
+                'MONTH',
+                'HOUR',
+            ])
+            ->nullable();
+
             $table->date('install_date')->nullable();
             $table->string('criticality')->nullable(); // A / B / C
 
@@ -28,6 +39,8 @@ return new class () extends Migration {
             $table->timestamps();
 
             $table->index(['area', 'machine_type', 'status']);
+
+
         });
     }
     /**

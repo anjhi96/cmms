@@ -10,7 +10,6 @@ use App\Imports\PMScheduleImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\MachineProblem;
 use App\Models\MachineMeasurement;
-use App\Http\Controllers\PMScheduleController;
 use App\Imports\PMSchedulesImport;
 use App\Models\MachineProblemFinding;
 use App\Models\Sparepart;
@@ -295,7 +294,9 @@ class PMScheduleController extends Controller
 
                 'duration' => $duration,
 
-                'oil_change' => $request->oil_change,
+                'oil_change' => $pmSchedule->requiresOilChange()
+                ? $request->oil_change
+                : null,
 
                 'greasing' => $request->greasing,
 
@@ -466,11 +467,13 @@ class PMScheduleController extends Controller
 
     }
 
+
+
     private function validatePMCompleted(PMSchedule $pmSchedule)
     {
         $errors = [];
 
-        if (blank($pmSchedule->oil_change)) {
+        if ($pmSchedule->requiresOilChange() && blank($pmSchedule->oil_change)) {
             $errors[] = 'Oil Change';
         }
 
@@ -512,8 +515,8 @@ class PMScheduleController extends Controller
         ->get();
 
         $pmChecklists = PMChecklist::where(
-        'pm_schedule_id',
-        $pmSchedule->id
+            'pm_schedule_id',
+            $pmSchedule->id
         )->get()
         ->keyBy('machine_checklist_id');
 

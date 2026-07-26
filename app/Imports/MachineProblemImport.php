@@ -9,28 +9,57 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class MachineProblemImport implements ToCollection, WithHeadingRow
 {
+    private function normalizeRow($row): array
+    {
+        if (is_array($row)) {
+            return $row;
+        }
+
+        if ($row instanceof \Illuminate\Support\Collection) {
+            return $row->toArray();
+        }
+
+        if (is_object($row) && method_exists($row, 'toArray')) {
+            return $row->toArray();
+        }
+
+        if ($row instanceof \ArrayAccess) {
+            $data = [];
+            foreach ($row as $key => $value) {
+                $data[$key] = $value;
+            }
+
+            return $data;
+        }
+
+        if ($row instanceof \Traversable) {
+            return iterator_to_array($row);
+        }
+
+        return (array) $row;
+    }
+
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
+            $row = $this->normalizeRow($row);
 
-            if (
-                blank($row['machine_type']) ||
-                blank($row['category']) ||
-                blank($row['problem'])
-            ) {
+            $machineType = trim((string) ($row['machine_type'] ?? $row['Machine Type'] ?? $row['machineType'] ?? ''));
+            $category = trim((string) ($row['category'] ?? $row['Category'] ?? ''));
+            $problem = trim((string) ($row['problem'] ?? $row['Problem'] ?? ''));
+
+            if ($machineType === '' || $category === '' || $problem === '') {
                 continue;
             }
 
-            MachineProblem::firstOrCreate(
-
+            MachineProblem::updateOrCreate(
                 [
-                    'machine_type' => trim($row['machine_type']),
-                    'problem'      => trim($row['problem']),
-                    'category'     => trim($row['category']),
+                    'machine_type' => $machineType,
+                    'problem'      => $problem,
+                    'category'     => $category,
                 ],
-
+                []
             );
-
         }
     }
 }

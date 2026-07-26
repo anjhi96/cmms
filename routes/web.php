@@ -6,13 +6,11 @@ use App\Http\Controllers\PMScheduleController;
 use App\Http\Controllers\SparepartController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\PMDetailController;
 use App\Http\Controllers\MachineProblemController;
 use App\Http\Controllers\MachineMeasurementController;
 use App\Http\Controllers\MachineChecklistController;
 use App\Http\Controllers\MachineProblemFindingController;
+use App\Http\Controllers\ImportTemplateController;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -33,11 +31,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class)
         ->only(['index', 'create', 'store']);
 
-    Route::post('/pm-schedules/{id}/details', [PMDetailController::class, 'store'])
-    ->name('pm-details.store');
 
-    Route::delete('/pm-details/{id}', [PMDetailController::class, 'destroy'])
-        ->name('pm-details.destroy');
 
     Route::post('/pm-schedules/import', [PMScheduleController::class, 'import'])
     ->name('pm-schedules.import');
@@ -113,6 +107,23 @@ Route::middleware(['auth'])->group(function () {
         '/machine-measurements/import',
         [MachineMeasurementController::class,'import']
     )->name('machine-measurements.import');
+
+    Route::get('/machines/{machine}/edit', [MachineController::class, 'edit'])
+    ->name('machines.edit');
+
+    Route::put('/machines/{machine}', [MachineController::class, 'update'])
+        ->name('machines.update');
+
+    Route::get(
+        '/import-templates',
+        [ImportTemplateController::class, 'index']
+    )->name('import-templates');
+
+
+    Route::get(
+        '/import-templates/{type}',
+        [ImportTemplateController::class, 'download']
+    )->name('import-templates.download');
 
 
 

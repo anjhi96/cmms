@@ -12,39 +12,41 @@ class SparepartsImport implements ToCollection
     public function collection(Collection $rows)
     {
         foreach ($rows->skip(1) as $row) {
+            $row = is_array($row) ? $row : [];
 
-            $materialNumber = trim($row[0]);
+            $materialNumber = trim((string) ($row[0] ?? ''));
 
-            // skip empty row
-            if (!$materialNumber) {
+            if ($materialNumber === '') {
                 continue;
             }
 
+            $status = strtoupper(trim((string) ($row[9] ?? 'ACTIVE')));
+
+            if (!in_array($status, ['ACTIVE', 'INACTIVE'], true)) {
+                $status = 'ACTIVE';
+            }
+
+            $stock = is_numeric($row[4] ?? null) ? (float) $row[4] : 0;
+            $rop = is_numeric($row[6] ?? null) ? (int) $row[6] : 0;
+            $price = is_numeric($row[8] ?? null) ? (float) $row[8] : 0;
+
             Sparepart::updateOrCreate(
-
                 [
-                    'material_number' => $materialNumber
+                    'material_number' => $materialNumber,
                 ],
-
                 [
-                    'location'     => trim($row[1] ?? null),
-                    'description'  => trim($row[2] ?? null),
-                    'remarks'      => trim($row[3] ?? null),
-
-                    'stock'        => $row[4] ?? 0,
-                    'unit'         => trim($row[5] ?? null),
-                    'rop'          => $row[6] ?? 0,
-
-                    'mrp_type'     => trim($row[7] ?? null),
-                    'price'        => $row[8] ?? 0,
-
-                    'status'       => strtoupper(trim($row[9] ?? 'ACTIVE')),
-
-                    'machine_type' => trim($row[10] ?? null),
-
-                    'segment'      => trim($row[11] ?? null),
-
-                    'pdt'          => trim($row[12] ?? null),
+                    'location'     => trim((string) ($row[1] ?? '')) ?: null,
+                    'description'  => trim((string) ($row[2] ?? '')) ?: null,
+                    'remarks'      => trim((string) ($row[3] ?? '')) ?: null,
+                    'stock'        => $stock,
+                    'unit'         => trim((string) ($row[5] ?? '')) ?: null,
+                    'rop'          => $rop,
+                    'mrp_type'     => trim((string) ($row[7] ?? '')) ?: null,
+                    'price'        => $price,
+                    'status'       => $status,
+                    'machine_type' => trim((string) ($row[10] ?? '')) ?: null,
+                    'segment'      => trim((string) ($row[11] ?? '')) ?: null,
+                    'pdt'          => trim((string) ($row[12] ?? '')) ?: null,
                 ]
             );
         }

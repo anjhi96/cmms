@@ -1,294 +1,212 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-
-        <!-- TITLE -->
-        <h1 class="text-2xl font-bold text-gray-800">
-            PM Schedule
-        </h1>
-
-        <!-- ACTIONS -->
-        <div class="flex flex-col md:flex-row md:items-center gap-3">
-            <!-- IMPORT FORM -->
-            <form action="{{ route('pm-schedules.import') }}" method="POST" enctype="multipart/form-data"
-                class="flex flex-col sm:flex-row sm:items-center gap-3 bg-white p-3 rounded shadow border">
-
-                @csrf
-
-                <!-- FILE WRAPPER -->
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-
-                    <!-- Hidden Input -->
-                    <input type="file" id="fileInput" name="file" accept=".csv" class="hidden"
-                        onchange="updateFileName(this)">
-
-                    <!-- Custom Button -->
-                    <label for="fileInput"
-                        class="cursor-pointer bg-gray-200 hover:bg-gray-300 text-sm px-3 py-2 rounded border">
-                        Choose File
-                    </label>
-
-                    <!-- File Name Display -->
-                    <span id="fileName" class="text-sm text-gray-600 truncate max-w-[200px]">
-                        No file chosen
-                    </span>
-
-                </div>
-
-                <!-- IMPORT BUTTON -->
-                <button class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded w-full sm:w-auto">
-                    Import
-                </button>
-
-            </form>
-
+    <div class="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">PM Schedule</h1>
+            <p class="text-sm text-slate-500">Manage preventive maintenance schedules</p>
         </div>
 
+        <form action="{{ route('pm-schedules.import') }}" method="POST" enctype="multipart/form-data"
+            class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-sm sm:flex-row sm:items-center">
+            @csrf
+            <div class="flex items-center gap-2">
+                <input type="file" id="fileInput" name="file" accept=".csv" class="hidden"
+                    onchange="updateFileName(this)">
+                <label for="fileInput"
+                    class="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+                    Choose File
+                </label>
+                <span id="fileName" class="max-w-[180px] truncate text-sm text-slate-500">No file chosen</span>
+            </div>
+            <button
+                class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700">
+                Import
+            </button>
+        </form>
     </div>
 
-    {{-- ALERT ERROR --}}
     @if ($errors->has('file'))
-        <div class="bg-red-100 text-red-700 p-3 rounded mb-3">
+        <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {{ $errors->first('file') }}
         </div>
     @endif
 
-    {{-- ALERT SUCCESS --}}
     @if (session('success'))
-        <div class="bg-green-100 p-3 rounded mb-4">
+        <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {{ session('success') }}
         </div>
     @endif
 
-    <form method="GET" class="mb-4 bg-white p-4 rounded shadow flex flex-wrap gap-2 items-center">
+    <form method="GET" class="mb-4 flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+        <input title="Search machine / type..." type="text" name="search" value="{{ request('search') }}"
+            placeholder="Search..."
+            class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 sm:w-40">
 
-        <!-- SEARCH -->
-        <input title="Search machine / type..." type="text" name="search" value="{{ request('search') }}" placeholder="Search..."
-            class="border p-2 rounded w-40">
-
-        {{-- AREA --}}
-        <select name="area" class="border p-2 rounded">
+        <select name="area" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
             <option value="">All Areas</option>
             @foreach ($areas as $area)
-                <option value="{{ $area }}" {{ request('area') == $area ? 'selected' : '' }}>
-                    {{ $area }}
+                <option value="{{ $area }}" {{ request('area') == $area ? 'selected' : '' }}>{{ $area }}
                 </option>
             @endforeach
         </select>
 
-        {{-- MACHINE TYPE --}}
-        <select name="machine_type" class="border p-2 rounded">
+        <select name="machine_type" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
             <option value="">All Machine Type</option>
-
             @foreach ($machineTypes as $type)
                 <option value="{{ $type }}" {{ request('machine_type') == $type ? 'selected' : '' }}>
-                    {{ $type }}
-                </option>
+                    {{ $type }}</option>
             @endforeach
-
         </select>
 
-        <!-- STATUS -->
-        <select name="status" class="border p-2 rounded">
+        <select name="status" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
             <option value="">All Status</option>
             <option value="OPEN" {{ request('status') == 'OPEN' ? 'selected' : '' }}>OPEN</option>
-            <option value="IN_PROGRESS" {{ request('status') == 'IN_PROGRESS' ? 'selected' : '' }}>
-                IN PROGRESS
-            </option>
-            <option value="FINISHED" {{ request('status') == 'FINISHED' ? 'selected' : '' }}>
-                FINISHED
-            </option>
-
-            <option value="FINISHED_ON_TIME" {{ request('status') == 'FINISHED_ON_TIME' ? 'selected' : '' }}>
-                FINISHED ON TIME
-            </option>
-
-            <option value="MISSED" {{ request('status') == 'MISSED' ? 'selected' : '' }}>
-                MISSED
-            </option>
+            <option value="IN_PROGRESS" {{ request('status') == 'IN_PROGRESS' ? 'selected' : '' }}>IN PROGRESS</option>
+            <option value="FINISHED" {{ request('status') == 'FINISHED' ? 'selected' : '' }}>FINISHED</option>
+            <option value="FINISHED_ON_TIME" {{ request('status') == 'FINISHED_ON_TIME' ? 'selected' : '' }}>FINISHED ON
+                TIME</option>
+            <option value="MISSED" {{ request('status') == 'MISSED' ? 'selected' : '' }}>MISSED</option>
         </select>
 
-        <!-- MONTH (SMART ORDER) -->
-        <select name="plan_month" class="border p-2 rounded">
+        <select name="plan_month" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
             <option value="">All Month</option>
             @foreach ($months as $m)
                 <option value="{{ $m }}" {{ request('plan_month') == $m ? 'selected' : '' }}>
-                    {{ $m }}
-                </option>
+                    {{ $m }}</option>
             @endforeach
         </select>
 
-        <!-- YEAR (DESC ORDER) -->
-        <select name="plan_year" class="border p-2 rounded">
+        <select name="plan_year" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
             <option value="">All Year</option>
             @foreach ($years as $y)
                 <option value="{{ $y }}" {{ request('plan_year') == $y ? 'selected' : '' }}>
-                    {{ $y }}
-                </option>
+                    {{ $y }}</option>
             @endforeach
         </select>
 
-        <!-- BUTTON -->
-        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-            Filter
-        </button>
-
-        <!-- RESET -->
-        <a href="{{ route('pm-schedules.index') }}" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">
-            Reset
-        </a>
-
+        <button
+            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">Filter</button>
+        <a href="{{ route('pm-schedules.index') }}"
+            class="rounded-lg bg-slate-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600">Reset</a>
     </form>
 
-    <div class="bg-white rounded shadow overflow-hidden">
-
-        <!-- TABLE LIST PM SCHEDULE -->
-        <div class="bg-white rounded shadow overflow-x-auto">
-
-            <table class="w-full text-sm text-left">
-
-                <!-- HEADER -->
-                <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50">
                     <tr>
-                        <th class="p-3">Area</th>
-                        <th class="p-3">Machine</th>
-                        <th class="p-3">Type</th>
-                        <th class="p-3">Date</th>
-                        <th class="p-3">Due Date</th>
-                        <th class="p-3">Month</th>
-                        <th class="p-3">Year</th>
-                        <th class="p-3">Status</th>
-                        <th class="p-3 text-center">Action</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Area
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Machine</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Type
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Date
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Due
+                            Date</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Month
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Year
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Status
+                        </th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Action</th>
                     </tr>
                 </thead>
-
-                <!-- BODY -->
-                <tbody class="divide-y">
-
+                <tbody class="divide-y divide-slate-100 bg-white">
                     @foreach ($schedules as $pm)
-                        <tr class="hover:bg-gray-50 transition">
-
-                            <td class="p-3 text-gray-600">
-                                {{ $pm->area }}
-                            </td>
-
-                            <td class="p-3 font-medium text-gray-800">
-                                {{ $pm->machine_number }}
-                            </td>
-
-                            <td class="p-3 text-gray-600">
-                                {{ $pm->machine_type }}
-                            </td>
-
-                            <td class="p-3 text-gray-600">
-                                {{ $pm->plan_date ? \Carbon\Carbon::parse($pm->plan_date)->format('d-m-Y') : '-' }}
-                            </td>
-
-                            <td class="p-3 text-gray-600">
-                                {{ $pm->due_date ? \Carbon\Carbon::parse($pm->due_date)->format('d-m-Y') : '-' }}
-                            </td>
-
-                            <td class="p-3 text-gray-600">
-                                {{ $pm->plan_month }}
-                            </td>
-
-                            <td class="p-3 text-gray-600">
-                                {{ $pm->plan_year }}
-                            </td>
-
-                            <td class="p-3">
-
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-3 text-slate-600">{{ $pm->area }}</td>
+                            <td class="px-4 py-3 font-medium text-slate-800">{{ $pm->machine_number }}</td>
+                            <td class="px-4 py-3 text-slate-600">{{ $pm->machine_type }}</td>
+                            <td class="px-4 py-3 text-slate-600">
+                                {{ $pm->plan_date ? \Carbon\Carbon::parse($pm->plan_date)->format('d-m-Y') : '-' }}</td>
+                            <td class="px-4 py-3 text-slate-600">
+                                {{ $pm->due_date ? \Carbon\Carbon::parse($pm->due_date)->format('d-m-Y') : '-' }}</td>
+                            <td class="px-4 py-3 text-slate-600">{{ $pm->plan_month }}</td>
+                            <td class="px-4 py-3 text-slate-600">{{ $pm->plan_year }}</td>
+                            <td class="px-4 py-3">
                                 @switch($pm->status)
                                     @case('OPEN')
-                                        <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-semibold">
-                                            OPEN
-                                        </span>
+                                        <span
+                                            class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">OPEN</span>
                                     @break
 
                                     @case('IN_PROGRESS')
-                                        <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs font-semibold">
-                                            IN PROGRESS
-                                        </span>
+                                        <span class="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700">IN
+                                            PROGRESS</span>
                                     @break
 
                                     @case('FINISHED')
-                                        <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-semibold">
-                                            FINISHED
-                                        </span>
+                                        <span
+                                            class="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-700">FINISHED</span>
                                     @break
 
                                     @case('FINISHED_ON_TIME')
-                                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">
-                                            FINISHED ON TIME
-                                        </span>
+                                        <span
+                                            class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">FINISHED
+                                            ON TIME</span>
                                     @break
 
                                     @case('MISSED')
-                                        <span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-semibold">
-                                            MISSED
-                                        </span>
+                                        <span
+                                            class="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700">MISSED</span>
                                     @break
 
                                     @default
-                                        <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
-                                            {{ $pm->status }}
-                                        </span>
+                                        <span
+                                            class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{{ $pm->status }}</span>
                                 @endswitch
-
                             </td>
-
-                            <td class="p-3 text-center">
-
+                            <td class="px-4 py-3 text-center">
                                 @if ($pm->status == 'OPEN' || $pm->status == 'MISSED')
                                     <a href="{{ route('pm-schedules.edit', $pm->id) }}"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded">
-                                        Fill PM
-                                    </a>
+                                        class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-blue-700">Fill
+                                        PM</a>
                                 @else
                                     <a href="{{ route('pm-schedules.edit', $pm->id) }}"
-                                        class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-3 py-1 rounded">
-                                        Edit
-                                    </a>
+                                        class="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-600">Edit</a>
                                 @endif
-
                             </td>
-
                         </tr>
                     @endforeach
-
                 </tbody>
-
             </table>
-
         </div>
-
     </div>
+</table>
 
-    <div class="mt-4">
-        {{ $schedules->links() }}
-    </div>
+</div>
 
-    <script>
-        function validateFile(input) {
-            const file = input.files[0];
+</div>
 
-            if (!file) return;
+<div class="mt-4">
+    {{ $schedules->links() }}
+</div>
 
-            const allowed = ['csv'];
-            const ext = file.name.split('.').pop().toLowerCase();
+<script>
+    function validateFile(input) {
+        const file = input.files[0];
 
-            if (!allowed.includes(ext)) {
-                alert("File harus .CSV saja!");
-                input.value = ""; // reset file
-            }
+        if (!file) return;
+
+        const allowed = ['csv'];
+        const ext = file.name.split('.').pop().toLowerCase();
+
+        if (!allowed.includes(ext)) {
+            alert("File harus .CSV saja!");
+            input.value = ""; // reset file
         }
-    </script>
+    }
+</script>
 
-    <script>
-        function updateFileName(input) {
-            const fileName = input.files[0] ? input.files[0].name : 'No file chosen';
-            document.getElementById('fileName').textContent = fileName;
-        }
-    </script>
+<script>
+    function updateFileName(input) {
+        const fileName = input.files[0] ? input.files[0].name : 'No file chosen';
+        document.getElementById('fileName').textContent = fileName;
+    }
+</script>
 @endsection

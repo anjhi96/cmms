@@ -1,329 +1,144 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="p-6 bg-gray-50 min-h-screen">
-
-        {{-- HEADER --}}
-        <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
-
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">
-                    Sparepart Master
-                </h1>
-
-                <p class="text-gray-500 text-sm">
-                    Manage sparepart master data
-                </p>
-            </div>
-
-            <!-- ACTIONS -->
-            <div class="flex flex-col md:flex-row md:items-center gap-3">
-
-                <!-- IMPORT FORM -->
-                <form action="{{ route('spareparts.import') }}" method="POST" enctype="multipart/form-data"
-                    class="flex flex-col sm:flex-row sm:items-center gap-3 bg-white p-3 rounded shadow border">
-
-                    @csrf
-
-                    <!-- FILE WRAPPER -->
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-
-                        <!-- Hidden Input -->
-                        <input type="file" id="sparepartFileInput" name="file" accept=".csv,.xlsx,.xls" class="hidden"
-                            onchange="updateSparepartFileName(this)">
-
-                        <!-- Custom Button -->
-                        <label for="sparepartFileInput"
-                            class="cursor-pointer bg-gray-200 hover:bg-gray-300 text-sm px-3 py-2 rounded border">
-
-                            Choose File
-
-                        </label>
-
-                        <!-- File Name Display -->
-                        <span id="sparepartFileName" class="text-sm text-gray-600 truncate max-w-[200px]">
-
-                            No file chosen
-
-                        </span>
-
-                    </div>
-
-                    <!-- IMPORT BUTTON -->
-                    <button class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded w-full sm:w-auto">
-
-                        Import
-
-                    </button>
-
-                </form>
-
-
-            </div>
-
+    <div class="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">Sparepart Master</h1>
+            <p class="text-sm text-slate-500">Manage sparepart master data</p>
         </div>
-        @if ($errors->has('file'))
-            <div class="bg-red-100 text-red-700 p-3 rounded mb-3">
-                {{ $errors->first('file') }}
+
+        <form action="{{ route('spareparts.import') }}" method="POST" enctype="multipart/form-data"
+            class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-sm sm:flex-row sm:items-center">
+            @csrf
+            <div class="flex items-center gap-2">
+                <input type="file" id="sparepartFileInput" name="file" accept=".csv" class="hidden" onchange="updateSparepartFileName(this)">
+                <label for="sparepartFileInput" class="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+                    Choose File
+                </label>
+                <span id="sparepartFileName" class="max-w-48 truncate text-sm text-slate-500">No file chosen</span>
             </div>
-        @endif
-
-        {{-- ALERT --}}
-        @if (session('success'))
-            <div class="bg-green-100 text-green-700 p-3 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        {{-- FILTER --}}
-        <form method="GET" class="mb-4 bg-white p-3 rounded shadow flex flex-wrap gap-2">
-
-            <!-- SORT -->
-            <select name="sort" class="border p-2 rounded">
-
-                <option value="">Default Sort</option>
-
-                <option value="material_asc" {{ request('sort') == 'material_asc' ? 'selected' : '' }}>
-                    Material No ↑
-                </option>
-
-                <option value="material_desc" {{ request('sort') == 'material_desc' ? 'selected' : '' }}>
-                    Material No ↓
-                </option>
-
-                <option value="stock_asc" {{ request('sort') == 'stock_asc' ? 'selected' : '' }}>
-                    Stock Low → High
-                </option>
-
-                <option value="stock_desc" {{ request('sort') == 'stock_desc' ? 'selected' : '' }}>
-                    Stock High → Low
-                </option>
-
-            </select>
-
-            <!-- SEARCH -->
-            <input type="text" name="search" value="{{ request('search') }}"
-                placeholder="Search material or description..." class="border p-2 rounded w-64">
-
-            <!-- MACHINE TYPE -->
-            <select name="machine_type" class="border p-2 rounded">
-
-                <option value="">All Machine Type</option>
-
-                @foreach ($machineTypes as $type)
-                    <option value="{{ $type }}" {{ request('machine_type') == $type ? 'selected' : '' }}>
-
-                        {{ $type }}
-
-                    </option>
-                @endforeach
-
-            </select>
-
-            <!-- STATUS -->
-            <select name="status" class="border p-2 rounded">
-
-                <option value="">All Status</option>
-
-                <option value="ACTIVE" {{ request('status') == 'ACTIVE' ? 'selected' : '' }}>
-
-                    ACTIVE
-
-                </option>
-
-                <option value="INACTIVE" {{ request('status') == 'INACTIVE' ? 'selected' : '' }}>
-
-                    INACTIVE
-
-                </option>
-
-            </select>
-
-            <!-- SEGMENT -->
-            <select name="segment" class="border p-2 rounded">
-
-                <option value="">All Segment</option>
-
-                @foreach ($segments as $segment)
-                    <option value="{{ $segment }}" {{ request('segment') == $segment ? 'selected' : '' }}>
-
-                        {{ $segment }}
-
-                    </option>
-                @endforeach
-
-            </select>
-
-            <!-- BUTTON -->
-            <button class="bg-blue-600 text-white px-4 py-2 rounded">
-                Filter
+            <button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700">
+                Import
             </button>
-
-            <!-- RESET -->
-            <a href="{{ route('spareparts.index') }}" class="bg-gray-400 text-white px-4 py-2 rounded">
-
-                Reset
-
-            </a>
-
         </form>
+    </div>
 
-        {{-- TABLE --}}
-        <div class="bg-white shadow rounded overflow-hidden">
+    @if ($errors->has('file'))
+        <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {{ $errors->first('file') }}
+        </div>
+    @endif
 
-            <table class="w-full">
+    @if (session('success'))
+        <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {{ session('success') }}
+        </div>
+    @endif
 
-                <thead class="bg-gray-100">
+    <form method="GET" class="mb-4 flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+        <select name="sort" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+            <option value="">Default Sort</option>
+            <option value="material_asc" {{ request('sort') == 'material_asc' ? 'selected' : '' }}>Material No ↑</option>
+            <option value="material_desc" {{ request('sort') == 'material_desc' ? 'selected' : '' }}>Material No ↓</option>
+            <option value="stock_asc" {{ request('sort') == 'stock_asc' ? 'selected' : '' }}>Stock Low → High</option>
+            <option value="stock_desc" {{ request('sort') == 'stock_desc' ? 'selected' : '' }}>Stock High → Low</option>
+        </select>
 
-                    <tr>
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search material or description..."
+            class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 sm:w-64">
 
-                        <th class="p-3 text-left">Material No</th>
-                        <th class="p-3 text-left">Description</th>
-                        <th class="p-3 text-left">Machine Type</th>
-                        <th class="p-3 text-left">Stock</th>
-                        <th class="p-3 text-left">Unit</th>
-                        <th class="p-3 text-left">ROP</th>
-                        <th class="p-3 text-left">Location</th>
-                        <th class="p-3 text-left">Price</th>
-                        <th class="p-3 text-left">Status</th>
-                        <th class="p-3 text-left">Action</th>
+        <select name="machine_type" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+            <option value="">All Machine Type</option>
+            @foreach ($machineTypes as $type)
+                <option value="{{ $type }}" {{ request('machine_type') == $type ? 'selected' : '' }}>{{ $type }}</option>
+            @endforeach
+        </select>
 
+        <select name="status" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+            <option value="">All Status</option>
+            <option value="ACTIVE" {{ request('status') == 'ACTIVE' ? 'selected' : '' }}>ACTIVE</option>
+            <option value="INACTIVE" {{ request('status') == 'INACTIVE' ? 'selected' : '' }}>INACTIVE</option>
+        </select>
+
+        <select name="segment" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+            <option value="">All Segment</option>
+            @foreach ($segments as $segment)
+                <option value="{{ $segment }}" {{ request('segment') == $segment ? 'selected' : '' }}>{{ $segment }}</option>
+            @endforeach
+        </select>
+
+        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">Filter</button>
+        <a href="{{ route('spareparts.index') }}" class="rounded-lg bg-slate-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600">Reset</a>
+    </form>
+
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Material No</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Description</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Machine Type</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Stock</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Unit</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">ROP</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Location</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Price</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+                @forelse($spareparts as $sparepart)
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ $sparepart->material_number }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ $sparepart->description }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ $sparepart->machine_type }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700">
+                            @if ($sparepart->stock <= $sparepart->rop)
+                                <span class="font-semibold text-red-600">{{ $sparepart->stock }} (LOW)</span>
+                            @else
+                                {{ $sparepart->stock }}
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ $sparepart->unit }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ $sparepart->rop }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ $sparepart->location }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700">$ {{ number_format($sparepart->price, 0, ',', '.') }}</td>
+                        <td class="px-4 py-3">
+                            @if ($sparepart->status == 'ACTIVE')
+                                <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">ACTIVE</span>
+                            @else
+                                <span class="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700">INACTIVE</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex flex-wrap gap-2">
+                                <a href="{{ route('spareparts.edit', $sparepart->id) }}" class="rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-amber-600">Edit</a>
+                                <form action="{{ route('spareparts.destroy', $sparepart->id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button onclick="return confirm('Delete sparepart?')" class="rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-rose-700">Delete</button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
+                @empty
+                    <tr>
+                        <td colspan="10" class="px-4 py-8 text-center text-sm text-slate-500">No Data Found</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
-                </thead>
-
-                <tbody>
-
-                    @forelse($spareparts as $sparepart)
-                        <tr class="border-t">
-
-                            <td class="p-3">
-                                {{ $sparepart->material_number }}
-                            </td>
-
-                            <td class="p-3">
-                                {{ $sparepart->description }}
-                            </td>
-
-                            <td class="p-3">
-                                {{ $sparepart->machine_type }}
-                            </td>
-
-                            <td class="p-3">
-
-                                @if ($sparepart->stock <= $sparepart->rop)
-                                    <span class="text-red-600 font-bold">
-
-                                        {{ $sparepart->stock }}
-
-                                        (LOW)
-                                    </span>
-                                @else
-                                    {{ $sparepart->stock }}
-                                @endif
-
-                            </td>
-
-                            <td class="p-3">
-                                {{ $sparepart->unit }}
-                            </td>
-
-                            <td class="p-3">
-                                {{ $sparepart->rop }}
-                            </td>
-
-                            <td class="p-3">
-                                {{ $sparepart->location }}
-                            </td>
-
-                            <td class="p-3">
-                                $ {{ number_format($sparepart->price, 0, ',', '.') }}
-                            </td>
-
-                            <td class="p-3" text-center>
-
-                                @if ($sparepart->status == 'ACTIVE')
-                                    <span class="bg-green-100 text-green-700 px-2 py-1 rounded">
-
-                                        ACTIVE
-
-                                    </span>
-                                @else
-                                    <span class="bg-red-100 text-red-700 px-2 py-1 rounded">
-
-                                        INACTIVE
-
-                                    </span>
-                                @endif
-
-                            </td>
-
-                            <td class="p-3" text-center>
-
-                                <div class="flex gap-2">
-
-                                    <a href="{{ route('spareparts.edit', $sparepart->id) }}"
-                                        class="bg-yellow-500 text-white px-3 py-1 rounded">
-
-                                        Edit
-
-                                    </a>
-
-                                    <form action="{{ route('spareparts.destroy', $sparepart->id) }}" method="POST">
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button onclick="return confirm('Delete sparepart?')"
-                                            class="bg-red-600 text-white px-3 py-1 rounded">
-
-                                            Delete
-
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                    @empty
-
-                        <tr>
-
-                            <td colspan="10" class="text-center p-5 text-gray-500">
-
-                                No Data Found
-
-                            </td>
-
-                        </tr>
-                    @endforelse
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-        <div class="mt-4">
-
-            {{ $spareparts->appends(request()->query())->links() }}
-
-        </div>
-
+    <div class="mt-4">
+        {{ $spareparts->appends(request()->query())->links() }}
     </div>
 
     <script>
         function updateSparepartFileName(input) {
-
-            const fileName = input.files.length ?
-                input.files[0].name :
-                'No file chosen';
-
-            document.getElementById('sparepartFileName').innerText = fileName;
+            const fileName = input.files.length ? input.files[0].name : 'No file chosen';
+            document.getElementById('sparepartFileName').textContent = fileName;
         }
     </script>
 @endsection

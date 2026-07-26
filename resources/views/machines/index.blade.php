@@ -1,103 +1,62 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="flex justify-between items-center mb-6">
-        <!-- TITLE -->
-        <h1 class="text-2xl font-bold text-gray-800">
-            Machine Master
-        </h1>
-
-        <!-- ACTIONS -->
-        <div class="flex flex-col md:flex-row md:items-center gap-3">
-
-            <!-- IMPORT FORM -->
-            <form action="{{ route('machines.import') }}" method="POST" enctype="multipart/form-data"
-                class="flex flex-col sm:flex-row sm:items-center gap-3 bg-white p-3 rounded shadow border">
-
-                @csrf
-
-                <!-- FILE WRAPPER -->
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-
-                    <!-- Hidden Input -->
-                    <input type="file" id="fileInput" name="file" accept=".csv" class="hidden"
-                        onchange="updateFileName(this)">
-
-                    <!-- Custom Button -->
-                    <label for="fileInput"
-                        class="cursor-pointer bg-gray-200 hover:bg-gray-300 text-sm px-3 py-2 rounded border">
-                        Choose File
-                    </label>
-
-                    <!-- File Name Display -->
-                    <span id="fileName" class="text-sm text-gray-600 truncate max-w-[200px]">
-                        No file chosen
-                    </span>
-
-                </div>
-
-                <!-- IMPORT BUTTON -->
-                <button class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded w-full sm:w-auto">
-                    Import
-                </button>
-
-            </form>
-
+    <div class="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">Machine Master</h1>
+            <p class="text-sm text-slate-500">Manage machine master data</p>
         </div>
+
+        <form action="{{ route('machines.import') }}" method="POST" enctype="multipart/form-data"
+            class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-sm sm:flex-row sm:items-center">
+            @csrf
+            <div class="flex items-center gap-2">
+                <input type="file" id="fileInput" name="file" accept=".csv" class="hidden" onchange="updateFileName(this)">
+                <label for="fileInput" class="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+                    Choose File
+                </label>
+                <span id="fileName" class="max-w-[180px] truncate text-sm text-slate-500">No file chosen</span>
+            </div>
+            <button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700">
+                Import
+            </button>
+        </form>
     </div>
+
     @if ($errors->has('file'))
-            <div class="bg-red-100 text-red-700 p-3 rounded mb-3">
-                {{ $errors->first('file') }}
-            </div>
-        @endif
+        <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {{ $errors->first('file') }}
+        </div>
+    @endif
 
-        {{-- ALERT --}}
-        @if (session('success'))
-            <div class="bg-green-100 text-green-700 p-3 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
+    @if (session('success'))
+        <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {{ session('success') }}
+        </div>
+    @endif
 
-    <form method="GET" class="mb-4 bg-white p-3 rounded shadow flex flex-wrap gap-2">
-        <!-- SORT -->
-        <select name="sort" class="border p-2 rounded">
-
+    <form method="GET" class="mb-4 flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+        <select name="sort" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
             <option value="">Default Sort</option>
-
-            <option value="machine_number_asc" {{ request('sort') == 'machine_number_asc' ? 'selected' : '' }}>
-                Machine No ↑
-            </option>
-
-            <option value="machine_number_desc" {{ request('sort') == 'machine_number_desc' ? 'selected' : '' }}>
-                Machine No ↓
-            </option>
-
-            <option value="area_asc" {{ request('sort') == 'area_asc' ? 'selected' : '' }}>
-                Area A-Z
-            </option>
-
-            <option value="area_desc" {{ request('sort') == 'area_desc' ? 'selected' : '' }}>
-                Area Z-A
-            </option>
-
+            <option value="machine_number_asc" {{ request('sort') == 'machine_number_asc' ? 'selected' : '' }}>Machine No ↑</option>
+            <option value="machine_number_desc" {{ request('sort') == 'machine_number_desc' ? 'selected' : '' }}>Machine No ↓</option>
+            <option value="area_asc" {{ request('sort') == 'area_asc' ? 'selected' : '' }}>Area A-Z</option>
+            <option value="area_desc" {{ request('sort') == 'area_desc' ? 'selected' : '' }}>Area Z-A</option>
         </select>
-        <!-- SEARCH -->
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search machine..."
-            class="border p-2 rounded w-64">
 
-        <!-- MACHINE TYPE -->
-        <select name="machine_type" class="border p-2 rounded">
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search machine..."
+            class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 sm:w-64">
+
+        <select name="machine_type" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
             <option value="">All Type</option>
             @foreach ($machineTypes as $type)
-                <option value="{{ $type->machine_type }}"
-                    {{ request('machine_type') == $type->machine_type ? 'selected' : '' }}>
+                <option value="{{ $type->machine_type }}" {{ request('machine_type') == $type->machine_type ? 'selected' : '' }}>
                     {{ $type->machine_type }}
                 </option>
             @endforeach
         </select>
 
-        <!-- AREA -->
-        <select name="area" class="border p-2 rounded">
+        <select name="area" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
             <option value="">All Area</option>
             @foreach ($areas as $a)
                 <option value="{{ $a->area }}" {{ request('area') == $a->area ? 'selected' : '' }}>
@@ -106,100 +65,66 @@
             @endforeach
         </select>
 
-        <!-- STATUS -->
-        <select name="status" class="border p-2 rounded">
+        <select name="status" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
             <option value="">All Status</option>
             <option value="ACTIVE" {{ request('status') == 'ACTIVE' ? 'selected' : '' }}>ACTIVE</option>
             <option value="INACTIVE" {{ request('status') == 'INACTIVE' ? 'selected' : '' }}>INACTIVE</option>
         </select>
 
-        <!-- BUTTON -->
-        <button class="bg-blue-600 text-white px-4 py-2 rounded">
+        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
             Filter
         </button>
 
-        <!-- RESET -->
-        <a href="{{ route('machines.index') }}" class="bg-gray-400 text-white px-4 py-2 rounded">
+        <a href="{{ route('machines.index') }}" class="rounded-lg bg-slate-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600">
             Reset
         </a>
-
-
-
     </form>
 
-    {{-- TABLE --}}
-    <div class="bg-white shadow rounded overflow-hidden">
-
-        <table class="w-full">
-
-            <thead class="bg-gray-100">
-
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
                 <tr>
-                    <th class="p-3 text-left">Area</th>
-                    <th class="p-3 text-left">Machine Type</th>
-                    <th class="p-3 text-left">Machine Number</th>
-                    <th class="p-3 text-left">Status</th>
-                    <th class="p-3 text-left">Action</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Area</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Machine Type</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Machine Number</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Action</th>
                 </tr>
-
             </thead>
-
-            <tbody>
-
+            <tbody class="divide-y divide-slate-100 bg-white">
                 @forelse($machines as $m)
-                    <tr class="border-t">
-
-                        <td class="p-3">{{ $m->area }}</td>
-                        <td class="p-3">{{ $m->machine_type }}</td>
-                        <td class="p-3 font-bold">{{ $m->machine_number }}</td>
-
-                        <td class="p-3">
-                            <span
-                                class="px-2 py-1 rounded
-                    {{ $m->status == 'ACTIVE' ? 'bg-green-200' : 'bg-red-200' }}">
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ $m->area }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ $m->machine_type }}</td>
+                        <td class="px-4 py-3 text-sm font-semibold text-slate-800">{{ $m->machine_number }}</td>
+                        <td class="px-4 py-3">
+                            <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $m->status == 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700' }}">
                                 {{ $m->status }}
                             </span>
                         </td>
-
-                        <td class="p-3 text-center">
-
-                            <div class="flex gap-2" text-center>
-
-                                <a href="{{ route('machines.edit', $m->id) }}"
-                                    class="bg-yellow-500 text-white px-3 py-1 rounded">
+                        <td class="px-4 py-3">
+                            <div class="flex flex-wrap gap-2">
+                                <a href="{{ route('machines.edit', $m->id) }}" class="rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-amber-600">
                                     Edit
                                 </a>
-
                                 <form method="POST" action="{{ route('machines.destroy', $m->id) }}" class="inline">
-
                                     @csrf
                                     @method('DELETE')
-
-                                    <button class="bg-red-600 text-white px-3 py-1 rounded"
+                                    <button class="rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-rose-700"
                                         onclick="return confirm('Delete machine?')">
                                         Delete
                                     </button>
-
                                 </form>
                             </div>
-
                         </td>
-
                     </tr>
-
                 @empty
-
                     <tr>
-                        <td colspan="5" class="text-center p-6 text-gray-500">
-                            No machines found
-                        </td>
+                        <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-500">No machines found</td>
                     </tr>
                 @endforelse
-
             </tbody>
-
         </table>
-
     </div>
 
     <div class="mt-4">
@@ -209,15 +134,12 @@
     <script>
         function validateFile(input) {
             const file = input.files[0];
-
             if (!file) return;
-
             const allowed = ['csv'];
             const ext = file.name.split('.').pop().toLowerCase();
-
             if (!allowed.includes(ext)) {
                 alert("File harus .CSV saja!");
-                input.value = ""; // reset file
+                input.value = "";
             }
         }
     </script>

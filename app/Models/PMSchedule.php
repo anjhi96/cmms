@@ -42,6 +42,15 @@ class PMSchedule extends Model
         ]);
     }
 
+    public function requiresOilChange(): bool
+    {
+        return in_array($this->machine_type, [
+            'NDE',
+            'NDB',
+            'BFM',
+        ]);
+    }
+
     public function getDurationFormattedAttribute()
     {
         if (!$this->duration) {
@@ -58,41 +67,37 @@ class PMSchedule extends Model
     {
         return $this->belongsTo(Machine::class);
     }
-    public function details()
-    {
-        return $this->hasMany(PMDetail::class);
-    }
 
     public function measurements()
-{
-    return $this->hasMany(
-        PMMeasurement::class,
-        'pm_schedule_id'
-    );
-}
+    {
+        return $this->hasMany(
+            PMMeasurement::class,
+            'pm_schedule_id'
+        );
+    }
 
 
     public function problems()
-{
-    return $this->hasMany(
-        PMProblem::class,
-        'pm_schedule_id'
-    );
-}
+    {
+        return $this->hasMany(
+            PMProblem::class,
+            'pm_schedule_id'
+        );
+    }
 
     public function spareparts()
-{
-    return $this->hasMany(
-        PMSparepart::class,
-        'pm_schedule_id'
-    );
-}
+    {
+        return $this->hasMany(
+            PMSparepart::class,
+            'pm_schedule_id'
+        );
+    }
 
     public function checklists()
-{
-    return $this->hasMany(
-        PMChecklist::class,
-        'pm_schedule_id'
-    );
-}
+    {
+        return $this->hasMany(
+            PMChecklist::class,
+            'pm_schedule_id'
+        );
+    }
 }

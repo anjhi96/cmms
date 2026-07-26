@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Exports;
+
+use Maatwebsite\Excel\Concerns\FromArray;
+
+class MachineTemplateExport implements FromArray
+{
+    public function array(): array
+    {
+        return [
+
+            [
+                'machine_number',
+                'machine_type',
+                'area',
+                'status',
+                'pm_cycle_value',
+                'pm_cycle_unit',
+            ],
+
+            [
+                'MC001',
+                'NDE',
+                'KA-WWD',
+                'ACTIVE',
+                104,
+                'WEEK',
+            ],
+
+        ];
+    }
+}

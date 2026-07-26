@@ -157,13 +157,40 @@ class MachineProblemController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,xlsx,xls'
+            'file' => [
+                'required',
+                'file',
+                'max:20480',
+                function ($attribute, $value, $fail) {
+                    $extension = strtolower($value->getClientOriginalExtension());
+                    $mime = strtolower($value->getClientMimeType());
+                    $allowedExtensions = ['csv', 'txt', 'xlsx', 'xls'];
+                    $allowedMimes = [
+                        'text/csv',
+                        'text/plain',
+                        'application/csv',
+                        'application/vnd.ms-excel',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/octet-stream',
+                    ];
+
+                    if (!in_array($extension, $allowedExtensions, true) && !in_array($mime, $allowedMimes, true)) {
+                        $fail('File must be a CSV or Excel file.');
+                    }
+                },
+            ],
         ]);
 
-        Excel::import(
-            new MachineProblemImport,
-            $request->file('file')
-        );
+        try {
+            Excel::import(
+                new MachineProblemImport,
+                $request->file('file')
+            );
+        } catch (\Throwable $e) {
+            return back()->withErrors([
+                'file' => 'Import failed: ' . $e->getMessage(),
+            ]);
+        }
 
         return back()->with(
             'success',

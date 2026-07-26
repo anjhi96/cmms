@@ -9,31 +9,58 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class MachineMeasurementImport implements ToCollection, WithHeadingRow
 {
+    private function normalizeRow($row): array
+    {
+        if (is_array($row)) {
+            return $row;
+        }
+
+        if ($row instanceof \Illuminate\Support\Collection) {
+            return $row->toArray();
+        }
+
+        if (is_object($row) && method_exists($row, 'toArray')) {
+            return $row->toArray();
+        }
+
+        if ($row instanceof \ArrayAccess) {
+            $data = [];
+            foreach ($row as $key => $value) {
+                $data[$key] = $value;
+            }
+
+            return $data;
+        }
+
+        if ($row instanceof \Traversable) {
+            return iterator_to_array($row);
+        }
+
+        return (array) $row;
+    }
+
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
+            $row = $this->normalizeRow($row);
 
-            if (
-                blank($row['machine_type']) ||
-                blank($row['measurement_item'])
-            ) {
+            $machineType = trim((string) ($row['machine_type'] ?? $row['Machine Type'] ?? $row['machineType'] ?? ''));
+            $measurementItem = trim((string) ($row['measurement_item'] ?? $row['measurement'] ?? $row['Measurement Item'] ?? ''));
+
+            if ($machineType === '' || $measurementItem === '') {
                 continue;
             }
 
             MachineMeasurement::updateOrCreate(
-
                 [
-                    'machine_type'     => trim($row['machine_type']),
-                    'measurement_item' => trim($row['measurement_item']),
+                    'machine_type'     => $machineType,
+                    'measurement_item' => $measurementItem,
                 ],
-
                 [
-                    'standard' => trim($row['standard'] ?? ''),
-                    'unit'     => trim($row['unit'] ?? ''),
+                    'standard' => trim((string) ($row['standard'] ?? $row['Standard'] ?? '')) ?: null,
+                    'unit'     => trim((string) ($row['unit'] ?? $row['Unit'] ?? '')) ?: null,
                 ]
-
             );
-
         }
     }
 }

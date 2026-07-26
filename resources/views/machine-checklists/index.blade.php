@@ -53,7 +53,7 @@
                         </label>
 
                         <!-- File Name Display -->
-                        <span id="fileName" class="text-sm text-gray-600 truncate max-w-[200px]">
+                        <span id="fileName" class="text-sm text-gray-600 truncate max-w-50">
 
                             No file chosen
 
@@ -190,6 +190,10 @@
                             Checklist Item
                         </th>
 
+                        <th class="px-4 py-3 text-left">
+                            Maintenance Type
+                        </th>
+
                         <th class="px-4 py-3 text-center">
                             Item Order
                         </th>
@@ -221,6 +225,10 @@
 
                             <td class="px-4 py-3">
                                 {{ $checklist->checklist_item }}
+                            </td>
+
+                            <td class="px-4 py-3">
+                                {{ $checklist->maintenance_type }}
                             </td>
 
                             <td class="px-4 py-3 text-center">

@@ -124,7 +124,10 @@ class MachineController extends Controller
 
     public function edit(Machine $machine)
     {
-        return view('machines.edit', compact('machine'));
+        return view(
+            'machines.edit',
+            compact('machine')
+        );
     }
 
     public function update(Request $request, Machine $machine)
@@ -135,13 +138,15 @@ class MachineController extends Controller
             'machine_number' => 'required|unique:machines,machine_number,' . $machine->id,
             'description' => 'nullable',
             'status' => 'required',
+            'pm_cycle_value' => 'nullable|integer|min:1',
+            'pm_cycle_unit' => 'nullable|in:DAY,WEEK,MONTH,HOUR',
         ]);
 
         $machine->update($request->all());
 
         return redirect()
-            ->route('machines.index')
-            ->with('success', 'Machine updated successfully');
+        ->route('machines.index')
+        ->with('success', 'Machine updated successfully.');
     }
 
     public function destroy(Machine $machine)

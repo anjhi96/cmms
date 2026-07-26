@@ -1,68 +1,49 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-800">User Management</h1>
+            <p class="text-sm text-slate-500">Manage system user access</p>
+        </div>
 
-<div class="flex justify-between items-center mb-6">
+        <a href="{{ route('users.create') }}" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
+            + Add User
+        </a>
+    </div>
 
-    <h1 class="text-2xl font-bold">
-        User Management
-    </h1>
+    @if(session('success'))
+        <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {{ session('success') }}
+        </div>
+    @endif
 
-    <a href="{{ route('users.create') }}"
-       class="bg-blue-600 text-white px-4 py-2 rounded">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Name</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Email</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Role</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 bg-white">
+                @foreach($users as $user)
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ $user->name }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ $user->email }}</td>
+                        <td class="px-4 py-3">
+                            <span class="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                                {{ $user->role }}
+                            </span>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 
-        + Add User
-
-    </a>
-
-</div>
-
-@if(session('success'))
-<div class="bg-green-100 p-3 rounded mb-4">
-    {{ session('success') }}
-</div>
-@endif
-
-<div class="bg-white rounded shadow overflow-hidden">
-
-<table class="w-full">
-
-    <thead class="bg-gray-100">
-
-        <tr>
-            <th class="p-3 text-left">Name</th>
-            <th class="p-3 text-left">Email</th>
-            <th class="p-3 text-left">Role</th>
-        </tr>
-
-    </thead>
-
-    <tbody>
-
-        @foreach($users as $user)
-
-        <tr class="border-t">
-
-            <td class="p-3">{{ $user->name }}</td>
-            <td class="p-3">{{ $user->email }}</td>
-            <td class="p-3">
-                <span class="px-2 py-1 bg-blue-100 rounded">
-                    {{ $user->role }}
-                </span>
-            </td>
-
-        </tr>
-
-        @endforeach
-
-    </tbody>
-
-</table>
-
-</div>
-
-<div class="mt-4">
-    {{ $users->links() }}
-</div>
-
+    <div class="mt-4">
+        {{ $users->links() }}
+    </div>
 @endsection

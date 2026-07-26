@@ -7,7 +7,6 @@ use App\Models\MachineChecklist;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\MachineChecklistImport;
-use App\Http\Controllers\MachineChecklistController;
 use App\Imports\MachineChecklistsImport;
 
 class MachineChecklistController extends Controller
@@ -180,19 +179,18 @@ class MachineChecklistController extends Controller
             compact(
                 'machineChecklist',
                 'machines'
+
             )
         );
     }
 
-    /**
-     * Update the specified resource.
-     */
     public function update(Request $request, MachineChecklist $machineChecklist)
     {
         $request->validate([
             'machine_type' => 'required',
             'section' => 'required',
             'checklist_item' => 'required',
+            'maintenance_type' => 'required|in:check,clean,lubrication,replace',
             'section_order' => 'required|integer|min:1',
             'item_order' => 'required|integer|min:1'
         ]);
@@ -216,6 +214,7 @@ class MachineChecklistController extends Controller
             'section' => trim($request->section),
             'section_order' => $request->section_order,
             'checklist_item' => trim($request->checklist_item),
+            'maintenance_type' => $request->maintenance_type,
             'item_order' => $request->item_order,
 ]);
 

@@ -9,7 +9,6 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
-use App\Imports\MachineProblemFindingImport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class MachineProblemFindingImport implements
@@ -22,8 +21,15 @@ class MachineProblemFindingImport implements
 
     public function model(array $row)
     {
-        $exists = MachineProblemFinding::where('category', trim($row['category']))
-            ->where('finding', trim($row['finding']))
+        $category = trim((string) ($row['category'] ?? $row['Category'] ?? ''));
+        $finding = trim((string) ($row['finding'] ?? $row['Finding'] ?? ''));
+
+        if ($category === '' || $finding === '') {
+            return null;
+        }
+
+        $exists = MachineProblemFinding::where('category', $category)
+            ->where('finding', $finding)
             ->first();
 
         if ($exists) {
@@ -31,8 +37,8 @@ class MachineProblemFindingImport implements
         }
 
         return new MachineProblemFinding([
-            'category' => trim($row['category']),
-            'finding'  => trim($row['finding']),
+            'category' => $category,
+            'finding'  => $finding,
         ]);
     }
 

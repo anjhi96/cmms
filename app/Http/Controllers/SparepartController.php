@@ -93,13 +93,40 @@ class SparepartController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv,xlsx,xls'
+            'file' => [
+                'required',
+                'file',
+                'max:20480',
+                function ($attribute, $value, $fail) {
+                    $extension = strtolower($value->getClientOriginalExtension());
+                    $mime = strtolower($value->getClientMimeType());
+                    $allowedExtensions = ['csv', 'txt'];
+                    $allowedMimes = [
+                        'text/csv',
+                        'text/plain',
+                        'application/csv',
+                        'application/excel',
+                        'application/vnd.ms-excel',
+                        'application/octet-stream',
+                    ];
+
+                    if (!in_array($extension, $allowedExtensions, true) && !in_array($mime, $allowedMimes, true)) {
+                        $fail('File must be a CSV file.');
+                    }
+                },
+            ],
         ]);
 
-        Excel::import(
-            new SparepartsImport(),
-            $request->file('file')
-        );
+        try {
+            Excel::import(
+                new SparepartsImport(),
+                $request->file('file')
+            );
+        } catch (\Throwable $e) {
+            return back()->withErrors([
+                'file' => 'Import failed: ' . $e->getMessage(),
+            ]);
+        }
 
         return back()->with(
             'success',

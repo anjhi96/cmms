@@ -14,6 +14,8 @@ class Machine extends Model
         'status',
         'install_date',
         'criticality',
-        'remarks'
+        'remarks',
+        'pm_cycle_value',
+        'pm_cycle_unit'
     ];
 }

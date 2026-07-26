@@ -22,23 +22,45 @@ class MachinesImport implements ToCollection
                 continue;
             }
 
-            $machineType = trim($row[1] ?? null);
-            $area        = trim($row[2] ?? null);
-            $status      = strtoupper(trim($row[3] ?? 'ACTIVE'));
+            $machineType   = trim($row[1] ?? null);
+            $area          = trim($row[2] ?? null);
+            $status        = strtoupper(trim($row[3] ?? 'ACTIVE'));
+
+            $pmCycleValue = $row[4] ?? null;
+            $pmCycleUnit  = strtoupper(trim($row[5] ?? null));
 
             // validasi status
             if (!in_array($status, ['ACTIVE', 'INACTIVE'])) {
                 $status = 'ACTIVE';
             }
 
+            // Validasi PM Cycle Value
+            if (!is_numeric($pmCycleValue)) {
+                $pmCycleValue = null;
+            }
+
+            // Validasi PM Cycle Unit
+            $allowedCycleUnit = [
+                'DAY',
+                'WEEK',
+                'MONTH',
+                'HOUR',
+            ];
+
+            if (!in_array($pmCycleUnit, $allowedCycleUnit)) {
+                $pmCycleUnit = null;
+            }
+
             Machine::updateOrCreate(
                 [
-                    'machine_number' => $machineNumber
+                    'machine_number'  => $machineNumber
                 ],
                 [
-                    'machine_type' => $machineType,
-                    'area'         => $area,
-                    'status'       => $status,
+                    'machine_type'    => $machineType,
+                    'area'            => $area,
+                    'status'          => $status,
+                    'pm_cycle_value'  => $pmCycleValue,
+                    'pm_cycle_unit'   => $pmCycleUnit,
                 ]
             );
         }

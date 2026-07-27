@@ -213,6 +213,38 @@ class PMScheduleController extends Controller
         )
         ->get();
 
+        $lastPm = PMSchedule::where('machine_number', $pmSchedule->machine_number)
+            ->whereNotNull('actual_date')
+            ->where('id', '!=', $pmSchedule->id)
+            ->latest('actual_date')
+            ->value('actual_date');
+
+        $lastPm = $lastPm ? Carbon::parse($lastPm) : null;
+
+        $nextPm = null;
+
+        if ($pmSchedule->actual_date) {
+
+            $nextPm = Carbon::parse($pmSchedule->actual_date);
+
+            switch ($pmSchedule->machine->pm_cycle_unit) {
+
+                case 'day':
+                    $nextPm->addDays($pmSchedule->machine->pm_cycle_value);
+                    break;
+
+                case 'week':
+                    $nextPm->addWeeks($pmSchedule->machine->pm_cycle_value);
+                    break;
+
+                case 'month':
+                    $nextPm->addMonths($pmSchedule->machine->pm_cycle_value);
+                    break;
+
+            }
+
+        }
+
 
         return view('pm-schedules.edit', compact(
             'pmSchedule',
@@ -223,7 +255,9 @@ class PMScheduleController extends Controller
             // existing PM data
             'pmMeasurements',
             'pmProblems',
-            'pmSpareparts'
+            'pmSpareparts',
+            'lastPm',
+            'nextPm'
         ));
     }
 

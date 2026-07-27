@@ -12,7 +12,9 @@ class SparepartsImport implements ToCollection
     public function collection(Collection $rows)
     {
         foreach ($rows->skip(1) as $row) {
-            $row = is_array($row) ? $row : [];
+            $row = $row instanceof \Illuminate\Support\Collection
+                ? $row->toArray()
+                : (array) $row;
 
             $materialNumber = trim((string) ($row[0] ?? ''));
 

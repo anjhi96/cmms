@@ -11,6 +11,7 @@ use App\Http\Controllers\MachineMeasurementController;
 use App\Http\Controllers\MachineChecklistController;
 use App\Http\Controllers\MachineProblemFindingController;
 use App\Http\Controllers\ImportTemplateController;
+use App\Http\Controllers\MachineHistoryController;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -129,6 +130,13 @@ Route::middleware(['auth'])->group(function () {
     '/pm-schedules/{pmSchedule}/assign-pic',
     [PMScheduleController::class,'assignPic']
     )->name('pm-schedules.assign-pic');
+
+    Route::middleware(['auth'])->group(function () {
+
+    Route::resource('machine-history', MachineHistoryController::class)
+        ->only(['index']);
+
+    });
 
 
 

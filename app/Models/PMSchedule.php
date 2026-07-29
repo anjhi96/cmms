@@ -42,6 +42,15 @@ class PMSchedule extends Model
         ]);
     }
 
+    protected function picFormatted(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->pic
+                ? \Illuminate\Support\Str::title(strtolower($this->pic))
+                : '-'
+        );
+    }
+
     public function requiresOilChange(): bool
     {
         return in_array($this->machine_type, [

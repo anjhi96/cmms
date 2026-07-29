@@ -157,13 +157,13 @@
     focus:ring-2
     focus:ring-blue-200" data-id="{{ $pm->id }}">
 
-                            <option value="">👤 Assign PIC</option>
+                            <option value="">Assign PIC</option>
 
                             @foreach($picsByArea[$pm->area] ?? [] as $pic)
 
                             <option value="{{ $pic->name }}" {{ $pm->pic == $pic->name ? 'selected' : '' }}>
 
-                                👤 {{ $pic->name }}
+                                👤 {{ \Illuminate\Support\Str::title(strtolower($pic->name)) }}
 
                             </option>
 
@@ -173,7 +173,7 @@
 
                         @else
 
-                        {{ $pm->pic ?? '-' }}
+                        {{ $pm->pic ? \Illuminate\Support\Str::title(strtolower($pm->pic)) : '-' }}
 
                         @endif
 
@@ -220,8 +220,6 @@
                         $role = auth()->user()->role;
                         @endphp
 
-                    <td class="p-3 text-center">
-
                         {{-- ADMIN --}}
                         @if($role == 'ADMIN')
 
@@ -267,7 +265,6 @@
 
                         @endif
 
-                    </td>
                     </td>
                 </tr>
                 @endforeach

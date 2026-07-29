@@ -110,6 +110,7 @@
         $checklistActive = request()->routeIs('machine-checklists.*');
         $problemCategoryActive = request()->routeIs('machine-problems.*');
         $problemFindingsActive = request()->routeIs('machine-problem-findings.*');
+        $machineHistoryActive = request()->routeIs('mashine-history.*')
         @endphp
 
         <nav class="flex-1 overflow-hidden px-3 py-4 text-sm" x-data="{
@@ -128,6 +129,39 @@
             [
             'route' => route('dashboard'),
             'label' => 'Dashboard',
+            'active' => $dashboardActive,
+            'icon' => '
+            <path d="M3 10.5 12 3l9 7.5" />
+            <path d="M5 10.5V21h5v-6h4v6h5V10.5" />',
+            ],
+            [
+            'route' => route('pm-schedules.index'),
+            'label' => 'PM Schedule',
+            'active' => $pmScheduleActive,
+            'icon' =>
+            '
+            <path d="M7 2v2" />
+            <path d="M17 2v2" />
+            <rect x="4" y="4" width="16" height="16" rx="2" />
+            <path d="M4 8h16" />
+            <path d="M8 12h.01" />
+            <path d="M12 12h.01" />
+            <path d="M16 12h.01" />',
+            'visible' => $userRole === 'ADMIN' || $userRole === 'PIC WWD'|| $userRole === 'PIC BUL'|| $userRole === 'KOORDINATOR',
+            ],
+            ],
+            ],
+            [
+            'key' => 'report',
+            'title' => 'Report',
+            'accent' => 'from-blue-500 to-cyan-500',
+            'icon' => '
+            <path d="M3 10.5 12 3l9 7.5" />
+            <path d="M5 10.5V21h5v-6h4v6h5V10.5" />',
+            'items' => [
+            [
+            'route' => route('machine-history.index'),
+            'label' => 'Machine History',
             'active' => $dashboardActive,
             'icon' => '
             <path d="M3 10.5 12 3l9 7.5" />

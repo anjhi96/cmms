@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -30,7 +31,7 @@ class UserController extends Controller
         ]);
 
         User::create([
-            'name' => $request->name,
+            'name' => Str::title(strtolower(trim($request->name))),
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,

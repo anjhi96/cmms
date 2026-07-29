@@ -19,7 +19,8 @@ return new class () extends Migration {
 
             $table->enum('role', [
                 'ADMIN',
-                'KOORDINATOR',
+                'KOORDINATOR WWD',
+                'KOORDINATOR BUL',
                 'PIC WWD',
                 'PIC BUL',
                 'GUEST'

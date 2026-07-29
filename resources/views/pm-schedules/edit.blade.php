@@ -22,36 +22,36 @@
 
     <div class="bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-xl p-6 shadow mb-6">
 
-            <h2 class="text-xl font-bold mb-4">
-                Machine Information
-            </h2>
+        <h2 class="text-xl font-bold mb-4">
+            Machine Information
+        </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-                <div>
-                    <p class="text-sm opacity-80">Machine Number</p>
-                    <p class="font-semibold text-lg">
-                        {{ $pmSchedule->machine_number }}
-                    </p>
-                </div>
+            <div>
+                <p class="text-sm opacity-80">Machine Number</p>
+                <p class="font-semibold text-lg">
+                    {{ $pmSchedule->machine_number }}
+                </p>
+            </div>
 
-                <div>
-                    <p class="text-sm opacity-80">Machine Type</p>
-                    <p class="font-semibold text-lg">
-                        {{ $pmSchedule->machine_type }}
-                    </p>
-                </div>
+            <div>
+                <p class="text-sm opacity-80">Machine Type</p>
+                <p class="font-semibold text-lg">
+                    {{ $pmSchedule->machine_type }}
+                </p>
+            </div>
 
-                <div>
-                    <p class="text-sm opacity-80">Last PM Date</p>
-                    <p class="font-semibold text-lg">
-                        {{ $lastPm ? $lastPm->format('d-m-Y') : '-' }}
-                    </p>
-                </div>
-
+            <div>
+                <p class="text-sm opacity-80">Last PM Date</p>
+                <p class="font-semibold text-lg">
+                    {{ $lastPm ? $lastPm->format('d-m-Y') : '-' }}
+                </p>
             </div>
 
         </div>
+
+    </div>
 
     <div class="bg-white rounded-xl shadow p-6 mb-6">
 
@@ -85,9 +85,28 @@
                     PIC PM
                 </label>
 
-                <input required name="pic" type="text" readonly
-                    value="{{ old('pic', $pmSchedule->pic ?? auth()->user()->name) }}"
-                    class="w-full bg-gray-100 border rounded-lg p-3">
+                @php
+                $canEditPic = in_array(auth()->user()->role, ['ADMIN', 'KOORDINATOR WWD', 'KOORDINATOR BUL']);
+                @endphp
+
+                <select name="pic" class="w-full rounded-lg border border-gray-300 px-3 py-2
+    {{ !$canEditPic ? 'bg-gray-100 cursor-not-allowed' : '' }}" {{ !$canEditPic ? 'disabled' : '' }}>
+
+                    <option value="">-- Select PIC --</option>
+
+                    @foreach ($pics as $pic)
+                    <option value="{{ $pic->name }}" {{ old('pic', $pmSchedule->pic) == $pic->name ? 'selected' : '' }}>
+
+                        {{ $pic->name }}
+
+                    </option>
+                    @endforeach
+
+                </select>
+
+                @if (!$canEditPic)
+                <input type="hidden" name="pic" value="{{ $pmSchedule->pic }}">
+                @endif
             </div>
 
             <div>
@@ -523,9 +542,9 @@
 
     </div>
 
-    {{-- Problem  --}}
+    {{-- Problem --}}
     <script>
-    let problemIndex = {{ isset($pmProblems) ? $pmProblems->count() : 0 }};
+    let problemIndex = @json(isset($pmProblems) ? $pmProblems->count() : 0);
 
     function addProblem() {
 
@@ -729,7 +748,7 @@
     </script>
 
     <script>
-    let sparepartIndex = {{ isset($pmSpareparts) ? $pmSpareparts->count() : 0 }};
+    let sparepartIndex = @json(isset($pmSpareparts) ? $pmSpareparts - > count() : 0);
 
     function initTomSelect(element) {
 

@@ -19,12 +19,46 @@ use App\Models\PMSparepart;
 use Illuminate\Support\Facades\DB;
 use App\Models\MachineChecklist;
 use App\Models\PMChecklist;
+use App\Models\User;
 
 class PMScheduleController extends Controller
 {
     public function index(Request $request)
     {
         $query = PMSchedule::query();
+
+        $user = auth()->user();
+
+        switch ($user->role) {
+
+            case 'KOORDINATOR WWD':
+                $query->where('area', 'WWD');
+                break;
+
+            case 'KOORDINATOR BUL':
+                $query->where('area', 'BUL');
+                break;
+
+            case 'PIC WWD':
+            case 'PIC BUL':
+                $query->where('pic', $user->name);
+                break;
+
+            case 'ADMIN':
+            default:
+                // lihat semua
+                break;
+        }
+
+        $picsByArea = [
+            'WWD' => User::where('role', 'PIC WWD')
+                        ->orderBy('name')
+                        ->get(),
+
+            'BUL' => User::where('role', 'PIC BUL')
+                        ->orderBy('name')
+                        ->get(),
+        ];
 
         // SEARCH
         if ($request->filled('search')) {
@@ -35,7 +69,10 @@ class PMScheduleController extends Controller
         }
 
         // FILTER AREA
-        if ($request->filled('area')) {
+        if (
+            $user->role === 'ADMIN' &&
+            $request->filled('area')
+        ) {
             $query->where('area', $request->area);
         }
 
@@ -96,7 +133,8 @@ class PMScheduleController extends Controller
             'months',
             'years',
             'machineTypes',
-            'areas'
+            'areas',
+            'picsByArea'
         ));
     }
 
@@ -161,6 +199,18 @@ class PMScheduleController extends Controller
 
     public function edit(PMSchedule $pmSchedule)
     {
+
+        $user = auth()->user();
+
+        if (str_starts_with($user->role, 'PIC')) {
+
+            if ($pmSchedule->pic !== $user->name) {
+
+                abort(403);
+
+            }
+
+        }
         $bigProblems = MachineProblem::where(
             'machine_type',
             $pmSchedule->machine_type
@@ -221,30 +271,17 @@ class PMScheduleController extends Controller
 
         $lastPm = $lastPm ? Carbon::parse($lastPm) : null;
 
-        $nextPm = null;
+        $picRole = match ($pmSchedule->area) {
+            'WWD' => 'PIC WWD',
+            'BUL' => 'PIC BUL',
+            default => null,
+        };
 
-        if ($pmSchedule->actual_date) {
-
-            $nextPm = Carbon::parse($pmSchedule->actual_date);
-
-            switch ($pmSchedule->machine->pm_cycle_unit) {
-
-                case 'day':
-                    $nextPm->addDays($pmSchedule->machine->pm_cycle_value);
-                    break;
-
-                case 'week':
-                    $nextPm->addWeeks($pmSchedule->machine->pm_cycle_value);
-                    break;
-
-                case 'month':
-                    $nextPm->addMonths($pmSchedule->machine->pm_cycle_value);
-                    break;
-
-            }
-
-        }
-
+        $pics = User::when($picRole, function ($q) use ($picRole) {
+                $q->where('role', $picRole);
+            })
+            ->orderBy('name')
+            ->get();
 
         return view('pm-schedules.edit', compact(
             'pmSchedule',
@@ -252,18 +289,35 @@ class PMScheduleController extends Controller
             'problemFindings',
             'measurements',
             'spareparts',
-            // existing PM data
             'pmMeasurements',
             'pmProblems',
             'pmSpareparts',
             'lastPm',
-            'nextPm'
+            'pics'
         ));
     }
 
 
     public function update(Request $request, PMSchedule $pmSchedule)
     {
+        $user = auth()->user();
+
+        if (str_starts_with($user->role,'PIC')) {
+
+            if ($pmSchedule->pic !== $user->name) {
+
+                abort(403);
+
+            }
+
+        }
+
+        if (!in_array($user->role, ['ADMIN', 'KOORDINATOR WWD', 'KOORDINATOR BUL'])) {
+            $request->merge([
+                'pic' => $pmSchedule->pic,
+            ]);
+        }
+
         // VALIDASI INPUT
         $request->validate([
         'order_number' => 'required',
@@ -478,7 +532,6 @@ class PMScheduleController extends Controller
         }
 
 
-
         // checklist sudah ada
         if (
             Carbon::parse($pmSchedule->actual_date)
@@ -554,12 +607,39 @@ class PMScheduleController extends Controller
         )->get()
         ->keyBy('machine_checklist_id');
 
+        $nextPm = $pmSchedule->actual_date
+            ? Carbon::parse($pmSchedule->actual_date)
+            : null;
+
+        if ($nextPm) {
+
+            $unit = strtolower(trim($pmSchedule->machine->pm_cycle_unit));
+            $value = (int) $pmSchedule->machine->pm_cycle_value;
+
+            match ($unit) {
+                'day'   => $nextPm->addDays($value),
+                'week'  => $nextPm->addWeeks($value),
+                'month' => $nextPm->addMonths($value),
+                'hour'  => $nextPm->addHours($value),
+                default => null,
+            };
+        }
+
+        $spareCost = PMSparepart::with('sparepart')
+            ->where('pm_schedule_id', $pmSchedule->id)
+            ->get()
+            ->sum(function ($item) {
+                return ($item->qty ?? 0) * ($item->sparepart->price ?? 0);
+            });
+
         return view(
             'pm-schedules.checklist',
             compact(
                 'pmSchedule',
                 'checklists',
-                'pmChecklists'
+                'pmChecklists',
+                'nextPm',
+                'spareCost'
             )
         );
     }
@@ -622,6 +702,21 @@ class PMScheduleController extends Controller
             ->route('pm-schedules.index')
             ->with('success', 'PM Checklist saved successfully');
 
+    }
+
+    public function assignPic(Request $request, PMSchedule $pmSchedule)
+    {
+        $request->validate([
+            'pic' => 'nullable|string|max:255',
+        ]);
+
+        $pmSchedule->update([
+            'pic' => $request->pic,
+        ]);
+
+        return response()->json([
+            'success' => true,
+        ]);
     }
 
     public function destroy(PMSchedule $pmSchedule)

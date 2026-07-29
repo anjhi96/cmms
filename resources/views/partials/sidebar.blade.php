@@ -146,7 +146,7 @@
             <path d="M8 12h.01" />
             <path d="M12 12h.01" />
             <path d="M16 12h.01" />',
-            'visible' => $userRole === 'PIC' || $userRole === 'ADMIN',
+            'visible' => $userRole === 'ADMIN' || $userRole === 'PIC WWD'|| $userRole === 'PIC BUL'|| $userRole === 'KOORDINATOR',
             ],
             ],
             ],

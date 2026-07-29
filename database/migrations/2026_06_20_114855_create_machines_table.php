@@ -13,8 +13,8 @@ return new class () extends Migration {
         Schema::create('machines', function (Blueprint $table) {
             $table->id();
 
-            $table->string('area');               // KA-WWD / KA-C&B
-            $table->string('machine_type');        // NDE, NDB, dll
+            $table->string('area');               // WWD / BUL
+            $table->string('machine_type');        // NDE, NDB, BFM, dll
             $table->string('machine_number')->unique();
 
             $table->string('description')->nullable();

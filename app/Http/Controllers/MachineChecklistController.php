@@ -169,6 +169,18 @@ class MachineChecklistController extends Controller
      */
     public function edit(MachineChecklist $machineChecklist)
     {
+        $user = auth()->user();
+
+        if (str_starts_with($user->role, 'PIC')) {
+
+            if ($pmSchedule->pic !== $user->name) {
+
+                abort(403);
+
+            }
+
+        }
+
         $machines = Machine::select('machine_type')
         ->distinct()
         ->orderBy('machine_type')
@@ -186,6 +198,18 @@ class MachineChecklistController extends Controller
 
     public function update(Request $request, MachineChecklist $machineChecklist)
     {
+        $user = auth()->user();
+
+        if (str_starts_with($user->role,'PIC')) {
+
+            if ($pmSchedule->pic !== $user->name) {
+
+                abort(403);
+
+            }
+
+        }
+        
         $request->validate([
             'machine_type' => 'required',
             'section' => 'required',

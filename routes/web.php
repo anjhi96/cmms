@@ -125,6 +125,11 @@ Route::middleware(['auth'])->group(function () {
         [ImportTemplateController::class, 'download']
     )->name('import-templates.download');
 
+    Route::post(
+    '/pm-schedules/{pmSchedule}/assign-pic',
+    [PMScheduleController::class,'assignPic']
+    )->name('pm-schedules.assign-pic');
+
 
 
 });

@@ -81,6 +81,47 @@
                 </div>
             </div>
 
+            <div>
+                <label class="text-sm text-gray-500">
+                    Cycle PM
+                </label>
+
+                <div class="font-semibold">
+                    {{ $pmSchedule->machine->pm_cycle_value }}
+                    {{ ucfirst($pmSchedule->machine->pm_cycle_unit) }}
+                </div>
+            </div>
+
+            <div>
+                <label class="text-sm text-gray-500">
+                    Next PM
+                </label>
+
+                <div class="font-semibold">
+                    {{ $nextPm ? $nextPm->format('d-m-Y') : '-' }}
+                </div>
+            </div>
+
+            <div>
+                <label class="text-sm text-gray-500">
+                    Sparepart Cost
+                </label>
+
+                <div class="font-semibold
+                        @if($spareCost == 0)
+                            text-gray-500
+                        @elseif($spareCost < 1000)
+                            text-green-600
+                        @elseif($spareCost < 3000)
+                            text-yellow-600
+                        @else
+                            text-red-600
+                        @endif
+                    ">
+                    $ {{ number_format($spareCost, 2, ',', '.') }}
+                </div>
+            </div>
+
         </div>
 
     </div>
@@ -345,7 +386,7 @@
 
         <div class="flex justify-between mt-6">
 
-            
+
 
             {{-- Back --}}
             <a href="{{ route('pm-schedules.edit', $pmSchedule->id) }}"

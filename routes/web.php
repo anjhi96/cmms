@@ -12,6 +12,7 @@ use App\Http\Controllers\MachineChecklistController;
 use App\Http\Controllers\MachineProblemFindingController;
 use App\Http\Controllers\ImportTemplateController;
 use App\Http\Controllers\MachineHistoryController;
+use App\Http\Controllers\QrScannerController;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -133,10 +134,21 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['auth'])->group(function () {
 
-    Route::resource('machine-history', MachineHistoryController::class)
-        ->only(['index']);
+        Route::resource('machine-history', MachineHistoryController::class)
+            ->only([
+                'index',
+                'show',
+            ]);
+
+        Route::get(
+            '/machine-history/{machineNumber}/detail/{pmSchedule}',
+            [MachineHistoryController::class, 'detail']
+        )->name('machine-history.detail');
 
     });
+
+    Route::get('/scan', [QrScannerController::class, 'index'])
+    ->name('qr.scan');
 
 
 

@@ -22,99 +22,98 @@
 
 <div class="overflow-x-auto rounded-xl border">
 
-<table class="min-w-full">
+    <table class="min-w-full">
 
-    <thead class="bg-slate-100">
+        <thead class="bg-slate-100">
 
-        <tr>
+            <tr>
 
-            <th class="px-4 py-3 text-left">
-                Machine Number
-            </th>
+                <th class="px-4 py-3 text-left">
+                    Machine Number
+                </th>
 
-            <th class="px-4 py-3 text-left">
-                Machine Type
-            </th>
+                <th class="px-4 py-3 text-left">
+                    Machine Type
+                </th>
 
-            <th class="px-4 py-3 text-left">
-                Area
-            </th>
+                <th class="px-4 py-3 text-left">
+                    Area
+                </th>
 
-            <th class="px-4 py-3 text-left">
-                Last PM
-            </th>
+                <th class="px-4 py-3 text-left">
+                    Last PM
+                </th>
 
-            <th class="px-4 py-3 text-center">
-                Action
-            </th>
+                <th class="px-4 py-3 text-center">
+                    Action
+                </th>
 
-        </tr>
+            </tr>
 
-    </thead>
+        </thead>
 
-    <tbody>
+        <tbody>
 
-    @forelse($machines as $machine)
+            @forelse($machines as $machine)
 
-        <tr class="border-t">
+            <tr class="border-t">
 
-            <td class="px-4 py-3">
+                <td class="px-4 py-3">
 
-                {{ $machine->machine_number }}
+                    {{ $machine->machine_number }}
 
-            </td>
+                </td>
 
-            <td class="px-4 py-3">
+                <td class="px-4 py-3">
 
-                {{ $machine->machine_type }}
+                    {{ $machine->machine_type }}
 
-            </td>
+                </td>
 
-            <td class="px-4 py-3">
+                <td class="px-4 py-3">
 
-                {{ $machine->area }}
+                    {{ $machine->area }}
 
-            </td>
+                </td>
 
-            <td class="px-4 py-3">
+                <td class="px-4 py-3">
 
-                {{ $machine->last_pm
+                    {{ $machine->last_pm
                     ? \Carbon\Carbon::parse($machine->last_pm)->format('d-m-Y')
                     : '-' }}
 
-            </td>
+                </td>
 
-            <td class="px-4 py-3 text-center">
+                <td class="px-4 py-3 text-center">
 
-                <button
-                    disabled
-                    class="rounded-lg bg-slate-300 px-4 py-2 text-white cursor-not-allowed">
+                    <a href="{{ route('machine-history.show', $machine->machine_number) }}"
+                        class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
 
-                    View History
+                        View History
 
-                </button>
+                    </a>
 
-            </td>
+                </td>
 
-        </tr>
+            </tr>
 
-    @empty
+            @empty
 
-        <tr>
+            <tr>
 
-            <td colspan="5" class="text-center py-10 text-slate-500">
+                <td colspan="5" class="text-center py-10 text-slate-500">
 
-                No machine history found.
+                    No machine history found.
 
-            </td>
+                </td>
 
-        </tr>
+            </tr>
 
-    @endforelse
+            @endforelse
 
-    </tbody>
+        </tbody>
 
-</table>
+    </table>
 
 </div>
 

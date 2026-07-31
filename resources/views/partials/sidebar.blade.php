@@ -110,7 +110,7 @@
         $checklistActive = request()->routeIs('machine-checklists.*');
         $problemCategoryActive = request()->routeIs('machine-problems.*');
         $problemFindingsActive = request()->routeIs('machine-problem-findings.*');
-        $machineHistoryActive = request()->routeIs('mashine-history.*')
+        $machineHistoryActive = request()->routeIs('machine-history.*')
         @endphp
 
         <nav class="flex-1 overflow-hidden px-3 py-4 text-sm" x-data="{
@@ -154,7 +154,7 @@
             [
             'key' => 'report',
             'title' => 'Report',
-            'accent' => 'from-blue-500 to-cyan-500',
+            'accent' => 'from-green-500 to-cyan-500',
             'icon' => '
             <path d="M3 10.5 12 3l9 7.5" />
             <path d="M5 10.5V21h5v-6h4v6h5V10.5" />',
@@ -162,7 +162,7 @@
             [
             'route' => route('machine-history.index'),
             'label' => 'Machine History',
-            'active' => $dashboardActive,
+            'active' => $machineHistoryActive,
             'icon' => '
             <path d="M3 10.5 12 3l9 7.5" />
             <path d="M5 10.5V21h5v-6h4v6h5V10.5" />',

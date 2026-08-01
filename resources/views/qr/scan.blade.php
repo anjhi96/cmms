@@ -50,4 +50,36 @@
 
 </div>
 
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+document.getElementById('startScanner').addEventListener('click', function () {
+
+    const scanner = new Html5Qrcode("reader");
+
+    scanner.start(
+        {
+            facingMode: "environment"
+        },
+        {
+            fps: 10,
+            qrbox: 250
+        },
+        function(decodedText){
+
+            scanner.stop();
+
+            window.location.href = "/m/" + decodedText;
+
+        },
+        function(error){
+
+            // abaikan error scanning
+
+        }
+    );
+
+});
+</script>
+
 @endsection

@@ -46,13 +46,13 @@
 
                     <h1 class="font-bold text-xl text-slate-800">
 
-                        Maintenance Free
+                        FreeDOMS
 
                     </h1>
 
                     <p class="text-xs text-slate-500">
 
-                        Preventive Maintenance System
+                        Preventive Maintenance
 
                     </p>
 
@@ -87,14 +87,14 @@
             <div class="flex items-center gap-3">
 
                 <a href="{{ route('login') }}"
-                    class="hidden md:inline-flex px-5 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 transition">
+                    class="hidden md:inline-flex px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 transition">
 
                     Login
 
                 </a>
 
                 <a href="{{ route('qr.scan') }}"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow">
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition shadow">
 
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">

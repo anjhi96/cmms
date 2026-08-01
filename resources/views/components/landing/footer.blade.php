@@ -8,13 +8,13 @@
 
                 <h2 class="text-2xl font-bold text-white">
 
-                    CMMS
+                    FreeDOMS
 
                 </h2>
 
                 <p class="mt-5 leading-8">
 
-                    Computerized Maintenance Management System
+                    Maintenance-Free Digital Optimization Management System
                     untuk membantu tim maintenance melakukan
                     Preventive Maintenance secara digital,
                     cepat, dan terdokumentasi.
@@ -69,7 +69,7 @@
 
             <p>
 
-                © {{ date('Y') }} CMMS. All Rights Reserved.
+                © {{ date('Y') }} FreeDOMS. All Rights Reserved.
 
             </p>
 

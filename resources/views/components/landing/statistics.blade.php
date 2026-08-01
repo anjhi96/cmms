@@ -34,7 +34,7 @@
 
                 <h3 class="text-4xl font-bold text-blue-600">
 
-                    1,000+
+                    2,000+
 
                 </h3>
 

@@ -39,13 +39,10 @@
 
                     <div class="flex">
 
-                        <input
-                            type="text"
-                            placeholder="Masukkan Nomor Mesin"
+                        <input type="text" placeholder="Masukkan Nomor Mesin"
                             class="rounded-l-xl border border-slate-300 px-4 py-4 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-                        <button
-                            class="rounded-r-xl bg-slate-800 text-white px-6 hover:bg-slate-900">
+                        <button class="rounded-r-xl bg-slate-800 text-white px-6 hover:bg-slate-900">
 
                             Cari
 
@@ -73,16 +70,9 @@
 
                         <span class="px-4 py-2 rounded-full bg-slate-100 text-sm">
 
-                            SHX-021
+                            9004
 
                         </span>
-
-                        <span class="px-4 py-2 rounded-full bg-slate-100 text-sm">
-
-                            BUL-115
-
-                        </span>
-
                     </div>
 
                 </div>
@@ -122,14 +112,13 @@
 
                                 <p class="text-slate-500">
 
-                                    Drawing Machine
+                                    Wet Wire Drawing Machine
 
                                 </p>
 
                             </div>
 
-                            <span
-                                class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold">
+                            <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold">
 
                                 ACTIVE
 

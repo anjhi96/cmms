@@ -13,7 +13,7 @@
             </h2>
 
             <p class="mt-5 max-w-3xl mx-auto text-slate-600 text-lg">
-                CMMS dirancang untuk membantu seluruh proses Preventive Maintenance,
+                FreeDOMS dirancang untuk membantu seluruh proses Preventive Maintenance,
                 mulai dari penjadwalan hingga histori mesin.
             </p>
 

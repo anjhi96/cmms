@@ -5,7 +5,7 @@
         <div class="text-center">
 
             <span class="text-blue-600 font-semibold uppercase tracking-wider">
-                Why CMMS?
+                Why FreeDOMS?
             </span>
 
             <h2 class="mt-3 text-4xl font-bold text-slate-900">
@@ -13,8 +13,7 @@
             </h2>
 
             <p class="mt-5 max-w-3xl mx-auto text-slate-600 text-lg">
-                Masih menggunakan checklist kertas, file Excel, atau mencari histori
-                maintenance secara manual? Saatnya beralih ke sistem yang lebih cepat,
+                Saatnya beralih ke sistem yang lebih cepat,
                 terdokumentasi, dan mudah dipantau.
             </p>
 
@@ -77,12 +76,11 @@
                         <div>
 
                             <h4 class="font-semibold">
-                                Jadwal PM Sering Terlewat
+                                Kesulitan Saat Proses Audit
                             </h4>
 
                             <p class="text-slate-600">
-                                Penjadwalan dan assignment dilakukan manual sehingga
-                                meningkatkan risiko overdue maintenance.
+                                Proses audit menjadi lambat karena teknisi harus mencari dokumen satu per satu.
                             </p>
 
                         </div>
@@ -102,7 +100,7 @@
                             </h4>
 
                             <p class="text-slate-600">
-                                Teknisi harus membuka file satu per satu hanya untuk
+                                Harus membuka file satu per satu hanya untuk
                                 mengetahui histori maintenance mesin.
                             </p>
 
@@ -126,7 +124,7 @@
                     <div>
 
                         <h3 class="text-2xl font-bold text-blue-700">
-                            Dengan CMMS
+                            Dengan FreeDOMS
                         </h3>
 
                         <p class="text-blue-600">
@@ -153,7 +151,7 @@
 
                             <p class="text-slate-600">
                                 Seluruh hasil inspeksi, measurement, problem,
-                                dan sparepart tersimpan secara digital.
+                                dan sparepart tersimpan secara digital dan terpusat.
                             </p>
 
                         </div>
@@ -163,18 +161,19 @@
                     <div class="flex gap-4">
 
                         <div class="text-blue-600 text-2xl">
-                            👤
+                            📊
                         </div>
 
                         <div>
 
                             <h4 class="font-semibold">
-                                Assignment PIC Otomatis
+                                Data Terkelola dengan Baik dan Bisa Dimanfaatkan
                             </h4>
 
                             <p class="text-slate-600">
-                                Koordinator dapat mengatur penugasan PIC dengan
-                                mudah sesuai area kerja.
+                                Data maintenance yang terdokumentasi dengan baik
+                                dapat digunakan untuk analisis dan perencanaan
+                                maintenance di masa depan.
                             </p>
 
                         </div>

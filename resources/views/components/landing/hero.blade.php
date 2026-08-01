@@ -14,8 +14,7 @@
 
                 </span>
 
-                <h1
-                    class="mt-6 text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-slate-900">
+                <h1 class="mt-6 text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-slate-900">
 
                     Kelola
                     <span class="text-blue-600">
@@ -30,28 +29,31 @@
 
                 </h1>
 
-                <p
-                    class="mt-6 text-lg leading-8 text-slate-600 max-w-xl">
+                <p class="mt-6 text-lg leading-8 text-slate-600 max-w-xl">
 
                     Digitalisasikan seluruh aktivitas maintenance mulai dari
-                    penjadwalan, inspeksi, checklist, penggantian sparepart,
-                    measurement, hingga riwayat mesin dalam satu platform yang
+                    penjadwalan PM, inspeksi, checklist, penggantian sparepart,
+                    measurement, small PM, hingga riwayat mesin dalam satu platform yang
                     mudah digunakan.
 
                 </p>
 
                 <div class="mt-10 flex flex-wrap gap-4">
 
-                    <a
-                        href="{{ route('qr.scan') }}"
+                    <a href="{{ route('qr.scan') }}"
                         class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-7 py-4 font-semibold text-white shadow-lg hover:bg-blue-700 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
 
-                        🔍 Scan Mesin
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3M8 8h2v2H8zM14 8h2v2h-2zM8 14h2v2H8zM14 14h2v2h-2z" />
+
+                        </svg>
+                        Scan Mesin
 
                     </a>
 
-                    <a
-                        href="{{ route('login') }}"
+                    <a href="{{ route('login') }}"
                         class="inline-flex items-center rounded-xl border border-slate-300 px-7 py-4 font-semibold hover:bg-slate-100 transition">
 
                         Login
@@ -87,23 +89,19 @@
             {{-- RIGHT --}}
             <div>
 
-                <div
-                    class="rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+                <div class="rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
 
-                    <div
-                        class="border-b bg-slate-50 px-6 py-4 flex items-center justify-between">
+                    <div class="border-b bg-slate-50 px-6 py-4 flex items-center justify-between">
 
-                        <h3
-                            class="font-semibold">
+                        <h3 class="font-semibold">
 
                             Dashboard Preview
 
                         </h3>
 
-                        <span
-                            class="rounded-full bg-green-100 text-green-700 text-xs px-3 py-1">
+                        <span class="rounded-full bg-green-100 text-green-700 text-xs px-3 py-1">
 
                             LIVE
 
@@ -115,8 +113,7 @@
 
                     <div class="p-6 grid grid-cols-2 gap-4">
 
-                        <div
-                            class="rounded-xl bg-blue-50 p-5">
+                        <div class="rounded-xl bg-blue-50 p-5">
 
                             <p class="text-sm text-slate-500">
 
@@ -132,8 +129,7 @@
 
                         </div>
 
-                        <div
-                            class="rounded-xl bg-green-50 p-5">
+                        <div class="rounded-xl bg-green-50 p-5">
 
                             <p class="text-sm text-slate-500">
 
@@ -149,8 +145,7 @@
 
                         </div>
 
-                        <div
-                            class="rounded-xl bg-red-50 p-5">
+                        <div class="rounded-xl bg-red-50 p-5">
 
                             <p class="text-sm text-slate-500">
 
@@ -166,8 +161,7 @@
 
                         </div>
 
-                        <div
-                            class="rounded-xl bg-yellow-50 p-5">
+                        <div class="rounded-xl bg-yellow-50 p-5">
 
                             <p class="text-sm text-slate-500">
 
@@ -189,11 +183,9 @@
 
                     <div class="px-6 pb-6">
 
-                        <div
-                            class="rounded-xl border p-4">
+                        <div class="rounded-xl border p-4">
 
-                            <h4
-                                class="font-semibold mb-3">
+                            <h4 class="font-semibold mb-3">
 
                                 Recent Activities
 

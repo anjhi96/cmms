@@ -18,7 +18,7 @@
 
             <p class="mt-5 max-w-3xl mx-auto text-slate-600 text-lg">
 
-                CMMS ini dirancang untuk menyederhanakan pekerjaan maintenance,
+                FreeDOMS ini dirancang untuk menyederhanakan pekerjaan maintenance,
                 meningkatkan keterlacakan data, serta mempermudah evaluasi
                 Preventive Maintenance.
 

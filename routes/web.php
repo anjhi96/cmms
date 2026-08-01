@@ -128,31 +128,28 @@ Route::middleware(['auth'])->group(function () {
     )->name('import-templates.download');
 
     Route::post(
-    '/pm-schedules/{pmSchedule}/assign-pic',
-    [PMScheduleController::class,'assignPic']
+        '/pm-schedules/{pmSchedule}/assign-pic',
+        [PMScheduleController::class,'assignPic']
     )->name('pm-schedules.assign-pic');
 
-    Route::middleware(['auth'])->group(function () {
+});
 
-        Route::resource('machine-history', MachineHistoryController::class)
+Route::resource('machine-history', MachineHistoryController::class)
             ->only([
                 'index',
                 'show',
             ]);
 
-        Route::get(
-            '/machine-history/{machineNumber}/detail/{pmSchedule}',
-            [MachineHistoryController::class, 'detail']
-        )->name('machine-history.detail');
-
-    });
-
-    Route::get('/scan', [QrScannerController::class, 'index'])
-    ->name('qr.scan');
+Route::get(
+    '/machine-history/{machineNumber}/detail/{pmSchedule}',
+    [MachineHistoryController::class, 'detail']
+)->name('machine-history.detail');
 
 
+Route::get('/scan', [QrScannerController::class, 'index'])
+->name('qr.scan');
 
-});
+Route::get('/m/{machine}', [MachineHistoryController::class, 'show']);
 
 require __DIR__.'/settings.php';
 // require __DIR__.'/auth.php'; // pastikan ada

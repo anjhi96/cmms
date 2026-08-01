@@ -45,7 +45,7 @@
             <a href="{{ route('login') }}"
                 class="px-8 py-4 rounded-2xl border-2 border-white text-white font-bold hover:bg-white hover:text-blue-700 transition">
 
-                🔐 Login CMMS
+                🔐 Login FreeDOMS
 
             </a>
 

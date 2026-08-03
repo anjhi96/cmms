@@ -34,19 +34,27 @@
 
     <div x-data class="flex h-screen overflow-hidden">
 
-        @include('partials.sidebar')
+        @if (!($hideSidebar ?? false))
+            @include('partials.sidebar')
+        @endif
 
         {{-- Margin statis lg:ml-72, karena sidebar SELALU full width di desktop.
         Di mobile margin 0 karena sidebar jadi overlay/drawer. --}}
         <div class="flex min-h-0 flex-1 flex-col">
 
-            @include('partials.topbar', ['pageTitle' => $pageTitle])
+            @if (!($hideTopbar ?? false))
+                @include('partials.topbar', ['pageTitle' => $pageTitle])
+            @endif
 
-            <main class="flex-1 overflow-y-auto lg:ml-72">
+            <main class="flex-1 overflow-y-auto {{ $hideSidebar ?? false ? '' : 'lg:ml-72' }}">
                 <div class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-                    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 lg:p-8">
+                    @if ($fullWidth ?? false)
                         @yield('content')
-                    </div>
+                    @else
+                        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 lg:p-8">
+                            @yield('content')
+                        </div>
+                    @endif
                 </div>
             </main>
 

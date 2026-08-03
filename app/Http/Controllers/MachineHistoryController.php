@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Machine;
 use Carbon\Carbon;
 use App\Models\MachineMeasurement;
@@ -11,16 +12,47 @@ use App\Models\PMMeasurement;
 use App\Models\PMProblem;
 use App\Models\PMSparepart;
 use App\Models\PMChecklist;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class MachineHistoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $query = PMSchedule::query();
 
-        /*
-        nanti role filter kita copy persis dari PMScheduleController
-        */
+        // SEARCH
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('machine_number', 'like', '%' . $request->search . '%')
+                  ->orWhere('machine_type', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // FILTER AREA
+        if ($request->filled('area')
+        ) {
+            $query->where('area', $request->area);
+        }
+
+        // FILTER MACHINE TYPE
+        if ($request->filled('machine_type')) {
+            $query->where('machine_type', $request->machine_type);
+        }
+
+        // GET UNIQUE AREAS
+        $areas = PMSchedule::select('area')
+            ->whereNotNull('area')
+            ->distinct()
+            ->orderBy('area')
+            ->pluck('area');
+
+        // GET UNIQUE MACHINE TYPES
+        $machineTypes = PMSchedule::select('machine_type')
+            ->whereNotNull('machine_type')
+            ->distinct()
+            ->orderBy('machine_type')
+            ->pluck('machine_type');
 
         $machines = $query
             ->select(
@@ -35,11 +67,18 @@ class MachineHistoryController extends Controller
                 'area'
             )
             ->orderBy('machine_number')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
+        ;
 
         return view(
             'machine-history.index',
-            compact('machines')
+            compact(
+                'machines',
+                'machineTypes',
+                'areas',
+
+            )
         );
     }
 
@@ -51,9 +90,9 @@ class MachineHistoryController extends Controller
         )->firstOrFail();
 
         $pmHistories = PMSchedule::where(
-                'machine_number',
-                $machineNumber
-            )
+            'machine_number',
+            $machineNumber
+        )
             ->whereNotNull('actual_date')
             ->latest('actual_date')
             ->paginate(10);
@@ -89,17 +128,24 @@ class MachineHistoryController extends Controller
 
         return view(
             'machine-history.show',
-            compact(
-                'machine',
-                'pmHistories',
-                'lastPm',
-                'nextPm'
-            )
+            [
+        'machine' => $machine,
+        'pmHistories' => $pmHistories,
+        'lastPm' => $lastPm,
+        'nextPm' => $nextPm,
+        'hideSidebar' => !Auth::check(),
+        'hideTopbar' => !Auth::check(),
+    ]
         );
     }
 
     public function detail($machineNumber, PMSchedule $pmSchedule)
     {
+        $machine = Machine::where(
+            'machine_number',
+            $machineNumber
+        )->firstOrFail();
+
         $measurements = MachineMeasurement::where(
             'machine_type',
             $pmSchedule->machine_type
@@ -161,17 +207,20 @@ class MachineHistoryController extends Controller
 
         return view(
             'machine-history.detail',
-            compact(
-                'pmSchedule',
-                'measurements',
-                'pmMeasurements',
-                'pmProblems',
-                'pmSpareparts',
-                'lastPm',
-                'nextPm',
-                'totalCost',
-                'checklists',
-            )
+            [
+        'machine' => $machine,
+        'pmSchedule' => $pmSchedule,
+        'measurements' => $measurements,
+        'pmMeasurements' => $pmMeasurements,
+        'pmProblems' => $pmProblems,
+        'pmSpareparts' => $pmSpareparts,
+        'lastPm' => $lastPm,
+        'nextPm' => $nextPm,
+        'totalCost' => $totalCost,
+        'checklists' => $checklists,
+        'hideSidebar' => !Auth::check(),
+        'hideTopbar' => !Auth::check(),
+    ]
         );
     }
 }

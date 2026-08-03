@@ -1,602 +1,419 @@
 @extends('layouts.app')
 
 @section('content')
-<h1 class="text-2xl font-bold mb-6">
-    Fill PM Record
-</h1>
 
-
-
-<div class="bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-xl p-6 shadow mb-6">
-
-    <h2 class="text-xl font-bold mb-4">
-        Machine Information
-    </h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
+    {{-- ============ Header ============ --}}
+    <div class="mb-6 flex flex-row items-center justify-between gap-3">
         <div>
-            <p class="text-sm opacity-80">Machine Number</p>
-            <p class="font-semibold text-lg">
-                {{ $pmSchedule->machine_number }}
+            <h1 class="text-2xl font-bold">
+                PM Record
+            </h1>
+            <p class="text-slate-500">
+                {{ $machine->machine_number }}
             </p>
         </div>
-
         <div>
-            <p class="text-sm opacity-80">Machine Type</p>
-            <p class="font-semibold text-lg">
-                {{ $pmSchedule->machine_type }}
-            </p>
-        </div>
-
-        <div>
-            <p class="text-sm opacity-80">Last PM Date</p>
-            <p class="font-semibold text-lg">
-                {{ $lastPm ? $lastPm->format('d-m-Y') : '-' }}
-            </p>
-        </div>
-
-    </div>
-
-</div>
-
-<div class="bg-white rounded-xl shadow p-6 mb-6">
-
-    <h3 class="text-lg font-semibold mb-6">
-        PM Information
-    </h3>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        <div>
-            <label name="order_number" class="block mb-2 text-sm font-medium">
-                Order Number
-            </label>
-
-            <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-
-                {{ $pmSchedule->order_number }}
-
-            </div>
-
-        </div>
-
-        <div>
-            <label name="actual_date" class="block mb-2 text-sm font-medium">
-                Actual Date
-            </label>
-
-            <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-
-                {{ $pmSchedule->actual_date }}
-
-            </div>
-        </div>
-
-        <div>
-            <label name="pic" class="block mb-2 text-sm font-medium">
-                PIC PM
-            </label>
-
-            <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-
-                {{ $pmSchedule->pic }}
-
-            </div>
-        </div>
-
-        <div>
-            <label name="start_time" class="block mb-2 text-sm font-medium">
-                Start PM
-            </label>
-
-            <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-
-                {{ $pmSchedule->start_time }}
-
-            </div>
-        </div>
-
-        <div>
-            <label name="end_time" class="block mb-2 text-sm font-medium">
-                End PM
-            </label>
-
-            <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-
-                {{ $pmSchedule->end_time }}
-
-            </div>
-        </div>
-
-        <div>
-            <label name="duration" class="block mb-2 text-sm font-medium">
-                Duration (Hours)
-            </label>
-
-            <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-
-                {{ $pmSchedule->duration }}
-
-            </div>
-        </div>
-
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-
-        {{-- Tampilkan hanya untuk type tertentu --}}
-        @if ($pmSchedule->requiresOilChange())
-        <div>
-            <label class="block mb-2 text-sm font-medium">
-                Oil Change
-            </label>
-
-            <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-
-                {{ $pmSchedule->oil_change }}
-
-            </div>
-        </div>
-        @endif
-
-        <div>
-            <label class="block mb-2 text-sm font-medium">
-                Greasing
-            </label>
-
-            <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-
-                {{ $pmSchedule->greasing }}
-
-            </div>
-        </div>
-
-        <div>
-            <label class="block mb-2 text-sm font-medium">
-                WO ZSBP
-            </label>
-
-            <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-
-                {{ $pmSchedule->wo_zsbp }}
-
-            </div>
-        </div>
-
-    </div>
-    <div class="gap-3 mt-5">
-        <label class="block mb-2 text-sm font-medium">
-            Remarks
-        </label>
-
-        <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-
-            {{ $pmSchedule->remarks }}
-
+            <a href="{{ route('machine-history.show', $pmSchedule->machine_number) }}"
+                class="inline-flex w-fit items-center rounded-lg bg-slate-700 px-4 py-2 text-white">
+                ← Back
+            </a>
         </div>
     </div>
 
-</div>
+    {{-- ============ PM Information ============ --}}
+    <div class="mb-6 rounded-xl bg-white p-6 shadow">
+        <h3 class="mb-6 text-lg font-semibold">
+            PM Information
+        </h3>
 
-<div class="bg-white rounded-xl shadow p-6 mb-6">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+                <label class="mb-2 block text-sm font-medium">Order Number</label>
+                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                    {{ $pmSchedule->order_number }}
+                </div>
+            </div>
 
-    <h3 class="text-lg font-semibold mb-6">
-        PM Result
-    </h3>
-    <div id="problem-wrapper">
+            <div>
+                <label class="mb-2 block text-sm font-medium">Actual Date</label>
+                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                    {{ $pmSchedule->actual_date }}
+                </div>
+            </div>
 
+            <div>
+                <label class="mb-2 block text-sm font-medium">PIC PM</label>
+                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                    {{ $pmSchedule->pic }}
+                </div>
+            </div>
 
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div>
+                <label class="mb-2 block text-sm font-medium">Start PM</label>
+                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                    {{ $pmSchedule->start_time }}
+                </div>
+            </div>
 
-            <h2 class="text-lg font-semibold mb-4">
-                Problems
-            </h2>
+            <div>
+                <label class="mb-2 block text-sm font-medium">End PM</label>
+                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                    {{ $pmSchedule->end_time }}
+                </div>
+            </div>
 
-            @if($pmProblems->isEmpty())
+            <div>
+                <label class="mb-2 block text-sm font-medium">Duration (Hours)</label>
+                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                    {{ $pmSchedule->duration }}
+                </div>
+            </div>
+        </div>
 
-            <div class="text-slate-500 italic">
+        <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+            @if ($pmSchedule->requiresOilChange())
+                <div>
+                    <label class="mb-2 block text-sm font-medium">Oil Change</label>
+                    <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                        {{ $pmSchedule->oil_change }}
+                    </div>
+                </div>
+            @endif
+
+            <div>
+                <label class="mb-2 block text-sm font-medium">Greasing</label>
+                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                    {{ $pmSchedule->greasing }}
+                </div>
+            </div>
+
+            <div>
+                <label class="mb-2 block text-sm font-medium">WO ZSBP</label>
+                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                    {{ $pmSchedule->wo_zsbp }}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 gap-3">
+            <label class="mb-2 block text-sm font-medium">Remarks</label>
+            <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                {{ $pmSchedule->remarks }}
+            </div>
+        </div>
+    </div>
+
+    {{-- ============ PM Problems ============ --}}
+    <div class="mb-6 rounded-xl bg-white p-6 shadow">
+        <h2 class="mb-4 text-lg font-semibold">
+            PM Problems
+        </h2>
+
+        @if ($pmProblems->isEmpty())
+            <div class="italic text-slate-500">
                 No problem found during this PM.
             </div>
-
-            @else
-
-            <div class="overflow-x-auto">
-
-                <table class="min-w-full border border-slate-200 rounded-lg">
-
+        @else
+            {{-- Desktop table --}}
+            <div class="hidden overflow-x-auto md:block">
+                <table class="min-w-full rounded-lg border border-slate-200">
                     <thead class="bg-slate-100">
-
                         <tr>
-
                             <th class="px-4 py-3 text-left">Problem</th>
                             <th class="px-4 py-3 text-left">Finding</th>
                             <th class="px-4 py-3 text-center">Severity</th>
-
                         </tr>
-
                     </thead>
-
                     <tbody>
-
-                        @foreach($pmProblems as $problem)
-
-                        <tr class="border-t">
-
-                            <td class="px-4 py-3">
-
-                                {{ $problem->machineProblem->problem ?? '-' }}
-
-                            </td>
-
-                            <td class="px-4 py-3">
-
-                                {{ $problem->machineProblemFinding->finding ?? '-' }}
-
-                            </td>
-
-                            <td class="px-4 py-3 text-center">
-
-                                @php
-                                $color = match($problem->severity){
-                                'High' => 'bg-red-100 text-red-700',
-                                'Medium' => 'bg-yellow-100 text-yellow-700',
-                                default => 'bg-green-100 text-green-700'
+                        @foreach ($pmProblems as $problem)
+                            @php
+                                $color = match ($problem->severity) {
+                                    'High' => 'bg-red-100 text-red-700',
+                                    'Medium' => 'bg-yellow-100 text-yellow-700',
+                                    default => 'bg-green-100 text-green-700',
                                 };
-                                @endphp
-
-                                <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $color }}">
-                                    {{ $problem->severity }}
-                                </span>
-
-                            </td>
-
-                        </tr>
-
+                            @endphp
+                            <tr class="border-t">
+                                <td class="px-4 py-3">{{ $problem->machineProblem->problem ?? '-' }}</td>
+                                <td class="px-4 py-3">{{ $problem->machineProblemFinding->finding ?? '-' }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <span class="rounded-full px-2 py-1 text-xs font-semibold {{ $color }}">
+                                        {{ $problem->severity }}
+                                    </span>
+                                </td>
+                            </tr>
                         @endforeach
-
                     </tbody>
-
                 </table>
-
             </div>
 
-            @endif
-
-        </div>
-
-    </div>
-
-</div>
-
-
-{{-- PM Measurement --}}
-
-<div class="bg-white rounded-lg shadow p-6 mb-6">
-
-    <h2 class="text-lg font-semibold mb-4">
-        Measurements
-    </h2>
-
-    <div class="overflow-x-auto">
-
-        <table class="min-w-full border">
-
-            <thead class="bg-slate-100">
-
-                <tr>
-
-                    <th class="px-4 py-3 text-left">
-                        Measurement Item
-                    </th>
-
-                    <th class="px-4 py-3 text-left">
-                        Result
-                    </th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                @foreach($pmMeasurements as $measurement)
-
-                <tr class="border-t">
-
-                    <td class="px-4 py-3">
-
-                        {{ $measurement->measurement_item }}
-
-                    </td>
-
-                    <td class="px-4 py-3 font-semibold">
-
-                        {{ $measurement->measurement_value }}
-
-                    </td>
-
-                </tr>
-
+            {{-- Mobile cards --}}
+            <div class="space-y-3 md:hidden">
+                @foreach ($pmProblems as $problem)
+                    @php
+                        $color = match ($problem->severity) {
+                            'High' => 'bg-red-100 text-red-700',
+                            'Medium' => 'bg-yellow-100 text-yellow-700',
+                            default => 'bg-green-100 text-green-700',
+                        };
+                    @endphp
+                    <div class="rounded-lg border border-slate-200 p-4">
+                        <div class="mb-2 flex items-start justify-between gap-2">
+                            <div class="text-sm font-semibold text-slate-800">
+                                {{ $problem->machineProblem->problem ?? '-' }}
+                            </div>
+                            <span class="shrink-0 rounded-full px-2 py-1 text-xs font-semibold {{ $color }}">
+                                {{ $problem->severity }}
+                            </span>
+                        </div>
+                        <div class="text-xs text-slate-500">Finding</div>
+                        <div class="text-sm text-slate-700">
+                            {{ $problem->machineProblemFinding->finding ?? '-' }}
+                        </div>
+                    </div>
                 @endforeach
-
-            </tbody>
-
-        </table>
-
+            </div>
+        @endif
     </div>
 
-</div>
-
-{{-- Sparepart Usage --}}
-
-<div class="bg-white rounded-lg shadow p-6 mb-6">
-
-    <div class="flex items-center justify-between mb-4">
-
-        <h2 class="text-lg font-semibold">
-            Sparepart Usage
+    {{-- ============ PM Measurement ============ --}}
+    <div class="mb-6 rounded-lg bg-white p-6 shadow">
+        <h2 class="mb-4 text-lg font-semibold">
+            Measurements
         </h2>
 
-        <div class="text-right">
-
-            <p class="text-sm text-slate-500">
-                Total Cost
-            </p>
-
-            <p class="text-xl font-bold text-emerald-600">
-                USD {{ number_format($totalCost, 2) }}
-            </p>
-
+        {{-- Desktop table --}}
+        <div class="hidden overflow-x-auto md:block">
+            <table class="min-w-full border">
+                <thead class="bg-slate-100">
+                    <tr>
+                        <th class="px-4 py-3 text-left">Measurement Item</th>
+                        <th class="px-4 py-3 text-left">Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($pmMeasurements as $measurement)
+                        <tr class="border-t">
+                            <td class="px-4 py-3">{{ $measurement->measurement_item }}</td>
+                            <td class="px-4 py-3 font-semibold">{{ $measurement->measurement_value }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
 
+        {{-- Mobile list --}}
+        <div class="divide-y divide-slate-100 rounded-lg border border-slate-200 md:hidden">
+            @foreach ($pmMeasurements as $measurement)
+                <div class="flex items-center justify-between gap-3 px-4 py-3">
+                    <span class="text-sm text-slate-600">{{ $measurement->measurement_item }}</span>
+                    <span class="text-sm font-semibold text-slate-800">{{ $measurement->measurement_value }}</span>
+                </div>
+            @endforeach
+        </div>
     </div>
 
-    @if($pmSpareparts->isEmpty())
+    {{-- ============ Sparepart Usage ============ --}}
+    <div class="mb-6 rounded-lg bg-white p-6 shadow">
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-lg font-semibold">
+                Sparepart Usage
+            </h2>
 
-    <div class="rounded-lg border border-dashed border-slate-300 py-8 text-center text-slate-500">
+            <div class="text-right">
+                <p class="text-sm text-slate-500">Total Cost</p>
+                <p class="text-xl font-bold text-emerald-600">
+                    USD {{ number_format($totalCost, 2) }}
+                </p>
+            </div>
+        </div>
 
-        No spareparts used during this PM.
+        @if ($pmSpareparts->isEmpty())
+            <div class="rounded-lg border border-dashed border-slate-300 py-8 text-center text-slate-500">
+                No spareparts used during this PM.
+            </div>
+        @else
+            {{-- Desktop table --}}
+            <div class="hidden overflow-x-auto md:block">
+                <table class="min-w-full rounded-lg border border-slate-200">
+                    <thead class="bg-slate-100">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Material Number</th>
+                            <th class="px-4 py-3 text-left">Description</th>
+                            <th class="px-4 py-3 text-center">Qty</th>
+                            <th class="px-4 py-3 text-center">Unit</th>
+                            <th class="px-4 py-3 text-right">Price</th>
+                            <th class="px-4 py-3 text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($pmSpareparts as $item)
+                            @php
+                                $price = $item->sparepart->price ?? 0;
+                                $qty = $item->qty ?? 0;
+                                $lineTotal = $qty * $price;
+                            @endphp
+                            <tr class="border-t hover:bg-slate-50">
+                                <td class="px-4 py-3 font-medium">{{ $item->sparepart->material_number }}</td>
+                                <td class="px-4 py-3">{{ $item->sparepart->description }}</td>
+                                <td class="px-4 py-3 text-center">{{ $qty }}</td>
+                                <td class="px-4 py-3 text-center">{{ $item->sparepart->unit }}</td>
+                                <td class="px-4 py-3 text-right">USD {{ number_format($price, 2) }}</td>
+                                <td class="px-4 py-3 text-right font-semibold">USD {{ number_format($lineTotal, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot class="border-t-2 bg-slate-50">
+                        <tr>
+                            <td colspan="5" class="px-4 py-3 text-right font-bold">Total Cost</td>
+                            <td class="px-4 py-3 text-right text-lg font-bold text-emerald-600">
+                                USD {{ number_format($totalCost, 2) }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
 
-    </div>
+            {{-- Mobile cards --}}
+            <div class="space-y-3 md:hidden">
+                @foreach ($pmSpareparts as $item)
+                    @php
+                        $price = $item->sparepart->price ?? 0;
+                        $qty = $item->qty ?? 0;
+                        $lineTotal = $qty * $price;
+                    @endphp
+                    <div class="rounded-lg border border-slate-200 p-4">
+                        <div class="mb-2">
+                            <div class="text-sm font-semibold text-slate-800">
+                                {{ $item->sparepart->material_number }}
+                            </div>
+                            <div class="text-xs text-slate-500">
+                                {{ $item->sparepart->description }}
+                            </div>
+                        </div>
 
-    @else
+                        <div class="grid grid-cols-2 gap-y-2 border-t border-slate-100 pt-3 text-xs">
+                            <div>
+                                <div class="text-slate-400">Qty / Unit</div>
+                                <div class="font-medium text-slate-700">{{ $qty }} {{ $item->sparepart->unit }}
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-slate-400">Price</div>
+                                <div class="font-medium text-slate-700">USD {{ number_format($price, 2) }}</div>
+                            </div>
+                        </div>
 
-    <div class="overflow-x-auto">
-
-        <table class="min-w-full border border-slate-200 rounded-lg">
-
-            <thead class="bg-slate-100">
-
-                <tr>
-
-                    <th class="px-4 py-3 text-left">
-                        Material Number
-                    </th>
-
-                    <th class="px-4 py-3 text-left">
-                        Description
-                    </th>
-
-                    <th class="px-4 py-3 text-center">
-                        Qty
-                    </th>
-
-                    <th class="px-4 py-3 text-center">
-                        Unit
-                    </th>
-
-                    <th class="px-4 py-3 text-right">
-                        Price
-                    </th>
-
-                    <th class="px-4 py-3 text-right">
-                        Total
-                    </th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                @foreach($pmSpareparts as $item)
-
-                @php
-                $price = $item->sparepart->price ?? 0;
-                $qty = $item->qty ?? 0;
-                $lineTotal = $qty * $price;
-                @endphp
-
-                <tr class="border-t hover:bg-slate-50">
-
-                    <td class="px-4 py-3 font-medium">
-                        {{ $item->sparepart->material_number }}
-                    </td>
-
-                    <td class="px-4 py-3">
-                        {{ $item->sparepart->description }}
-                    </td>
-
-                    <td class="px-4 py-3 text-center">
-                        {{ $qty }}
-                    </td>
-
-                    <td class="px-4 py-3 text-center">
-                        {{ $item->sparepart->unit }}
-                    </td>
-
-                    <td class="px-4 py-3 text-right">
-                        USD {{ number_format($price, 2) }}
-                    </td>
-
-                    <td class="px-4 py-3 text-right font-semibold">
-                        USD {{ number_format($lineTotal, 2) }}
-                    </td>
-
-                </tr>
-
+                        <div class="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+                            <span class="text-xs text-slate-400">Total</span>
+                            <span class="font-semibold text-emerald-600">USD {{ number_format($lineTotal, 2) }}</span>
+                        </div>
+                    </div>
                 @endforeach
 
-            </tbody>
-
-            <tfoot class="bg-slate-50 border-t-2">
-
-                <tr>
-
-                    <td colspan="5" class="px-4 py-3 text-right font-bold">
-
-                        Total Cost
-
-                    </td>
-
-                    <td class="px-4 py-3 text-right text-emerald-600 font-bold text-lg">
-
-                        USD {{ number_format($totalCost, 2) }}
-
-                    </td>
-
-                </tr>
-
-            </tfoot>
-
-        </table>
-
+                <div class="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3">
+                    <span class="font-bold text-slate-800">Total Cost</span>
+                    <span class="text-lg font-bold text-emerald-600">USD {{ number_format($totalCost, 2) }}</span>
+                </div>
+            </div>
+        @endif
     </div>
 
-    @endif
+    {{-- ============ PM Checklist ============ --}}
+    <div class="rounded-xl bg-white p-6 shadow">
+        <h2 class="mb-5 text-xl font-semibold">
+            PM Checklist
+        </h2>
 
-</div>
+        @foreach ($checklists as $section => $items)
+            <div x-data="{ open: true }" class="mb-4 overflow-hidden rounded-xl border">
 
-<div class="bg-white rounded-xl shadow p-6">
+                <button @click="open=!open"
+                    class="flex w-full items-center justify-between bg-slate-100 px-5 py-4 transition hover:bg-slate-200">
 
-    <h2 class="text-xl font-semibold mb-5">
+                    <div class="flex items-center gap-3">
+                        <span class="font-semibold">{{ $section }}</span>
+                        <span class="rounded-full bg-slate-300 px-2 py-1 text-xs">
+                            {{ $items->count() }} Items
+                        </span>
+                    </div>
 
-        PM Checklist
+                    <svg class="h-5 w-5 transition" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
 
-    </h2>
+                <div x-show="open" x-transition class="border-t border-slate-200">
 
-    @foreach($checklists as $section => $items)
+                    {{-- Desktop table --}}
+                    <div class="hidden overflow-x-auto md:block">
+                        <table class="w-full">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Checklist Item</th>
+                                    <th class="px-4 py-3 text-center">Result</th>
+                                    <th class="px-4 py-3 text-left">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($items as $item)
+                                    <tr class="border-t hover:bg-slate-50">
+                                        <td class="px-4 py-3">
+                                            {{ $item->machineChecklist->checklist_item }}
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="flex flex-wrap justify-center gap-2">
+                                                @forelse($item->results as $result)
+                                                    <span
+                                                        class="rounded-full px-2 py-1 text-xs font-semibold {{ $result['badge'] }}">
+                                                        {{ $result['text'] }}
+                                                    </span>
+                                                @empty
+                                                    <span class="text-slate-400">-</span>
+                                                @endforelse
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            {{ $item->remarks ?: '-' }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
 
-    <div x-data="{ open: true }" class="mb-4 border rounded-xl overflow-hidden">
-
-        <button @click="open=!open"
-            class="w-full flex justify-between items-center bg-slate-100 px-5 py-4 hover:bg-slate-200 transition">
-
-            <div class="flex items-center gap-3">
-
-                <span class="font-semibold">
-
-                    {{ $section }}
-
-                </span>
-
-                <span class="text-xs bg-slate-300 rounded-full px-2 py-1">
-
-                    {{ $items->count() }} Items
-
-                </span>
-
-            </div>
-
-            <svg class="w-5 h-5 transition" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-
-            </svg>
-
-        </button>
-
-        <div x-show="open" x-transition class="border-t border-slate-200">
-
-            <div class="overflow-x-auto">
-                <table class="w-full">
-
-                    <thead class="bg-slate-50">
-
-                        <tr>
-
-                            <th class="px-4 py-3 text-left">
-                                Checklist Item
-                            </th>
-
-                            <th class="px-4 py-3 text-center">
-                                Result
-                            </th>
-
-                            <th class="px-4 py-3 text-left">
-                                Remarks
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @foreach($items as $item)
-
-                        <tr class="border-t hover:bg-slate-50">
-
-                            <td class="px-4 py-3">
-
-                                {{ $item->machineChecklist->checklist_item }}
-
-                            </td>
-
-                            <td class="px-4 py-3">
-
-                                <div class="flex flex-wrap gap-2 justify-center">
-
-                                    @forelse($item->results as $result)
-
-                                    <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $result['badge'] }}">
-
-                                        {{ $result['text'] }}
-
-                                    </span>
-
-                                    @empty
-
-                                    <span class="text-slate-400">
-
-                                        -
-
-                                    </span>
-
-                                    @endforelse
-
+                    {{-- Mobile cards --}}
+                    <div class="space-y-3 p-3 md:hidden">
+                        @foreach ($items as $item)
+                            <div class="rounded-lg border border-slate-200 p-3">
+                                <div class="mb-2 text-sm font-medium text-slate-800">
+                                    {{ $item->machineChecklist->checklist_item }}
                                 </div>
 
-                            </td>
+                                <div class="mb-2 flex flex-wrap gap-2">
+                                    @forelse($item->results as $result)
+                                        <span class="rounded-full px-2 py-1 text-xs font-semibold {{ $result['badge'] }}">
+                                            {{ $result['text'] }}
+                                        </span>
+                                    @empty
+                                        <span class="text-xs text-slate-400">-</span>
+                                    @endforelse
+                                </div>
 
-                            </td>
-
-                            <td class="px-4 py-3">
-
-                                {{ $item->remarks ?: '-' }}
-
-                            </td>
-
-                        </tr>
-
+                                <div class="border-t border-slate-100 pt-2 text-xs">
+                                    <span class="text-slate-400">Remarks: </span>
+                                    <span class="text-slate-600">{{ $item->remarks ?: '-' }}</span>
+                                </div>
+                            </div>
                         @endforeach
+                    </div>
 
-                    </tbody>
-
-                </table>
-
+                </div>
             </div>
+        @endforeach
 
-        </div>
     </div>
 
-    @endforeach
-
-</div>
-
-
-
-<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
 @endsection

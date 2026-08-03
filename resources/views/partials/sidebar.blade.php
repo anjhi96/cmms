@@ -1,21 +1,30 @@
-    <aside :class="collapsed ? 'w-20' : 'w-72'"
+    {{-- Daftarkan Alpine store sekali saja. Idealnya taruh di layout utama (app.blade.php)
+     sebelum script Alpine di-load, tapi kalau belum ada, taruh di sini juga aman. --}}
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('sidebar', {
+                open: true,
+            });
+        });
+    </script>
+
+    <aside x-cloak :class="$store.sidebar.open ? 'translate-x-0' : '-translate-x-full'"
         class="fixed inset-y-0 left-0
-           z-40
-           flex h-screen flex-col
-           border-r border-slate-800
-           bg-slate-900 text-white
-           transition-all duration-300">
+       z-40 w-72
+       flex h-screen flex-col
+       border-r border-slate-800
+       bg-slate-900 text-white
+       transition-transform duration-300
+       lg:translate-x-0">
 
         <div class="border-b border-slate-800 px-4 py-5">
-
             <div class="flex items-center justify-between gap-3">
 
-                <div x-show="!collapsed" class="flex min-w-0 items-center gap-3">
-
+                <div class="flex min-w-0 items-center gap-3">
                     <div
                         class="flex h-12 w-12 items-center justify-center rounded-2xl
-                    bg-gradient-to-br from-emerald-400 to-cyan-500
-                    text-slate-950 shadow-lg shadow-emerald-500/20">
+                bg-gradient-to-br from-emerald-400 to-cyan-500
+                text-slate-950 shadow-lg shadow-emerald-500/20">
 
                         <svg viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" fill="none">
                             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -47,7 +56,6 @@
                                 </g>
                             </g>
                         </svg>
-
                     </div>
                     <div class="min-w-0">
                         <div class="text-base font-semibold tracking-wide text-white">FreeDOMS</div>
@@ -55,45 +63,15 @@
                     </div>
                 </div>
 
-                <button x-show="collapsed" @click="collapsed = !collapsed"
-                    class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 text-slate-950 shadow-lg transition hover:scale-105"
-                    title="Expand Sidebar">
-                    <svg viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" fill="none" class="h-5 w-5">
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                        <g id="SVGRepo_iconCarrier">
-                            <g style="stroke-width:.903553">
-                                <g style="stroke-width:1.22576">
-                                    <path d="M6 104V56h34.856M6 80h21.855" class="a"
-                                        style="fill:none;stroke:#000000;stroke-width:14.7089;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
-                                        transform="matrix(.79792 0 0 .83414 17.08 29.264)"></path>
-                                </g>
-                                <g style="stroke-width:2.24031;stroke-dasharray:none">
-                                    <path
-                                        d="M14.665 15.027V7.109h2.574a2.672 2.672 0 1 1 0 5.345h-2.574m5.245 2.573-2.483-2.582"
-                                        class="a"
-                                        style="fill:none;stroke:#000000;stroke-width:2.24031;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
-                                        transform="matrix(5.56244 0 0 5.15795 -16.54 38.912)"></path>
-                                </g>
-                                <g style="stroke-width:1.03392">
-                                    <path d="M6 6h28v0M6 24h28v0M6 42h28v0"
-                                        style="fill:none;stroke:#000000;stroke-width:12.4073;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;stroke-dasharray:none;paint-order:stroke fill markers"
-                                        transform="matrix(.86732 0 0 1.07855 141.13 70.11)"></path>
-                                </g>
-                                <g style="stroke-width:1.03392">
-                                    <path d="M6 6h28v0M6 24h28v0M6 42h28v0"
-                                        style="fill:none;stroke:#000000;stroke-width:12.4073;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;stroke-dasharray:none;paint-order:stroke fill markers"
-                                        transform="matrix(.86732 0 0 1.07855 103.848 70.12)"></path>
-                                </g>
-                            </g>
-                        </g>
+                {{-- Tombol Close (X) --}}
+                <button @click="$store.sidebar.open = false"
+                    class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 transition hover:bg-slate-800 hover:text-white lg:hidden"
+                    title="Close Sidebar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
                     </svg>
-                </button>
-
-                <button x-show="!collapsed" @click="collapsed = !collapsed"
-                    class="hidden rounded-lg p-2 text-slate-300 transition hover:bg-slate-800 hover:text-white lg:block"
-                    title="Collapse Sidebar">
-                    ☰
                 </button>
             </div>
         </div>
@@ -118,7 +96,7 @@
             $machineHistoryActive = request()->routeIs('machine-history.*');
         @endphp
         <nav class="flex-1 overflow-hidden px-3 py-4 text-sm" x-data="{
-            openGroup: '{{ $dashboardActive || $pmScheduleActive ? 'main' : ($machineActive || $sparepartActive || $measurementActive || $checklistActive || $problemCategoryActive || $problemFindingsActive ? 'master' : 'system') }}'
+            openGroup: '{{ $dashboardActive || $pmScheduleActive ? 'main' : ($machineActive || $sparepartActive || $measurementActive || $checklistActive || $problemCategoryActive || $problemFindingsActive ? 'master' : ($machineHistoryActive || $reportActive ? 'report' : 'system')) }}'
         }">
             @php
                 $groups = [
@@ -175,22 +153,14 @@
             <path d="M5 10.5V21h5v-6h4v6h5V10.5" />',
                             ],
                             [
-                                'route' => route('pm-schedules.index'),
-                                'label' => 'PM Schedule',
-                                'active' => $pmScheduleActive,
+                                'route' => route('reports.index'),
+                                'label' => 'Reports',
+                                'active' => $reportActive,
                                 'icon' => '
-            <path d="M7 2v2" />
-            <path d="M17 2v2" />
-            <rect x="4" y="4" width="16" height="16" rx="2" />
-            <path d="M4 8h16" />
-            <path d="M8 12h.01" />
-            <path d="M12 12h.01" />
-            <path d="M16 12h.01" />',
-                                'visible' =>
-                                    $userRole === 'ADMIN' ||
-                                    $userRole === 'PIC WWD' ||
-                                    $userRole === 'PIC BUL' ||
-                                    $userRole === 'KOORDINATOR',
+            <path d="M4 19V9" />
+            <path d="M20 19V5" />
+            <path d="M12 19V13" />',
+                                'visible' => $userRole === 'ADMIN' || $userRole === 'KOORDINATOR',
                             ],
                         ],
                     ],
@@ -296,16 +266,6 @@
             <path d="M19 6v4" />',
                                 'visible' => $userRole === 'ADMIN',
                             ],
-                            [
-                                'route' => route('reports.index'),
-                                'label' => 'Reports',
-                                'active' => $reportActive,
-                                'icon' => '
-            <path d="M4 19V9" />
-            <path d="M20 19V5" />
-            <path d="M12 19V13" />',
-                                'visible' => $userRole === 'ADMIN' || $userRole === 'KOORDINATOR',
-                            ],
                         ],
                     ],
                 ];
@@ -325,13 +285,11 @@
                                     {!! $group['icon'] !!}
                                 </svg>
                             </span>
-                            <span x-show="!collapsed"
+                            <span
                                 class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">{{ $group['title'] }}</span>
                         </div>
-                        <span class="text-sm text-slate-400"
-                            x-show="openGroup !== '{{ $group['key'] }}' && !collapsed">+</span>
-                        <span class="text-sm text-slate-400"
-                            x-show="openGroup === '{{ $group['key'] }}' && !collapsed">−</span>
+                        <span class="text-sm text-slate-400" x-show="openGroup !== '{{ $group['key'] }}'">+</span>
+                        <span class="text-sm text-slate-400" x-show="openGroup === '{{ $group['key'] }}'">−</span>
                     </button>
 
                     <div x-show="openGroup === '{{ $group['key'] }}'" class="space-y-1 px-2 pb-2">
@@ -347,7 +305,7 @@
                                             {!! $item['icon'] !!}
                                         </svg>
                                     </span>
-                                    <span x-show="!collapsed" class="truncate">{{ $item['label'] }}</span>
+                                    <span class="truncate">{{ $item['label'] }}</span>
                                 </a>
                             @endif
                         @endforeach
@@ -359,4 +317,10 @@
         <div class="border-t border-slate-800 px-4 py-3 text-xs text-slate-500">
             v1.0 PM System
         </div>
+    </aside>
+
+    {{-- Overlay untuk mobile, klik di luar sidebar buat nutup --}}
+    <div x-show="$store.sidebar.open" x-cloak @click="$store.sidebar.open = false"
+        class="fixed inset-0 z-30 bg-black/40 lg:hidden" x-transition.opacity>
+    </div>
     </aside>

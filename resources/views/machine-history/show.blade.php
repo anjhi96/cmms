@@ -45,14 +45,14 @@
             </div>
         </div>
 
-        <div class="rounded-xl border bg-white p-4 shadow-sm">
+        <div class="rounded-xl border bg-orange-100 p-4 shadow-sm">
             <div class="text-xs text-slate-500">Last PM</div>
             <div class="mt-1 text-lg font-semibold">
                 {{ $lastPm ? $lastPm->format('d-m-Y') : '-' }}
             </div>
         </div>
 
-        <div class="rounded-xl border bg-white p-4 shadow-sm">
+        <div class="rounded-xl border bg-green-100 p-4 shadow-sm">
             <div class="text-xs text-slate-500">Next PM</div>
             <div class="mt-1 text-lg font-semibold">
                 {{ $nextPm ? $nextPm->format('d-m-Y') : '-' }}
@@ -81,7 +81,7 @@
                             {{ \Carbon\Carbon::parse($pm->actual_date)->format('d-m-Y') }}
                         </td>
                         <td class="px-4 py-3">{{ $pm->order_number }}</td>
-                        <td class="px-4 py-3">{{ $pm->pic }}</td>
+                        <td class="px-4 py-3">{{ \Illuminate\Support\Str::title(strtolower($pm->pic)) }}</td>
                         <td class="px-4 py-3">{{ $pm->duration_formatted }}</td>
                         <td class="px-4 py-3">
                             @switch($pm->status)

@@ -13,11 +13,25 @@ use App\Http\Controllers\MachineProblemFindingController;
 use App\Http\Controllers\ImportTemplateController;
 use App\Http\Controllers\MachineHistoryController;
 use App\Http\Controllers\QrScannerController;
+use App\Http\Controllers\OilAuditController;
 
 Route::view('/', 'welcome')->name('home');
 
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/oil-audits/scan', [OilAuditController::class, 'scan'])
+        ->name('oil-audits.scan');
+    Route::get('/oil-audits/entry/{machineNumber}', [OilAuditController::class, 'entry'])
+        ->name('oil-audits.entry');
+    Route::post('/oil-audits', [OilAuditController::class, 'store'])
+        ->name('oil-audits.store');
+    Route::get('/oil-audit-report', [OilAuditController::class, 'report'])
+        ->name('oil-audits.report');
+    Route::get('/oil-audit-report/{machineNumber}', [OilAuditController::class, 'history'])
+        ->name('oil-audits.history');
+    Route::post('/oil-audits/{oilAudit}/follow-up', [OilAuditController::class, 'storeFollowUp'])
+        ->name('oil-audits.follow-up.store');
+
     Route::resource('machines', MachineController::class);
 
     Route::view('/dashboard', 'dashboard') ->name('dashboard');

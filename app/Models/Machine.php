@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Machine extends Model
 {
@@ -16,6 +18,16 @@ class Machine extends Model
         'criticality',
         'remarks',
         'pm_cycle_value',
-        'pm_cycle_unit'
+        'pm_cycle_unit',
     ];
+
+    public function oilAudits(): HasMany
+    {
+        return $this->hasMany(OilAudit::class);
+    }
+
+    public function latestOilAudit(): HasOne
+    {
+        return $this->hasOne(OilAudit::class)->latestOfMany('audited_at');
+    }
 }

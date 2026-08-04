@@ -228,7 +228,7 @@
                             </td>
 
                             <td class="px-4 py-3">
-                                {{ $checklist->maintenance_type }}
+                                {{ \Illuminate\Support\Str::title(strtolower($checklist->maintenance_type)) }}
                             </td>
 
                             <td class="px-4 py-3 text-center">

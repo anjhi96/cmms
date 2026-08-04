@@ -90,13 +90,14 @@
             $checklistActive = request()->routeIs('machine-checklists.*');
             $problemCategoryActive = request()->routeIs('machine-problems.*');
             $problemFindingsActive = request()->routeIs('machine-problem-findings.*');
+            $oilAuditActive = request()->routeIs('oil-audits.*');
 
         @endphp
         @php
             $machineHistoryActive = request()->routeIs('machine-history.*');
         @endphp
         <nav class="flex-1 overflow-hidden px-3 py-4 text-sm" x-data="{
-            openGroup: '{{ $dashboardActive || $pmScheduleActive ? 'main' : ($machineActive || $sparepartActive || $measurementActive || $checklistActive || $problemCategoryActive || $problemFindingsActive ? 'master' : ($machineHistoryActive || $reportActive ? 'report' : 'system')) }}'
+            openGroup: '{{ $dashboardActive || $pmScheduleActive || $oilAuditActive ? 'main' : ($machineActive || $sparepartActive || $measurementActive || $checklistActive || $problemCategoryActive || $problemFindingsActive ? 'master' : ($machineHistoryActive || $reportActive ? 'report' : 'system')) }}'
         }">
             @php
                 $groups = [
@@ -134,6 +135,14 @@
                                     $userRole === 'PIC BUL' ||
                                     $userRole === 'KOORDINATOR',
                             ],
+                            [
+                                'route' => route('oil-audits.scan'),
+                                'label' => 'Audit Oli',
+                                'active' => $oilAuditActive && !request()->routeIs('oil-audits.report', 'oil-audits.history'),
+                                'icon' => '
+            <path d="M12 3s-5 5.5-5 10a5 5 0 0 0 10 0c0-4.5-5-10-5-10Z" />
+            <path d="M9.5 15.5c.7.8 1.5 1.2 2.5 1.2" />',
+                            ],
                         ],
                     ],
                     [
@@ -161,6 +170,16 @@
             <path d="M20 19V5" />
             <path d="M12 19V13" />',
                                 'visible' => $userRole === 'ADMIN' || $userRole === 'KOORDINATOR',
+                            ],
+                            [
+                                'route' => route('oil-audits.report'),
+                                'label' => 'Report Audit Oli',
+                                'active' => request()->routeIs('oil-audits.report', 'oil-audits.history'),
+                                'icon' => '
+            <path d="M4 19V9" />
+            <path d="M10 19V5" />
+            <path d="M16 19v-7" />
+            <path d="M22 19V3" />',
                             ],
                         ],
                     ],

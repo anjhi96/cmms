@@ -28,24 +28,24 @@ function buildProblemRow(index) {
         .join('');
 
     return `
-        <div class="problem-row flex gap-2 mb-2">
-            <select name="problems[${index}][problem]" class="problem-select border p-2 w-1/2 rounded">
+        <div class="problem-row mb-2 flex gap-2 max-sm:mb-3 max-sm:flex-col max-sm:rounded-xl max-sm:border max-sm:border-gray-200 max-sm:bg-gray-50 max-sm:p-3">
+            <select name="problems[${index}][problem]" class="problem-select w-1/2 rounded-xl border border-gray-300 p-2 text-sm max-sm:w-full">
                 <option value="">-- Select Problem --</option>
                 ${options}
             </select>
 
-            <select name="problems[${index}][finding]" class="finding-select border p-2 flex-1 rounded">
+            <select name="problems[${index}][finding]" class="finding-select flex-1 rounded-xl border border-gray-300 p-2 text-sm max-sm:w-full">
                 <option value="">-- Finding --</option>
             </select>
 
-            <select name="problems[${index}][severity]" class="border p-2 rounded w-1/5">
+            <select name="problems[${index}][severity]" class="w-1/5 rounded-xl border border-gray-300 p-2 text-sm max-sm:w-full">
                 <option value="">-- Severity --</option>
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
                 <option value="High">High</option>
             </select>
 
-            <button type="button" onclick="removeProblem(this)" class="bg-red-500 text-white px-3 rounded">
+            <button type="button" onclick="removeProblem(this)" class="rounded-xl bg-red-500 px-3 py-2 text-white transition hover:bg-red-600 max-sm:w-full max-sm:py-2">
                 X
             </button>
         </div>
@@ -54,12 +54,12 @@ function buildProblemRow(index) {
 
 function buildSparepartRow(index) {
     return `
-        <div class="sparepart-row flex gap-2 mb-2">
-            <select name="spareparts[${index}][sparepart_id]" placeholder="Select Sparepart" class="sparepart-select border p-2 w-2/3 rounded"></select>
+        <div class="sparepart-row mb-2 flex gap-2 max-sm:mb-3 max-sm:flex-col max-sm:rounded-xl max-sm:border max-sm:border-gray-200 max-sm:bg-gray-50 max-sm:p-3">
+            <select name="spareparts[${index}][sparepart_id]" placeholder="Select Sparepart" class="sparepart-select w-2/3 rounded-xl border border-gray-300 p-2 text-sm max-sm:w-full"></select>
 
-            <input type="number" name="spareparts[${index}][qty]" placeholder="Qty" class="border p-3 w-1/3 rounded">
+            <input type="number" name="spareparts[${index}][qty]" placeholder="Qty" class="w-1/3 rounded-xl border border-gray-300 p-3 text-sm max-sm:w-full">
 
-            <button type="button" onclick="removeSparepart(this)" class="bg-red-500 text-white px-3 rounded">
+            <button type="button" onclick="removeSparepart(this)" class="rounded-xl bg-red-500 px-3 py-2 text-white transition hover:bg-red-600 max-sm:w-full max-sm:py-2">
                 X
             </button>
         </div>

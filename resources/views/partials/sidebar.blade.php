@@ -3,7 +3,7 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('sidebar', {
-                open: true,
+                open: false,
             });
         });
     </script>

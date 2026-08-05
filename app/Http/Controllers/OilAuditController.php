@@ -11,6 +11,8 @@ use Illuminate\View\View;
 
 class OilAuditController extends Controller
 {
+    private const AUDIT_AREA = 'WWD';
+
     public function scan(): View
     {
         return view('oil-audits.scan');
@@ -18,7 +20,9 @@ class OilAuditController extends Controller
 
     public function entry(string $machineNumber): View
     {
-        $machine = Machine::where('machine_number', trim($machineNumber))->firstOrFail();
+        $machine = Machine::where('machine_number', trim($machineNumber))
+            ->where('area', self::AUDIT_AREA)
+            ->firstOrFail();
 
         return view('oil-audits.entry', compact('machine'));
     }
@@ -27,10 +31,15 @@ class OilAuditController extends Controller
     {
         $validated = $request->validate([
             'machine_id' => ['required', 'exists:machines,id'],
-            'condition' => ['required', 'in:'.implode(',', array_keys(OilAudit::CONDITION_LABELS))],
+            'condition' => [
+                'required',
+                'in:'.implode(',', array_keys(OilAudit::CONDITION_LABELS)),
+            ],
         ]);
 
-        $machine = Machine::findOrFail($validated['machine_id']);
+        $machine = Machine::whereKey($validated['machine_id'])
+            ->where('area', self::AUDIT_AREA)
+            ->firstOrFail();
         $user = $request->user();
 
         OilAudit::create([
@@ -52,6 +61,7 @@ class OilAuditController extends Controller
     public function report(Request $request): View
     {
         $machines = Machine::query()
+            ->where('area', self::AUDIT_AREA)
             ->with(['latestOilAudit.followUp'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->trim()->toString();
@@ -62,10 +72,19 @@ class OilAuditController extends Controller
                         ->orWhere('description', 'like', "%{$search}%");
                 });
             })
-            ->when($request->filled('area'), fn ($query) => $query->where('area', $request->input('area')))
-            ->when($request->filled('machine_type'), fn ($query) => $query->where('machine_type', $request->input('machine_type')))
+            ->when(
+                $request->filled('area'),
+                fn ($query) => $query->where('area', $request->input('area'))
+            )
+            ->when(
+                $request->filled('machine_type'),
+                fn ($query) => $query->where('machine_type', $request->input('machine_type'))
+            )
             ->when($request->filled('condition'), function ($query) use ($request) {
-                $query->whereHas('latestOilAudit', fn ($auditQuery) => $auditQuery->where('condition', $request->input('condition')));
+                $query->whereHas(
+                    'latestOilAudit',
+                    fn ($auditQuery) => $auditQuery->where('condition', $request->input('condition'))
+                );
             })
             ->when($request->boolean('follow_up'), function ($query) {
                 $query->whereHas('latestOilAudit', function ($auditQuery) {
@@ -76,16 +95,35 @@ class OilAuditController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $areas = Machine::query()->select('area')->distinct()->orderBy('area')->pluck('area');
-        $machineTypes = Machine::query()->select('machine_type')->distinct()->orderBy('machine_type')->pluck('machine_type');
+        $areas = Machine::query()
+            ->where('area', self::AUDIT_AREA)
+            ->select('area')
+            ->distinct()
+            ->orderBy('area')
+            ->pluck('area');
+        $machineTypes = Machine::query()
+            ->where('area', self::AUDIT_AREA)
+            ->select('machine_type')
+            ->distinct()
+            ->orderBy('machine_type')
+            ->pluck('machine_type');
 
         $summary = [
-            'today' => OilAudit::whereDate('audited_at', today())->count(),
-            'pending' => OilAudit::requiringFollowUp()->whereDoesntHave('followUp')->count(),
-            'critical' => OilAudit::where('condition', 'KRITIS')->whereDoesntHave('followUp')->count(),
+            'today' => OilAudit::where('area', self::AUDIT_AREA)
+                ->whereDate('audited_at', today())
+                ->count(),
+            'pending' => OilAudit::where('area', self::AUDIT_AREA)
+                ->requiringFollowUp()
+                ->whereDoesntHave('followUp')
+                ->count(),
+            'critical' => OilAudit::where('area', self::AUDIT_AREA)
+                ->where('condition', 'KRITIS')
+                ->whereDoesntHave('followUp')
+                ->count(),
         ];
 
         $pendingAudits = OilAudit::query()
+            ->where('area', self::AUDIT_AREA)
             ->requiringFollowUp()
             ->whereDoesntHave('followUp')
             ->with('machine')
@@ -104,7 +142,9 @@ class OilAuditController extends Controller
 
     public function history(string $machineNumber): View
     {
-        $machine = Machine::where('machine_number', trim($machineNumber))->firstOrFail();
+        $machine = Machine::where('machine_number', trim($machineNumber))
+            ->where('area', self::AUDIT_AREA)
+            ->firstOrFail();
         $audits = $machine->oilAudits()
             ->with('followUp')
             ->latest('audited_at')
@@ -129,14 +169,22 @@ class OilAuditController extends Controller
 
     public function storeFollowUp(Request $request, OilAudit $oilAudit): RedirectResponse
     {
-        abort_unless($oilAudit->needsFollowUp(), 422, 'Follow up hanya diperlukan untuk kondisi oli yang tidak oke.');
+        abort_unless($oilAudit->area === self::AUDIT_AREA, 404);
+        abort_unless(
+            $oilAudit->needsFollowUp(),
+            422,
+            'Follow up hanya diperlukan untuk kondisi oli yang tidak oke.'
+        );
 
         if ($oilAudit->followUp()->exists()) {
             return back()->with('warning', 'Follow up untuk audit ini sudah disimpan.');
         }
 
         $validated = $request->validate([
-            'problem' => ['required', 'in:'.implode(',', OilAudit::PROBLEM_OPTIONS)],
+            'problem' => [
+                'required',
+                'in:'.implode(',', OilAudit::PROBLEM_OPTIONS),
+            ],
             'action_taken' => ['required', 'string', 'max:2000'],
         ]);
 

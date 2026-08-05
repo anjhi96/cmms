@@ -7,7 +7,7 @@
         <div>
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">Audit Oli</p>
             <h1 class="mt-1 text-2xl font-bold text-slate-900">Report Audit Oli</h1>
-            <p class="mt-1 text-sm text-slate-500">Pantau kondisi terakhir dan riwayat pengecekan seluruh mesin.</p>
+            <p class="mt-1 text-sm text-slate-500">Pantau kondisi terakhir dan riwayat pengecekan mesin area WWD.</p>
         </div>
         <a href="{{ route('oil-audits.scan') }}" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 lg:w-fit">
             <span class="text-lg leading-none">⌁</span> Mulai Audit dengan QR
@@ -63,7 +63,7 @@
     <form method="GET" class="mb-5 flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3">
         <input name="search" value="{{ request('search') }}" placeholder="Cari nomor, tipe, atau deskripsi mesin" class="w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 sm:min-w-[220px] sm:flex-1">
         <select name="area" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 sm:w-auto">
-            <option value="">Semua area</option>
+            <option value="">Area WWD</option>
             @foreach ($areas as $area)
                 <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
             @endforeach

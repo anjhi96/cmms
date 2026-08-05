@@ -14,14 +14,15 @@
             </p>
         </div>
         <div>
-            @auth
-                @if (auth()->user()->role !== 'guest')
-                    <a href="{{ route('machine-history.index') }}"
-                        class="inline-flex w-fit items-center rounded-lg bg-slate-700 px-4 py-2 text-white">
-                        ← Back
-                    </a>
-                @endif
-            @endauth
+            @php
+                $backRoute = auth()->check() && auth()->user()->role !== 'guest'
+                    ? route('machine-history.index')
+                    : route('qr.scan');
+            @endphp
+            <a href="{{ $backRoute }}"
+                class="inline-flex w-fit items-center rounded-lg bg-slate-700 px-4 py-2 text-white">
+                ← Back
+            </a>
         </div>
     </div>
 

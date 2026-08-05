@@ -13,7 +13,7 @@
                 </svg>
             </div>
             <h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">Audit Oli Cepat</h1>
-            <p class="mt-2 text-sm text-slate-500 sm:text-base">Scan QR pada mesin, pilih kondisi oli, lalu lanjut ke mesin berikutnya.</p>
+            <p class="mt-2 text-sm text-slate-500 sm:text-base">Scan QR pada mesin area WWD, pilih kondisi oli, lalu lanjut ke mesin berikutnya.</p>
         </div>
 
         @if (session('success'))

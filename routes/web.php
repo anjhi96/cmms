@@ -17,6 +17,7 @@ use App\Http\Controllers\OilAuditController;
 
 Route::view('/', 'welcome')->name('home');
 
+Route::view('/dashboard-guest', 'dashboard-guest')->name('dashboard-guest');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/oil-audits/scan', [OilAuditController::class, 'scan'])

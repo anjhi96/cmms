@@ -62,12 +62,6 @@
 
     <form method="GET" class="mb-5 flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3">
         <input name="search" value="{{ request('search') }}" placeholder="Cari nomor, tipe, atau deskripsi mesin" class="w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 sm:min-w-[220px] sm:flex-1">
-        <select name="area" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 sm:w-auto">
-            <option value="">Area WWD</option>
-            @foreach ($areas as $area)
-                <option value="{{ $area }}" @selected(request('area') === $area)>{{ $area }}</option>
-            @endforeach
-        </select>
         <select name="machine_type" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 sm:w-auto">
             <option value="">Semua tipe mesin</option>
             @foreach ($machineTypes as $type)

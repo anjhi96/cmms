@@ -13,6 +13,8 @@ class OilAuditController extends Controller
 {
     private const AUDIT_AREA = 'WWD';
 
+    private const AUDIT_MACHINE_TYPES = ['NDE', 'NDB'];
+
     public function scan(): View
     {
         return view('oil-audits.scan');
@@ -22,6 +24,7 @@ class OilAuditController extends Controller
     {
         $machine = Machine::where('machine_number', trim($machineNumber))
             ->where('area', self::AUDIT_AREA)
+            ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
             ->firstOrFail();
 
         return view('oil-audits.entry', compact('machine'));
@@ -39,6 +42,7 @@ class OilAuditController extends Controller
 
         $machine = Machine::whereKey($validated['machine_id'])
             ->where('area', self::AUDIT_AREA)
+            ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
             ->firstOrFail();
         $user = $request->user();
 
@@ -62,6 +66,7 @@ class OilAuditController extends Controller
     {
         $machines = Machine::query()
             ->where('area', self::AUDIT_AREA)
+            ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
             ->with(['latestOilAudit.followUp'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->trim()->toString();
@@ -97,12 +102,14 @@ class OilAuditController extends Controller
 
         $areas = Machine::query()
             ->where('area', self::AUDIT_AREA)
+            ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
             ->select('area')
             ->distinct()
             ->orderBy('area')
             ->pluck('area');
         $machineTypes = Machine::query()
             ->where('area', self::AUDIT_AREA)
+            ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
             ->select('machine_type')
             ->distinct()
             ->orderBy('machine_type')
@@ -110,13 +117,16 @@ class OilAuditController extends Controller
 
         $summary = [
             'today' => OilAudit::where('area', self::AUDIT_AREA)
+                ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
                 ->whereDate('audited_at', today())
                 ->count(),
             'pending' => OilAudit::where('area', self::AUDIT_AREA)
+                ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
                 ->requiringFollowUp()
                 ->whereDoesntHave('followUp')
                 ->count(),
             'critical' => OilAudit::where('area', self::AUDIT_AREA)
+                ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
                 ->where('condition', 'KRITIS')
                 ->whereDoesntHave('followUp')
                 ->count(),
@@ -124,6 +134,7 @@ class OilAuditController extends Controller
 
         $pendingAudits = OilAudit::query()
             ->where('area', self::AUDIT_AREA)
+            ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
             ->requiringFollowUp()
             ->whereDoesntHave('followUp')
             ->with('machine')
@@ -144,6 +155,7 @@ class OilAuditController extends Controller
     {
         $machine = Machine::where('machine_number', trim($machineNumber))
             ->where('area', self::AUDIT_AREA)
+            ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
             ->firstOrFail();
         $audits = $machine->oilAudits()
             ->with('followUp')
@@ -169,7 +181,11 @@ class OilAuditController extends Controller
 
     public function storeFollowUp(Request $request, OilAudit $oilAudit): RedirectResponse
     {
-        abort_unless($oilAudit->area === self::AUDIT_AREA, 404);
+        abort_unless(
+            $oilAudit->area === self::AUDIT_AREA
+                && in_array($oilAudit->machine_type, self::AUDIT_MACHINE_TYPES, true),
+            404
+        );
         abort_unless(
             $oilAudit->needsFollowUp(),
             422,

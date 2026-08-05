@@ -16,7 +16,6 @@
 
     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <a href="{{ route('oil-audits.report') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-slate-900"><span aria-hidden="true">←</span> Kembali ke Report Audit Oli</a>
-        <a href="{{ route('oil-audits.entry', $machine->machine_number) }}" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700 sm:w-fit">Audit mesin ini lagi</a>
     </div>
 
     @if (session('success'))
@@ -139,7 +138,7 @@
                                     </div>
                                     <div>
                                         <label for="action-{{ $audit->id }}" class="mb-1.5 block text-xs font-semibold text-slate-700">Tindakan yang dilakukan</label>
-                                        <textarea id="action-{{ $audit->id }}" name="action_taken" required rows="3" maxlength="2000" placeholder="Contoh: Tambah oli hingga batas aman dan cek sumber kebocoran." class="w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"></textarea>
+                                        <textarea id="action-{{ $audit->id }}" name="action_taken" required rows="3" maxlength="2000" placeholder="Contoh: Repair kapstan dan tambah oli hingga batas aman." class="w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"></textarea>
                                     </div>
                                 </div>
                                 <div class="mt-3 flex justify-end">

@@ -18,11 +18,12 @@ class OilAudit extends Model
     ];
 
     public const PROBLEM_OPTIONS = [
-        'Level oli hampir minimum',
-        'Level oli tepat di garis minimum',
-        'Level oli kritis / di bawah batas aman',
-        'Kebocoran oli',
-        'Kondisi oli tidak normal',
+        'Kapstan 1',
+        'Kapstan 2',
+        'Kapstan 3',
+        'Kapstan 4',
+        'Mainshaft',
+        'Innershaft',
         'Lainnya',
     ];
 

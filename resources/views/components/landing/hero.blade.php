@@ -40,8 +40,17 @@
 
                 <div class="mt-10 flex flex-wrap gap-4">
 
-                    <a href="{{ route('qr.scan') }}"
+                    <a href="{{ route('dashboard-guest') }}"
                         class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-7 py-4 font-semibold text-white shadow-lg hover:bg-blue-700 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                        </svg>
+                        Lihat Dashboard
+
+                    </a>
+
+                    <a href="{{ route('qr.scan') }}"
+                        class="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-7 py-4 font-semibold text-slate-900 shadow-lg hover:bg-slate-200 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
 

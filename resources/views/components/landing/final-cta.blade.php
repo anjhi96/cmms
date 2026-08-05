@@ -35,8 +35,15 @@
 
         <div class="mt-12 flex flex-wrap justify-center gap-5">
 
-            <a href="{{ route('qr.scan') }}"
+            <a href="{{ route('dashboard-guest') }}"
                 class="px-8 py-4 rounded-2xl bg-white text-blue-700 font-bold shadow-xl hover:scale-105 transition">
+
+                📊 Lihat Dashboard
+
+            </a>
+
+            <a href="{{ route('qr.scan') }}"
+                class="px-8 py-4 rounded-2xl border-2 border-white text-white font-bold hover:bg-white hover:text-blue-700 transition">
 
                 📷 Scan Mesin
 

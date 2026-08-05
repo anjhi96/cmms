@@ -81,6 +81,12 @@
 
                 </a>
 
+                <a href="{{ route('dashboard-guest') }}" class="text-slate-600 hover:text-blue-600 transition">
+
+                    Dashboard
+
+                </a>
+
             </div>
 
             {{-- Action --}}

@@ -156,10 +156,8 @@ class MachineHistoryController extends Controller
         ->orderBy('measurement_item')
         ->get();
 
-        $pmMeasurements = PMMeasurement::where(
-            'pm_schedule_id',
-            $pmSchedule->id
-        )->get();
+        // get PM measurements via relationship and key by machine_measurement_id
+        $pmMeasurements = $pmSchedule->measurements()->get()->keyBy('machine_measurement_id');
 
         $pmProblems = PMProblem::with([
             'machineProblem',

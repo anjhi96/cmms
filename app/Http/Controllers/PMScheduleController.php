@@ -239,10 +239,8 @@ class PMScheduleController extends Controller
         ->get();
 
         // ambil data PM yang sudah ada untuk schedule ini
-        $pmMeasurements = PMMeasurement::where(
-            'pm_schedule_id',
-            $pmSchedule->id
-        )->get();
+        // Key by machine_measurement_id for faster lookup in Blade and to avoid collection/Builder mismatch
+        $pmMeasurements = $pmSchedule->measurements()->get()->keyBy('machine_measurement_id');
 
 
         $pmProblems = PMProblem::with([

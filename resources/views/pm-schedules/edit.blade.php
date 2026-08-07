@@ -326,7 +326,7 @@
 
                     @forelse ($measurements as $i => $item)
                     @php
-                    $oldMeasurement = $pmMeasurements->where('machine_measurement_id', $item->id)->first();
+                    $oldMeasurement = $pmMeasurements->get($item->id) ?? null;
                     @endphp
 
                     <tr>
@@ -370,7 +370,7 @@
 
             @forelse ($measurements as $i => $item)
             @php
-            $oldMeasurement = $pmMeasurements->where('machine_measurement_id', $item->id)->first();
+            $oldMeasurement = $pmMeasurements->get($item->id) ?? null;
             @endphp
 
             <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">

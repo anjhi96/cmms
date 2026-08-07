@@ -134,7 +134,7 @@ function buildUserOptions(selected = '') {
 }
 
 function buildManpowerRow(sessionIndex, index, manpower = {}) {
-    const selectedPerson = manpower.person || defaultManpowerPerson || '';
+    const selectedPerson = manpower.person || (users.length === 1 ? defaultManpowerPerson || users[0].name : '');
 
     return `
         <div class="manpower-row mb-3 rounded-2xl border border-slate-200 bg-white p-4" data-manpower-index="${index}">

@@ -362,7 +362,34 @@ class PMScheduleController extends Controller
                 'pic' => $pmSchedule->pic,
             ]);
         }
-
+ 
+        $sessionsInput = $request->input('sessions', []);
+        if (is_array($sessionsInput)) {
+            foreach ($sessionsInput as $sessionIndex => $session) {
+                if (array_key_exists('end_time', $session) && $session['end_time'] === '') {
+                    $sessionsInput[$sessionIndex]['end_time'] = null;
+                }
+ 
+                if (array_key_exists('actual_date', $session) && $session['actual_date'] === '') {
+                    $sessionsInput[$sessionIndex]['actual_date'] = null;
+                }
+ 
+                if (!empty($session['manpowers']) && is_array($session['manpowers'])) {
+                    foreach ($session['manpowers'] as $manpowerIndex => $manpower) {
+                        if (array_key_exists('end_time', $manpower) && $manpower['end_time'] === '') {
+                            $sessionsInput[$sessionIndex]['manpowers'][$manpowerIndex]['end_time'] = null;
+                        }
+ 
+                        if (array_key_exists('person', $manpower) && $manpower['person'] === '') {
+                            $sessionsInput[$sessionIndex]['manpowers'][$manpowerIndex]['person'] = null;
+                        }
+                    }
+                }
+            }
+ 
+            $request->merge(['sessions' => $sessionsInput]);
+        }
+ 
         // VALIDASI INPUT
         $request->validate([
             'order_number' => 'required',

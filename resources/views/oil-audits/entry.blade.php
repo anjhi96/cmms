@@ -32,7 +32,7 @@
             <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h2 class="text-xl font-bold text-slate-900">Bagaimana kondisi oli mesin?</h2>
-                    <p class="mt-1 text-sm text-slate-500">Pilih satu kondisi untuk menyimpan audit sekarang. Tekan tombol angka <span class="font-semibold">1–5</span> untuk lebih cepat.</p>
+                    <p class="mt-1 text-sm text-slate-500">Pilih satu kondisi untuk menyimpan audit sekarang. Tekan tombol angka <span class="font-semibold">1–7</span> untuk lebih cepat.</p>
                 </div>
                 <span class="text-xs font-medium text-slate-400">Tersimpan otomatis dengan waktu saat ini</span>
             </div>
@@ -45,6 +45,8 @@
                         ['key' => 'HAMPIR_GARIS', 'number' => '3', 'label' => 'Hampir Garis', 'detail' => 'Perlu action', 'class' => 'border-orange-200 bg-orange-50 text-orange-800 hover:border-orange-500 hover:bg-orange-100 focus:ring-orange-300'],
                         ['key' => 'PAS_GARIS', 'number' => '4', 'label' => 'Pas Garis', 'detail' => 'Perlu action', 'class' => 'border-rose-200 bg-rose-50 text-rose-800 hover:border-rose-500 hover:bg-rose-100 focus:ring-rose-300'],
                         ['key' => 'KRITIS', 'number' => '5', 'label' => 'Kritis', 'detail' => 'Segera action', 'class' => 'border-red-300 bg-red-50 text-red-900 hover:border-red-600 hover:bg-red-100 focus:ring-red-300'],
+                        ['key' => 'OLI_KERUH', 'number' => '6', 'label' => 'Oli Keruh/Hitam', 'detail' => 'Periksa kualitas oli', 'class' => 'border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-500 hover:bg-amber-100 focus:ring-amber-300'],
+                        ['key' => 'GLASS_BUREM', 'number' => '7', 'label' => 'Level Glass Burem', 'detail' => 'Butuh tindak lanjut', 'class' => 'border-rose-200 bg-rose-50 text-rose-800 hover:border-rose-500 hover:bg-rose-100 focus:ring-rose-300'],
                     ];
                 @endphp
                 @foreach ($conditions as $condition)

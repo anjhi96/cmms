@@ -8,8 +8,10 @@
         $barHeights = [
             'OKE' => 'h-7',
             'PANTAU' => 'h-10',
+            'OLI_KERUH' => 'h-12',
             'HAMPIR_GARIS' => 'h-14',
-            'PAS_GARIS' => 'h-16',
+            'GLASS_BUREM' => 'h-16',
+            'PAS_GARIS' => 'h-18',
             'KRITIS' => 'h-20',
         ];
     @endphp

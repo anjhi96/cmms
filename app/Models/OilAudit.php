@@ -15,6 +15,8 @@ class OilAudit extends Model
         'HAMPIR_GARIS' => 'Hampir Garis',
         'PAS_GARIS' => 'Pas Garis',
         'KRITIS' => 'Kritis',
+        'OLI_KERUH' => 'Oli Keruh/Hitam',
+        'GLASS_BUREM' => 'Level Glass Burem',
     ];
 
     public const PROBLEM_OPTIONS = [
@@ -24,6 +26,8 @@ class OilAudit extends Model
         'Kapstan 4',
         'Mainshaft',
         'Innershaft',
+        'Oli Keruh/Hitam',
+        'Level Glass Burem',
         'Lainnya',
     ];
 
@@ -67,7 +71,8 @@ class OilAudit extends Model
 
     public static function followUpConditions(): array
     {
-        return ['HAMPIR_GARIS', 'PAS_GARIS', 'KRITIS'];
+        // Conditions that require follow up: include GLASS_BUREM as requested
+        return ['HAMPIR_GARIS', 'PAS_GARIS', 'KRITIS', 'GLASS_BUREM'];
     }
 
     public function needsFollowUp(): bool
@@ -88,6 +93,9 @@ class OilAudit extends Model
             'HAMPIR_GARIS' => ['badge' => 'bg-orange-500 text-white', 'dot' => 'bg-orange-500', 'bar' => 'bg-orange-500'],
             'PAS_GARIS' => ['badge' => 'bg-rose-500 text-white', 'dot' => 'bg-rose-500', 'bar' => 'bg-rose-500'],
             'KRITIS' => ['badge' => 'bg-red-700 text-white', 'dot' => 'bg-red-700', 'bar' => 'bg-red-700'],
+            // New conditions: give OLI_KERUH a monitoring color and GLASS_BUREM a follow-up color
+            'OLI_KERUH' => ['badge' => 'bg-amber-600 text-white', 'dot' => 'bg-amber-500', 'bar' => 'bg-amber-500'],
+            'GLASS_BUREM' => ['badge' => 'bg-rose-600 text-white', 'dot' => 'bg-rose-500', 'bar' => 'bg-rose-500'],
             default => ['badge' => 'bg-slate-500 text-white', 'dot' => 'bg-slate-400', 'bar' => 'bg-slate-400'],
         };
     }

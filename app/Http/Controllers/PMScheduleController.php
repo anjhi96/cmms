@@ -640,6 +640,9 @@ class PMScheduleController extends Controller
 
     public function checklist(PMSchedule $pmSchedule)
     {
+        // Load work sessions to decide which execution date to display (avoid N+1 in view)
+        $pmSchedule->load('workSessions');
+
         $checklists = MachineChecklist::where(
             'machine_type',
             $pmSchedule->machine_type
@@ -654,8 +657,27 @@ class PMScheduleController extends Controller
         )->get()
         ->keyBy('machine_checklist_id');
 
-        $nextPm = $pmSchedule->actual_date
-            ? Carbon::parse($pmSchedule->actual_date)
+        // Decide execution / actual date for display on checklist page
+        $executionDate = null;
+
+        if ($pmSchedule->relationLoaded('workSessions') && $pmSchedule->workSessions->isNotEmpty()) {
+            // Sort by actual_date and start_time to deterministically pick the last session
+            $lastSession = $pmSchedule->workSessions->sortBy(function ($ws) {
+                return ($ws->actual_date ?? '') . ' ' . ($ws->start_time ?? '00:00');
+            })->last();
+
+            if ($lastSession && $lastSession->actual_date) {
+                $executionDate = Carbon::parse($lastSession->actual_date);
+            }
+        }
+
+        // Fallback to legacy single-day actual_date when no work sessions exist
+        if (!$executionDate && $pmSchedule->actual_date) {
+            $executionDate = Carbon::parse($pmSchedule->actual_date);
+        }
+
+        $nextPm = $executionDate
+            ? $executionDate->copy()
             : null;
 
         if ($nextPm) {
@@ -686,7 +708,8 @@ class PMScheduleController extends Controller
                 'checklists',
                 'pmChecklists',
                 'nextPm',
-                'spareCost'
+                'spareCost',
+                'executionDate'
             )
         );
     }

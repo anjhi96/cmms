@@ -21,36 +21,36 @@
     </div>
 
     {{-- ============ PM Information ============ --}}
-    <div class="mb-6 rounded-xl bg-white p-6 shadow">
+    <div class="mb-6 rounded-2xl border bg-white shadow-sm p-6">
         <h3 class="mb-6 text-lg font-semibold">
             PM Information
         </h3>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-                <label class="mb-2 block text-sm font-medium">Order Number</label>
-                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                <label class="mb-1 block text-xs uppercase text-gray-500">Order Number</label>
+                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-medium text-sm">
                     {{ $pmSchedule->order_number }}
                 </div>
             </div>
 
             <div>
-                <label class="mb-2 block text-sm font-medium">Execution</label>
+                <label class="mb-1 block text-xs uppercase text-gray-500">Execution</label>
 
-                @if ($pmSchedule->workSessions()->exists())
+                @if ($pmSchedule->workSessions && $pmSchedule->workSessions->isNotEmpty())
                     <div class="mt-1 rounded-lg border bg-slate-50 p-3">
-                        @foreach ($pmSchedule->workSessions()->orderBy('actual_date')->get() as $ws)
+                        @foreach ($pmSchedule->workSessions->sortBy(function($ws){ return ($ws->actual_date ?? '') . ' ' . ($ws->start_time ?? '00:00'); }) as $ws)
                             <div class="mb-3">
                                 <div class="text-sm font-semibold">Day {{ $loop->iteration }} — {{ \Carbon\Carbon::parse($ws->actual_date)->format('d-m-Y') }}</div>
                                 <div class="text-xs text-slate-500">Start: {{ $ws->start_time ?? '-' }} &middot; End: {{ $ws->end_time ?? '-' }} &middot; Duration: {{ $ws->duration ? floor($ws->duration/60) . ' Hours ' . ($ws->duration % 60) . ' Minutes' : '-' }}</div>
                             </div>
                         @endforeach
 
-                        <div class="mt-3 border-t pt-2 text-sm font-semibold">Total Duration: @php $total = $pmSchedule->workSessions()->sum('duration'); $h = floor($total/60); $m = $total % 60; echo $total ? "{$h} Hours {$m} Minutes" : '-'; @endphp</div>
+                        <div class="mt-3 border-t pt-2 text-sm font-semibold">Total Duration: @php $total = $pmSchedule->workSessions->sum('duration'); $h = floor($total/60); $m = $total % 60; echo $total ? "{$h} Hours {$m} Minutes" : '-'; @endphp</div>
                     </div>
                 @else
-                    <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-                        {{ $pmSchedule->actual_date ?? '-' }}
+                    <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-medium text-sm">
+                        {{ $pmSchedule->actual_date ? \Carbon\Carbon::parse($pmSchedule->actual_date)->format('d-m-Y') : '-' }}
                         <div class="text-xs text-slate-500 mt-1">Start: {{ $pmSchedule->start_time ?? '-' }} &middot; End: {{ $pmSchedule->end_time ?? '-' }} &middot; Duration: {{ $pmSchedule->duration ? floor($pmSchedule->duration/60) . ' Hours ' . ($pmSchedule->duration % 60) . ' Minutes' : '-' }}</div>
                     </div>
                 @endif
@@ -58,8 +58,8 @@
             </div>
 
             <div>
-                <label class="mb-2 block text-sm font-medium">PIC PM</label>
-                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                <label class="mb-1 block text-xs uppercase text-gray-500">PIC PM</label>
+                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-medium text-sm">
                     {{ $pmSchedule->pic }}
                 </div>
             </div>

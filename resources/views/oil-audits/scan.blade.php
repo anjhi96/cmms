@@ -41,7 +41,7 @@
                 QR tidak terbaca? Masukkan nomor mesin secara manual
             </button>
             <form x-show="manualOpen" x-cloak method="GET" action="{{ route('oil-audits.entry', ['machineNumber' => '__machine__']) }}" class="mx-auto mt-4 flex max-w-md gap-2" id="manual-machine-form">
-                <input id="manual-machine-number" type="text" required autocomplete="off" placeholder="Contoh: MSN-001" class="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm uppercase outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
+                <input id="manual-machine-number" type="text" required autocomplete="off" placeholder="Contoh: 10001" class="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm uppercase outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100">
                 <button class="rounded-xl bg-slate-800 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-700">Lanjut</button>
             </form>
         </div>

@@ -26,7 +26,7 @@
         </div>
     </div>
 
-    <div class="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+    <div class="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
 
         <div class="rounded-xl border bg-white p-4 shadow-sm">
             <div class="text-xs text-slate-500">Machine Type</div>
@@ -58,9 +58,18 @@
             <div class="mt-1 text-lg font-semibold">
                 {{ $nextPm ? $nextPm->format('d-m-Y') : '-' }}
             </div>
+            @if (strtolower($machine->pm_cycle_unit) === 'hour')
+                <div class="mt-1 text-xs text-slate-500">Estimasi</div>
+            @endif
         </div>
 
     </div>
+
+    @if (strtolower($machine->pm_cycle_unit) === 'hour')
+        <div class="mb-4 rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2 text-sm text-slate-700">
+            Note: Next PM akan akurat jika mesin running non stop
+        </div>
+    @endif
 
     {{-- ============ DESKTOP: Tabel (md ke atas) ============ --}}
     <div class="hidden overflow-hidden rounded-xl border md:block">

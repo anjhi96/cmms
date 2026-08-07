@@ -22,7 +22,8 @@ class OilAuditController extends Controller
 
     public function entry(string $machineNumber): View
     {
-        $machine = Machine::where('machine_number', trim($machineNumber))
+        $machine = Machine::with('latestOilAudit.followUp')
+            ->where('machine_number', trim($machineNumber))
             ->where('area', self::AUDIT_AREA)
             ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
             ->firstOrFail();

@@ -23,6 +23,8 @@ return new class extends Migration
                 'HAMPIR_GARIS',
                 'PAS_GARIS',
                 'KRITIS',
+                'OLI_KERUH',
+                'GLASS_BUREM',
             ]);
 
             $table->foreignId('audited_by_user_id')->nullable()->constrained('users')->nullOnDelete();

@@ -22,6 +22,29 @@
             </div>
         </div>
 
+        @if ($machine->latestOilAudit)
+            <div class="mb-5 overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Riwayat pengecekan terakhir</p>
+                        <p class="mt-1 text-lg font-semibold text-slate-900">{{ $machine->latestOilAudit->conditionLabel() }}</p>
+                        <p class="mt-2 text-sm text-slate-600">
+                            {{ $machine->latestOilAudit->audited_at->format('d M Y, H:i') }} · oleh {{ $machine->latestOilAudit->audited_by_name }}
+                        </p>
+                        @if ($machine->latestOilAudit->needsFollowUp() && $machine->latestOilAudit->followUp)
+                            <p class="mt-3 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Telah ditindaklanjuti</p>
+                        @elseif ($machine->latestOilAudit->needsFollowUp())
+                            <p class="mt-3 inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">Menunggu tindak lanjut</p>
+                        @endif
+                    </div>
+                    <div class="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">
+                        <p class="font-semibold text-slate-900">Audit terakhir</p>
+                        <p class="mt-1 text-xs">{{ $machine->latestOilAudit->machine_type }} · {{ $machine->latestOilAudit->area }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         @if ($errors->any())
             <div class="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
                 {{ $errors->first() }}
@@ -44,9 +67,12 @@
                         ['key' => 'PANTAU', 'number' => '2', 'label' => 'Pantau', 'detail' => 'Periksa berkala', 'class' => 'border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-500 hover:bg-amber-100 focus:ring-amber-300'],
                         ['key' => 'HAMPIR_GARIS', 'number' => '3', 'label' => 'Hampir Garis', 'detail' => 'Perlu action', 'class' => 'border-orange-200 bg-orange-50 text-orange-800 hover:border-orange-500 hover:bg-orange-100 focus:ring-orange-300'],
                         ['key' => 'PAS_GARIS', 'number' => '4', 'label' => 'Pas Garis', 'detail' => 'Perlu action', 'class' => 'border-rose-200 bg-rose-50 text-rose-800 hover:border-rose-500 hover:bg-rose-100 focus:ring-rose-300'],
-                        ['key' => 'KRITIS', 'number' => '5', 'label' => 'Kritis', 'detail' => 'Segera action', 'class' => 'border-red-300 bg-red-50 text-red-900 hover:border-red-600 hover:bg-red-100 focus:ring-red-300'],
-                        ['key' => 'OLI_KERUH', 'number' => '6', 'label' => 'Oli Keruh/Hitam', 'detail' => 'Periksa kualitas oli', 'class' => 'border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-500 hover:bg-amber-100 focus:ring-amber-300'],
-                        ['key' => 'GLASS_BUREM', 'number' => '7', 'label' => 'Level Glass Burem', 'detail' => 'Butuh tindak lanjut', 'class' => 'border-rose-200 bg-rose-50 text-rose-800 hover:border-rose-500 hover:bg-rose-100 focus:ring-rose-300'],
+                        ['key' => 'KRITIS', 'number' => '5', 'label' => 'Kritis', 'detail' => 'Segera action', 
+                        'class' => 'border-red-300 bg-red-50 text-red-900 hover:border-red-600 hover:bg-red-100 focus:ring-red-300'],
+                        ['key' => 'OLI_KERUH', 'number' => '6', 'label' => 'Oli Hitam', 'detail' => 'Periksa kualitas oli', 
+                        'class' => 'border-amber-200 bg-amber-50 text-amber-800 hover:border-amber-500 hover:bg-amber-100 focus:ring-amber-300'],
+                        ['key' => 'GLASS_BUREM', 'number' => '7', 'label' => 'LG Burem', 'detail' => 'Butuh tindak lanjut', 
+                        'class' => 'border-rose-200 bg-rose-50 text-rose-800 hover:border-rose-500 hover:bg-rose-100 focus:ring-rose-300'],
                     ];
                 @endphp
                 @foreach ($conditions as $condition)

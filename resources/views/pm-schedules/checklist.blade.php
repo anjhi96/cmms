@@ -34,9 +34,9 @@
                 <div class="font-semibold">{{ $pmSchedule->pic }}</div>
             </div>
             <div>
-                <label class="text-sm text-gray-500">Actual Date</label>
+                <label class="text-sm text-gray-500">PM Date</label>
                 <div class="font-semibold">
-                    {{ $pmSchedule->actual_date ? \Carbon\Carbon::parse($pmSchedule->actual_date)->format('d-m-Y') : '-' }}
+                    {{ $executionDate ? $executionDate->format('d-m-Y') : ($pmSchedule->actual_date ? \Carbon\Carbon::parse($pmSchedule->actual_date)->format('d-m-Y') : '-') }}
                 </div>
             </div>
             <div>

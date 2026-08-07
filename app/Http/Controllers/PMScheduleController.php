@@ -366,22 +366,18 @@ class PMScheduleController extends Controller
         $sessionsInput = $request->input('sessions', []);
         if (is_array($sessionsInput)) {
             foreach ($sessionsInput as $sessionIndex => $session) {
-                if (array_key_exists('end_time', $session) && $session['end_time'] === '') {
-                    $sessionsInput[$sessionIndex]['end_time'] = null;
-                }
+                if (is_array($session)) {
+                    $sessionsInput[$sessionIndex]['actual_date'] = trim($session['actual_date'] ?? '');
+                    $sessionsInput[$sessionIndex]['start_time'] = trim($session['start_time'] ?? '');
+                    $sessionsInput[$sessionIndex]['end_time'] = trim($session['end_time'] ?? '') ?: null;
  
-                if (array_key_exists('actual_date', $session) && $session['actual_date'] === '') {
-                    $sessionsInput[$sessionIndex]['actual_date'] = null;
-                }
- 
-                if (!empty($session['manpowers']) && is_array($session['manpowers'])) {
-                    foreach ($session['manpowers'] as $manpowerIndex => $manpower) {
-                        if (array_key_exists('end_time', $manpower) && $manpower['end_time'] === '') {
-                            $sessionsInput[$sessionIndex]['manpowers'][$manpowerIndex]['end_time'] = null;
-                        }
- 
-                        if (array_key_exists('person', $manpower) && $manpower['person'] === '') {
-                            $sessionsInput[$sessionIndex]['manpowers'][$manpowerIndex]['person'] = null;
+                    if (!empty($session['manpowers']) && is_array($session['manpowers'])) {
+                        foreach ($session['manpowers'] as $manpowerIndex => $manpower) {
+                            if (is_array($manpower)) {
+                                $sessionsInput[$sessionIndex]['manpowers'][$manpowerIndex]['person'] = trim($manpower['person'] ?? '') ?: null;
+                                $sessionsInput[$sessionIndex]['manpowers'][$manpowerIndex]['start_time'] = trim($manpower['start_time'] ?? '') ?: null;
+                                $sessionsInput[$sessionIndex]['manpowers'][$manpowerIndex]['end_time'] = trim($manpower['end_time'] ?? '') ?: null;
+                            }
                         }
                     }
                 }

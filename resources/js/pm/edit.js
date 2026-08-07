@@ -133,11 +133,13 @@ function buildUserOptions(selected = '') {
     return options.join('');
 }
 
-function buildManpowerRow(sessionIndex, index, manpower = {}) {
-    const selectedPerson = manpower.person || (users.length === 1 ? defaultManpowerPerson || users[0].name : '');
+function buildManpowerRow(sessionIndex, index, manpower = {}, session = {}, autoMirror = false) {
+    const selectedPerson = manpower.person || (autoMirror ? defaultManpowerPerson : (users.length === 1 ? defaultManpowerPerson || users[0].name : '')) || '';
+    const startValue = manpower.start_time || session.start_time || '';
+    const endValue = manpower.end_time || session.end_time || '';
 
     return `
-        <div class="manpower-row mb-3 rounded-2xl border border-slate-200 bg-white p-4" data-manpower-index="${index}">
+        <div class="manpower-row mb-3 rounded-2xl border border-slate-200 bg-white p-4" data-manpower-index="${index}" data-auto-mirror="${autoMirror ? 'true' : 'false'}">
             <input data-manpower-field="sessions[{sessionIndex}][manpowers][{manpowerIndex}][id]" type="hidden" value="${manpower.id || ''}">
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
@@ -149,11 +151,11 @@ function buildManpowerRow(sessionIndex, index, manpower = {}) {
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium">Start</label>
-                    <input data-manpower-field="sessions[{sessionIndex}][manpowers][{manpowerIndex}][start_time]" type="time" value="${manpower.start_time || ''}" class="w-full rounded-2xl border border-gray-300 p-3 text-sm manpower-start">
+                    <input data-manpower-field="sessions[{sessionIndex}][manpowers][{manpowerIndex}][start_time]" type="time" value="${startValue}" class="w-full rounded-2xl border border-gray-300 p-3 text-sm manpower-start">
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium">End</label>
-                    <input data-manpower-field="sessions[{sessionIndex}][manpowers][{manpowerIndex}][end_time]" type="time" value="${manpower.end_time || ''}" class="w-full rounded-2xl border border-gray-300 p-3 text-sm manpower-end">
+                    <input data-manpower-field="sessions[{sessionIndex}][manpowers][{manpowerIndex}][end_time]" type="time" value="${endValue}" class="w-full rounded-2xl border border-gray-300 p-3 text-sm manpower-end">
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium">Duration</label>
@@ -267,8 +269,36 @@ function updateSessionDuration(sessionCard) {
 
     const duration = calculateDurationFromTimes(startInput.value, endInput.value);
     durationInput.value = formatMinutesAsDuration(duration);
+    mirrorSessionToFirstManpower(sessionCard);
     updateSessionManHourTotal(sessionCard);
     updateSummaryTotals();
+}
+
+function mirrorSessionToFirstManpower(sessionCard) {
+    const autoManpowerRow = sessionCard.querySelector('.manpower-row[data-auto-mirror="true"]');
+    if (!autoManpowerRow) {
+        return;
+    }
+
+    const sessionStart = sessionCard.querySelector('.session-start-time')?.value || '';
+    const sessionEnd = sessionCard.querySelector('.session-end-time')?.value || '';
+    const personInput = autoManpowerRow.querySelector('select[data-manpower-field$="[person]"]');
+    const startInput = autoManpowerRow.querySelector('.manpower-start');
+    const endInput = autoManpowerRow.querySelector('.manpower-end');
+
+    if (personInput && !personInput.value) {
+        personInput.value = defaultManpowerPerson || '';
+    }
+
+    if (startInput) {
+        startInput.value = sessionStart;
+    }
+
+    if (endInput) {
+        endInput.value = sessionEnd;
+    }
+
+    updateManpowerRow(autoManpowerRow);
 }
 
 function updateManpowerRow(manpowerRow) {
@@ -337,10 +367,19 @@ function buildSession(sessionData, index) {
 
     const manpowers = Array.isArray(sessionData.manpowers) ? sessionData.manpowers : [];
     const manpowerWrapper = sessionCard.querySelector('.manpower-wrapper');
+    const initialManpowers = manpowers.length > 0 ? manpowers : [{
+        id: null,
+        person: defaultManpowerPerson || '',
+        start_time: sessionData.start_time || '',
+        end_time: sessionData.end_time || '',
+        duration: null,
+        man_hour: null,
+    }];
 
-    manpowers.forEach((manpower, manpowerIndex) => {
+    initialManpowers.forEach((manpower, manpowerIndex) => {
         const manpowerWrapperRow = document.createElement('div');
-        manpowerWrapperRow.innerHTML = buildManpowerRow(index, manpowerIndex, manpower);
+        const isAuto = manpowers.length === 0 && manpowerIndex === 0;
+        manpowerWrapperRow.innerHTML = buildManpowerRow(index, manpowerIndex, manpower, sessionData, isAuto);
         manpowerWrapper.appendChild(manpowerWrapperRow.firstElementChild);
     });
 
@@ -404,8 +443,17 @@ window.addManpower = function (button) {
     const sessionCard = button.closest('.session-card');
     const manpowerWrapper = sessionCard.querySelector('.manpower-wrapper');
     const manpowerIndex = manpowerWrapper.querySelectorAll('.manpower-row').length;
+    const sessionStart = sessionCard.querySelector('.session-start-time')?.value || '';
+    const sessionEnd = sessionCard.querySelector('.session-end-time')?.value || '';
     const row = document.createElement('div');
-    row.innerHTML = buildManpowerRow(sessionIndex, manpowerIndex, {});
+    row.innerHTML = buildManpowerRow(sessionIndex, manpowerIndex, {
+        id: null,
+        person: users.length === 1 ? (defaultManpowerPerson || users[0].name) : '',
+        start_time: sessionStart,
+        end_time: sessionEnd,
+        duration: null,
+        man_hour: null,
+    }, { start_time: sessionStart, end_time: sessionEnd });
     manpowerWrapper.appendChild(row.firstElementChild);
 
     refreshSessionIndexes();

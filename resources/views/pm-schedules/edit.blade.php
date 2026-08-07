@@ -76,12 +76,13 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium">
-                    Actual Date
+                    Completion Date
                 </label>
 
-                <input required name="actual_date" type="date"
-                    value="{{ old('actual_date', $pmSchedule->actual_date ?? date('Y-m-d')) }}"
-                    class="w-full border rounded-2xl p-3">
+                <input name="completion_date_display" type="date" readonly
+                    value="{{ $pmSchedule->actual_date ? \Carbon\Carbon::parse($pmSchedule->actual_date)->format('Y-m-d') : '' }}"
+                    class="w-full border rounded-2xl p-3 bg-gray-100">
+                <p class="text-xs text-slate-500 mt-1">Displayed only when PM is completed</p>
             </div>
 
             <div>
@@ -111,37 +112,83 @@
                 @endif
             </div>
 
-            <div>
-                <label class="block mb-2 text-sm font-medium">
-                    Start PM
-                </label>
 
-                <input required name="start_time" type="time" id="start_time"
-                    value="{{ $pmSchedule->start_time ? \Carbon\Carbon::parse($pmSchedule->start_time)->format('H:i') : '' }}"
-                    class="w-full border rounded-2xl p-3">
-            </div>
 
-            <div>
-                <label class="block mb-2 text-sm font-medium">
-                    End PM
-                </label>
+            <div class="col-span-2">
+                <h4 class="mb-2 text-sm font-medium">PM Work Sessions</h4>
 
-                <input name="end_time" type="time" id="end_time"
-                    value="{{ $pmSchedule->end_time ? \Carbon\Carbon::parse($pmSchedule->end_time)->format('H:i') : '' }}"
-                    class="w-full border rounded-2xl p-3">
-            </div>
+                <div id="work-sessions" class="space-y-3">
+                    @php
+                        $sessions = $pmSchedule->workSessions ?? collect();
+                    @endphp
 
-            <div>
-                <label class="block mb-2 text-sm font-medium">
-                    Duration (Hours)
-                </label>
+                    @if($sessions->isNotEmpty())
+                        @foreach($sessions as $i => $s)
+                            <div class="session-row rounded-lg border p-3" data-index="{{ $i }}">
+                                <input type="hidden" name="sessions[{{ $i }}][id]" value="{{ $s->id }}">
 
-                <input name="duration" type="text" id="duration" readonly value="{{ $pmSchedule->duration_formatted }}"
-                    class="w-full border rounded-2xl p-3 bg-gray-100">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div>
+                                        <label class="text-xs">Date</label>
+                                        <input type="date" name="sessions[{{ $i }}][actual_date]" value="{{ $s->actual_date }}" class="w-full border rounded-2xl p-2">
+                                    </div>
 
-                <p id="duration_error" class="text-red-500 text-sm mt-1 hidden">
-                    End time cannot be earlier than start time
-                </p>
+                                    <div>
+                                        <label class="text-xs">Start</label>
+                                        <input type="time" name="sessions[{{ $i }}][start_time]" value="{{ $s->start_time ? \Carbon\Carbon::parse($s->start_time)->format('H:i') : '' }}" class="w-full border rounded-2xl p-2 session-start">
+                                    </div>
+
+                                    <div>
+                                        <label class="text-xs">End</label>
+                                        <input type="time" name="sessions[{{ $i }}][end_time]" value="{{ $s->end_time ? \Carbon\Carbon::parse($s->end_time)->format('H:i') : '' }}" class="w-full border rounded-2xl p-2 session-end">
+                                    </div>
+                                </div>
+
+                                <div class="mt-2 flex items-center justify-between">
+                                    <div class="text-sm text-slate-600">Duration: <span class="session-duration">{{ $s->duration ? floor($s->duration/60) . ' Hours ' . ($s->duration % 60) . ' Minutes' : '-' }}</span></div>
+                                    <div>
+                                        @if($i > 0)
+                                            <button type="button" class="remove-session inline-flex items-center rounded-lg bg-red-500 px-3 py-1 text-white">Remove Day</button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        {{-- Default Day 1 preset from legacy fields (no DB write) --}}
+                        <div class="session-row rounded-lg border p-3" data-index="0">
+                            <input type="hidden" name="sessions[0][id]" value="">
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="text-xs">Date</label>
+                                    <input type="date" name="sessions[0][actual_date]" value="{{ old('sessions.0.actual_date', $pmSchedule->actual_date ?? date('Y-m-d')) }}" class="w-full border rounded-2xl p-2">
+                                </div>
+
+                                <div>
+                                    <label class="text-xs">Start</label>
+                                    <input type="time" name="sessions[0][start_time]" value="{{ old('sessions.0.start_time', $pmSchedule->start_time ? \Carbon\Carbon::parse($pmSchedule->start_time)->format('H:i') : '') }}" class="w-full border rounded-2xl p-2 session-start">
+                                </div>
+
+                                <div>
+                                    <label class="text-xs">End</label>
+                                    <input type="time" name="sessions[0][end_time]" value="{{ old('sessions.0.end_time', $pmSchedule->end_time ? \Carbon\Carbon::parse($pmSchedule->end_time)->format('H:i') : '') }}" class="w-full border rounded-2xl p-2 session-end">
+                                </div>
+                            </div>
+
+                            <div class="mt-2 flex items-center justify-between">
+                                <div class="text-sm text-slate-600">Duration: <span class="session-duration">{{ $pmSchedule->duration ? floor($pmSchedule->duration/60) . ' Hours ' . ($pmSchedule->duration % 60) . ' Minutes' : '-' }}</span></div>
+                                <div></div>
+                            </div>
+                        </div>
+                    @endif
+
+                </div>
+
+                <div class="mt-3 flex items-center gap-2">
+                    <button type="button" id="add-session" class="bg-green-600 text-white px-3 py-1 rounded-xl">+ Add Day</button>
+                    <div class="text-sm text-slate-600">Total PM Duration: <span id="total-duration" data-initial="{{ $pmSchedule->duration_formatted }}">{{ $pmSchedule->duration_formatted }}</span></div>
+                </div>
             </div>
 
         </div>

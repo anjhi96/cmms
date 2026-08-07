@@ -35,37 +35,32 @@
             </div>
 
             <div>
-                <label class="mb-2 block text-sm font-medium">Actual Date</label>
-                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-                    {{ $pmSchedule->actual_date }}
-                </div>
+                <label class="mb-2 block text-sm font-medium">Execution</label>
+
+                @if ($pmSchedule->workSessions()->exists())
+                    <div class="mt-1 rounded-lg border bg-slate-50 p-3">
+                        @foreach ($pmSchedule->workSessions()->orderBy('actual_date')->get() as $ws)
+                            <div class="mb-3">
+                                <div class="text-sm font-semibold">Day {{ $loop->iteration }} — {{ \Carbon\Carbon::parse($ws->actual_date)->format('d-m-Y') }}</div>
+                                <div class="text-xs text-slate-500">Start: {{ $ws->start_time ?? '-' }} &middot; End: {{ $ws->end_time ?? '-' }} &middot; Duration: {{ $ws->duration ? floor($ws->duration/60) . ' Hours ' . ($ws->duration % 60) . ' Minutes' : '-' }}</div>
+                            </div>
+                        @endforeach
+
+                        <div class="mt-3 border-t pt-2 text-sm font-semibold">Total Duration: @php $total = $pmSchedule->workSessions()->sum('duration'); $h = floor($total/60); $m = $total % 60; echo $total ? "{$h} Hours {$m} Minutes" : '-'; @endphp</div>
+                    </div>
+                @else
+                    <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
+                        {{ $pmSchedule->actual_date ?? '-' }}
+                        <div class="text-xs text-slate-500 mt-1">Start: {{ $pmSchedule->start_time ?? '-' }} &middot; End: {{ $pmSchedule->end_time ?? '-' }} &middot; Duration: {{ $pmSchedule->duration ? floor($pmSchedule->duration/60) . ' Hours ' . ($pmSchedule->duration % 60) . ' Minutes' : '-' }}</div>
+                    </div>
+                @endif
+
             </div>
 
             <div>
                 <label class="mb-2 block text-sm font-medium">PIC PM</label>
                 <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
                     {{ $pmSchedule->pic }}
-                </div>
-            </div>
-
-            <div>
-                <label class="mb-2 block text-sm font-medium">Start PM</label>
-                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-                    {{ $pmSchedule->start_time }}
-                </div>
-            </div>
-
-            <div>
-                <label class="mb-2 block text-sm font-medium">End PM</label>
-                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-                    {{ $pmSchedule->end_time }}
-                </div>
-            </div>
-
-            <div>
-                <label class="mb-2 block text-sm font-medium">Duration (Hours)</label>
-                <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-                    {{ $pmSchedule->duration }}
                 </div>
             </div>
         </div>

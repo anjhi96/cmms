@@ -3,6 +3,8 @@ const pmData = document.getElementById('pm-data');
 const findings = pmData ? JSON.parse(pmData.dataset.findings || '{}') : {};
 const spareparts = pmData ? JSON.parse(pmData.dataset.spareparts || '[]') : [];
 const bigProblems = pmData ? JSON.parse(pmData.dataset.bigProblems || '[]') : [];
+const users = pmData ? JSON.parse(pmData.dataset.users || '[]') : [];
+const defaultManpowerPerson = pmData ? pmData.dataset.defaultPerson || '' : '';
 
 let problemIndex = pmData ? Number(pmData.dataset.problemIndex || 0) : 0;
 let sparepartIndex = pmData ? Number(pmData.dataset.sparepartIndex || 0) : 0;
@@ -117,7 +119,23 @@ function calculateDurationFromTimes(start, end) {
     return endMinutes - startMinutes;
 }
 
+function buildUserOptions(selected = '') {
+    const options = ['<option value="">-- Select Person --</option>'];
+
+    users.forEach((user) => {
+        options.push(`
+            <option value="${escapeHtml(user.name)}" ${user.name === selected ? 'selected' : ''}>
+                ${escapeHtml(user.name)}
+            </option>
+        `);
+    });
+
+    return options.join('');
+}
+
 function buildManpowerRow(sessionIndex, index, manpower = {}) {
+    const selectedPerson = manpower.person || defaultManpowerPerson || '';
+
     return `
         <div class="manpower-row mb-3 rounded-2xl border border-slate-200 bg-white p-4" data-manpower-index="${index}">
             <input data-manpower-field="sessions[{sessionIndex}][manpowers][{manpowerIndex}][id]" type="hidden" value="${manpower.id || ''}">
@@ -125,7 +143,9 @@ function buildManpowerRow(sessionIndex, index, manpower = {}) {
             <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
                 <div>
                     <label class="block mb-2 text-sm font-medium">Person</label>
-                    <input data-manpower-field="sessions[{sessionIndex}][manpowers][{manpowerIndex}][person]" type="text" value="${manpower.person || ''}" class="w-full rounded-2xl border border-gray-300 p-3 text-sm">
+                    <select data-manpower-field="sessions[{sessionIndex}][manpowers][{manpowerIndex}][person]" class="w-full rounded-2xl border border-gray-300 p-3 text-sm">
+                        ${buildUserOptions(selectedPerson)}
+                    </select>
                 </div>
                 <div>
                     <label class="block mb-2 text-sm font-medium">Start</label>
@@ -215,7 +235,7 @@ function setSessionInputNames(sessionCard, sessionIndex) {
 
     sessionCard.querySelectorAll('[data-session-field]').forEach((element) => {
         const template = element.getAttribute('data-session-field');
-        element.name = template.replace('{index}', sessionIndex);
+        element.name = template.replace(/\{index\}/g, sessionIndex);
     });
 
     sessionCard.querySelectorAll('.manpower-row').forEach((manpowerRow, manpowerIndex) => {
@@ -223,8 +243,8 @@ function setSessionInputNames(sessionCard, sessionIndex) {
         manpowerRow.querySelectorAll('[data-manpower-field]').forEach((element) => {
             const template = element.getAttribute('data-manpower-field');
             element.name = template
-                .replace('{sessionIndex}', sessionIndex)
-                .replace('{manpowerIndex}', manpowerIndex);
+                .replace(/\{sessionIndex\}/g, sessionIndex)
+                .replace(/\{manpowerIndex\}/g, manpowerIndex);
         });
     });
 

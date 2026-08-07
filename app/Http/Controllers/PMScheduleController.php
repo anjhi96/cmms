@@ -324,6 +324,8 @@ class PMScheduleController extends Controller
             ->orderBy('name')
             ->get();
 
+        $users = User::orderBy('name')->get();
+
         return view('pm-schedules.edit', compact(
             'pmSchedule',
             'bigProblems',
@@ -335,7 +337,8 @@ class PMScheduleController extends Controller
             'pmSpareparts',
             'sessions',
             'lastPm',
-            'pics'
+            'pics',
+            'users'
         ));
     }
 
@@ -621,8 +624,8 @@ class PMScheduleController extends Controller
 
 
         return redirect()
-    ->route('pm-schedules.checklist', $pmSchedule->id)
-    ->with('success', 'PM Progress Saved');
+            ->route('pm-schedules.checklist', $pmSchedule)
+            ->with('success', 'PM Progress Saved');
 
     }
 

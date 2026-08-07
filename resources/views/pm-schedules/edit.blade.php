@@ -12,18 +12,35 @@
 </div>
 @endif
 
+@if ($errors->any())
+<div class="mb-4 rounded-xl bg-red-100 border border-red-300 text-red-700 px-4 py-3">
+    <strong>There are errors with your submission:</strong>
+    <ul class="mt-2 list-disc list-inside text-sm">
+        @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
+
 <form method="POST" action="{{ route('pm-schedules.update', $pmSchedule) }}" class="bg-white p-6 rounded shadow max-sm:p-4">
 
     <div id="pm-data"
-        data-findings='@json($problemFindings)'
-        data-spareparts='@json($spareparts)'
-        data-big-problems='@json($bigProblems)'
-        data-sessions='@json(old('sessions', $sessions))'
+        data-findings='@json($problemFindings, JSON_HEX_APOS)'
+        data-spareparts='@json($spareparts, JSON_HEX_APOS)'
+        data-big-problems='@json($bigProblems, JSON_HEX_APOS)'
+        data-sessions='@json(old('sessions', $sessions), JSON_HEX_APOS)'
+        data-users='@json($users->map(fn($user) => ['id' => $user->id, 'name' => $user->name])->all(), JSON_HEX_APOS)'
+        data-default-person='{{ e($pmSchedule->pic) }}'
         data-problem-index='@json(isset($pmProblems) ? $pmProblems->count() : 0)'
         data-sparepart-index='@json(isset($pmSpareparts) ? $pmSpareparts->count() : 0)'></div>
 
     @csrf
     @method('PUT')
+    <input type="hidden" name="actual_date" value="{{ old('actual_date', $pmSchedule->actual_date) }}">
+    <input type="hidden" name="start_time" value="{{ old('start_time', $pmSchedule->start_time) }}">
+    <input type="hidden" name="end_time" value="{{ old('end_time', $pmSchedule->end_time) }}">
+    <input type="hidden" name="duration" value="{{ old('duration', $pmSchedule->duration) }}">
 
     <div class="bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-xl p-6 shadow mb-6 max-sm:p-4">
 

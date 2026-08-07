@@ -269,10 +269,20 @@ function initPage() {
         if (event.target.classList.contains('problem-select')) {
             loadFinding(event.target);
         }
+
+        // sessions change handlers
+        if (event.target.classList.contains('session-start') || event.target.classList.contains('session-end')) {
+            const row = event.target.closest('.session-row');
+            if (row) {
+                calculateSessionDuration(row);
+                updateAllSessionDurations();
+            }
+        }
     });
 
     initProblemFindings();
 
+    // migrate single start/end inputs if present (legacy); keep compatibility but not required for multi-day
     const startInput = document.getElementById('start_time');
     const endInput = document.getElementById('end_time');
 
@@ -280,7 +290,129 @@ function initPage() {
     endInput?.addEventListener('change', calculateDuration);
 
     initSpareparts();
+
+    // sessions add/remove handlers
+    document.getElementById('add-session')?.addEventListener('click', addSession);
+    document.querySelectorAll('.remove-session').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const row = btn.closest('.session-row');
+            row?.remove();
+            updateAllSessionDurations();
+        });
+    });
+
+    // initial calculation for existing rows
+    document.querySelectorAll('.session-row').forEach(function (row) {
+        calculateSessionDuration(row);
+    });
+    updateAllSessionDurations();
 }
+
+// --- session helpers ---
+function parseTimeToMinutes(value) {
+    if (!value) return null;
+    const parts = value.split(':');
+    if (parts.length !== 2) return null;
+    return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+}
+
+function calculateSessionDuration(row) {
+    const start = row.querySelector('.session-start')?.value || null;
+    const end = row.querySelector('.session-end')?.value || null;
+    const display = row.querySelector('.session-duration');
+
+    if (!start || !end) {
+        if (display) display.textContent = '-';
+        row.dataset.duration = '';
+        return;
+    }
+
+    const s = parseTimeToMinutes(start);
+    const e = parseTimeToMinutes(end);
+
+    if (s === null || e === null) {
+        if (display) display.textContent = '-';
+        row.dataset.duration = '';
+        return;
+    }
+
+    let diff = e - s;
+    if (diff < 0) {
+        diff += 24 * 60; // assume next day
+    }
+
+    const hours = Math.floor(diff / 60);
+    const minutes = diff % 60;
+
+    if (display) display.textContent = `${hours} Hours ${minutes} Minutes`;
+    row.dataset.duration = diff.toString();
+}
+
+function updateAllSessionDurations() {
+    const rows = document.querySelectorAll('.session-row');
+    let total = 0;
+    rows.forEach(function (row) {
+        const d = parseInt(row.dataset.duration || '0', 10);
+        if (!isNaN(d)) total += d;
+    });
+
+    const totalEl = document.getElementById('total-duration');
+    if (totalEl) {
+        const hours = Math.floor(total / 60);
+        const minutes = total % 60;
+        if (total === 0) {
+            totalEl.textContent = totalEl.dataset.initial || '';
+        } else {
+            totalEl.textContent = `${hours} Hours ${minutes} Minutes`;
+        }
+    }
+}
+
+function addSession() {
+    const container = document.getElementById('work-sessions');
+    if (!container) return;
+
+    const index = container.querySelectorAll('.session-row').length;
+
+    const html = `
+        <div class="session-row rounded-lg border p-3" data-index="${index}">
+            <input type="hidden" name="sessions[${index}][id]" value="">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                    <label class="text-xs">Date</label>
+                    <input type="date" name="sessions[${index}][actual_date]" value="" class="w-full border rounded-2xl p-2">
+                </div>
+                <div>
+                    <label class="text-xs">Start</label>
+                    <input type="time" name="sessions[${index}][start_time]" value="" class="w-full border rounded-2xl p-2 session-start">
+                </div>
+                <div>
+                    <label class="text-xs">End</label>
+                    <input type="time" name="sessions[${index}][end_time]" value="" class="w-full border rounded-2xl p-2 session-end">
+                </div>
+            </div>
+            <div class="mt-2 flex items-center justify-between">
+                <div class="text-sm text-slate-600">Duration: <span class="session-duration">-</span></div>
+                <div>
+                    <button type="button" class="remove-session inline-flex items-center rounded-lg bg-red-500 px-3 py-1 text-white">Remove Day</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', html);
+
+    const newRow = container.querySelector('.session-row[data-index="' + index + '"]');
+    if (newRow) {
+        newRow.querySelector('.remove-session').addEventListener('click', function () {
+            newRow.remove();
+            updateAllSessionDurations();
+        });
+        newRow.querySelector('.session-start')?.addEventListener('change', function () { calculateSessionDuration(newRow); updateAllSessionDurations(); });
+        newRow.querySelector('.session-end')?.addEventListener('change', function () { calculateSessionDuration(newRow); updateAllSessionDurations(); });
+    }
+}
+
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {

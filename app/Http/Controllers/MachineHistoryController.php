@@ -94,6 +94,7 @@ class MachineHistoryController extends Controller
             $machineNumber
         )
             ->whereNotNull('actual_date')
+            ->with('workSessions')
             ->latest('actual_date')
             ->paginate(10);
 
@@ -145,6 +146,8 @@ class MachineHistoryController extends Controller
             'machine_number',
             $machineNumber
         )->firstOrFail();
+
+        $pmSchedule->load('workSessions');
 
         $measurements = MachineMeasurement::where(
             'machine_type',

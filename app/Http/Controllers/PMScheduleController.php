@@ -319,84 +319,130 @@ class PMScheduleController extends Controller
         }
 
         // VALIDASI INPUT
-        $request->validate([
-        'order_number' => 'required',
+        $rules = [
+            'order_number' => 'required',
+            'pic' => 'required',
+            'greasing' => 'nullable',
+            'oil_change' => 'nullable',
+            'wo_zsbp' => 'nullable',
+            'remarks' => 'nullable',
+            'problems.*.problem' => 'nullable',
+            'problems.*.finding' => 'nullable',
+            'problems.*.severity' => 'nullable',
+            'measurements.*.measurement_item' => 'nullable',
+            'measurements.*.measurement_value' => 'nullable',
+            'spareparts.*.sparepart_id' => 'nullable',
+            'spareparts.*.qty' => 'nullable|integer|min:1',
+        ];
 
-        'actual_date' => 'required|date',
+        // If sessions array provided => multi-day flow
+        if ($request->has('sessions')) {
+            $rules['sessions'] = 'array';
+            $rules['sessions.*.actual_date'] = 'required|date';
+            $rules['sessions.*.start_time'] = 'required';
+            $rules['sessions.*.end_time'] = 'nullable';
+        } else {
+            // legacy single-day flow
+            $rules['actual_date'] = 'required|date';
+            $rules['start_time'] = 'required';
+            $rules['end_time'] = 'nullable';
+        }
 
-        'pic' => 'required',
+        $request->validate($rules);
 
-        'start_time' => 'required',
+        // Server-side duration and persistence
+        DB::transaction(function () use ($request, $pmSchedule) {
 
-        'end_time' => 'nullable',
+            // Update header (do NOT change actual_date/start_time/end_time/duration for multi-day sessions)
+            $updateHeader = [
+                'order_number' => $request->order_number,
+                'pic' => $request->pic,
+                'oil_change' => $pmSchedule->requiresOilChange() ? $request->oil_change : null,
+                'greasing' => $request->greasing,
+                'wo_zsbp' => $request->wo_zsbp,
+                'remarks' => $request->remarks,
+                'status' => 'IN_PROGRESS',
+            ];
 
-        'greasing' => 'nullable',
+            // Multi-day sessions handling
+            if ($request->has('sessions')) {
 
-        'oil_change' => 'nullable',
+                $sessionIds = [];
 
-        'wo_zsbp' => 'nullable',
+                // existing sessions for selective delete
+                $existingIds = $pmSchedule->workSessions()->pluck('id')->toArray();
 
-        'remarks' => 'nullable',
+                foreach ($request->sessions as $s) {
 
-        'problems.*.problem' => 'nullable',
+                    $start = Carbon::createFromFormat('H:i', $s['start_time']);
+                    $end = $s['end_time'] ? Carbon::createFromFormat('H:i', $s['end_time']) : null;
 
-        'problems.*.finding' => 'nullable',
+                    if ($end) {
+                        if ($end->lessThan($start)) {
+                            $end->addDay();
+                        }
+                        $duration = $start->diffInMinutes($end);
+                    } else {
+                        $duration = null;
+                    }
 
-        'problems.*.severity' => 'nullable',
+                    // If id provided and belongs to this schedule, update; otherwise create
+                    if (!empty($s['id'])) {
+                        $ws = $pmSchedule->workSessions()->where('id', $s['id'])->first();
+                        if ($ws) {
+                            $ws->update([
+                                'actual_date' => $s['actual_date'],
+                                'start_time' => $s['start_time'],
+                                'end_time' => $s['end_time'] ?? null,
+                                'duration' => $duration,
+                            ]);
 
-        'measurements.*.measurement_item' => 'nullable',
+                            $sessionIds[] = $ws->id;
 
-        'measurements.*.measurement_value' => 'nullable',
+                            continue;
+                        }
+                    }
 
-        'spareparts.*.sparepart_id' => 'nullable',
+                    $new = $pmSchedule->workSessions()->create([
+                        'actual_date' => $s['actual_date'],
+                        'start_time' => $s['start_time'],
+                        'end_time' => $s['end_time'] ?? null,
+                        'duration' => $duration,
+                    ]);
 
-        'spareparts.*.qty' => 'nullable|integer|min:1',
+                    $sessionIds[] = $new->id;
+                }
 
-]);
-        // 1. hitung duration
-        $duration = null;
+                // delete removed sessions (selective)
+                $toDelete = array_diff($existingIds, $sessionIds);
+                if (!empty($toDelete)) {
+                    $pmSchedule->workSessions()->whereIn('id', $toDelete)->delete();
+                }
 
-        if ($request->start_time && $request->end_time) {
+                // Update header without touching legacy execution columns
+                $pmSchedule->update($updateHeader);
 
-            $start = Carbon::createFromFormat('H:i', $request->start_time);
-            $end   = Carbon::createFromFormat('H:i', $request->end_time);
+            } else {
+                // Legacy single-day behavior (keep existing semantics)
+                $duration = null;
+                if ($request->start_time && $request->end_time) {
+                    $start = Carbon::createFromFormat('H:i', $request->start_time);
+                    $end = Carbon::createFromFormat('H:i', $request->end_time);
+                    if ($end->lessThan($start)) {
+                        $end->addDay();
+                    }
+                    $duration = $start->diffInMinutes($end);
+                }
 
-            if ($end->lessThan($start)) {
-                $end->addDay();
+                $pmSchedule->update(array_merge($updateHeader, [
+                    'actual_date' => $request->actual_date,
+                    'start_time' => $request->start_time,
+                    'end_time' => $request->end_time,
+                    'duration' => $duration,
+                ]));
             }
 
-            $duration = $start->diffInMinutes($end);
-        }
-        DB::transaction(function () use ($request, $pmSchedule, $duration) {
-            // 2. update schedule (header)
-            $pmSchedule->update([
-                'order_number' => $request->order_number,
-
-                'actual_date' => $request->actual_date,
-
-                'pic' => $request->pic,
-
-                'start_time' => $request->start_time,
-
-                'end_time' => $request->end_time,
-
-                'duration' => $duration,
-
-                'oil_change' => $pmSchedule->requiresOilChange()
-                ? $request->oil_change
-                : null,
-
-                'greasing' => $request->greasing,
-
-                'wo_zsbp' => $request->wo_zsbp,
-
-                'remarks' => $request->remarks,
-
-                'status' => 'IN_PROGRESS',
-
-            ]);
-
-            // 3. update measurements
+            // 3. update measurements (unchanged)
             PMMeasurement::where(
                 'pm_schedule_id',
                 $pmSchedule->id
@@ -482,6 +528,7 @@ class PMScheduleController extends Controller
                 }
 
             }
+
         });
 
         return redirect()
@@ -692,6 +739,14 @@ class PMScheduleController extends Controller
             }
 
         });
+
+        // If there are work sessions, set completion date to last session's date when checklist is saved
+        $lastSessionDate = $pmSchedule->workSessions()->latest('actual_date')->value('actual_date');
+        if ($lastSessionDate) {
+            $pmSchedule->update([
+                'actual_date' => $lastSessionDate,
+            ]);
+        }
 
         $pmSchedule->refresh();
 

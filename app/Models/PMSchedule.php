@@ -62,14 +62,28 @@ class PMSchedule extends Model
 
     public function getDurationFormattedAttribute()
     {
-        if (!$this->duration) {
+        // Prefer aggregated work session duration when available (multi-day)
+        if ($this->relationLoaded('workSessions') && $this->workSessions->isNotEmpty()) {
+            $total = (int) $this->workSessions->sum('duration');
+        } elseif ($this->workSessions()->exists()) {
+            $total = (int) $this->workSessions()->sum('duration');
+        } else {
+            $total = $this->duration;
+        }
+
+        if (!$total) {
             return '';
         }
 
-        $hours = floor($this->duration / 60);
-        $minutes = $this->duration % 60;
+        $hours = floor($total / 60);
+        $minutes = $total % 60;
 
         return "{$hours} Hours {$minutes} Minutes";
+    }
+
+    public function workSessions()
+    {
+        return $this->hasMany(PMWorkSession::class, 'pm_schedule_id');
     }
 
     public function machine()

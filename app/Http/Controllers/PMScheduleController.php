@@ -16,6 +16,8 @@ use App\Models\Sparepart;
 use App\Models\PMMeasurement;
 use App\Models\PMProblem;
 use App\Models\PMSparepart;
+use App\Models\PMWorkSession;
+use App\Models\PMManpower;
 use Illuminate\Support\Facades\DB;
 use App\Models\MachineChecklist;
 use App\Models\PMChecklist;
@@ -257,11 +259,50 @@ class PMScheduleController extends Controller
 
 
         $pmSpareparts = PMSparepart::with('sparepart')
-        ->where(
-            'pm_schedule_id',
-            $pmSchedule->id
-        )
-        ->get();
+            ->where(
+                'pm_schedule_id',
+                $pmSchedule->id
+            )
+            ->get();
+
+        $workSessions = PMWorkSession::with('manpowers')
+            ->where('pm_schedule_id', $pmSchedule->id)
+            ->get();
+
+        if ($workSessions->isEmpty()) {
+            $workSessions = collect([
+                (object) [
+                    'id' => null,
+                    'actual_date' => $pmSchedule->actual_date ?? date('Y-m-d'),
+                    'start_time' => $pmSchedule->start_time ?? '',
+                    'end_time' => $pmSchedule->end_time ?? '',
+                    'duration' => $pmSchedule->duration,
+                    'manpowers' => collect(),
+                ],
+            ]);
+        }
+
+        $sessions = $workSessions->map(function ($session) {
+            return [
+                'id' => $session->id,
+                'actual_date' => $session->actual_date,
+                'start_time' => $session->start_time,
+                'end_time' => $session->end_time,
+                'duration' => $session->duration,
+                'manpowers' => collect($session->manpowers)->map(function ($manpower) {
+                    return [
+                        'id' => $manpower->id,
+                        'person' => $manpower->person,
+                        'start_time' => $manpower->start_time,
+                        'end_time' => $manpower->end_time,
+                        'duration' => $manpower->duration,
+                        'man_hour' => $manpower->man_hour,
+                    ];
+                })->toArray(),
+            ];
+        })->toArray();
+
+        $pmSchedule->setRelation('workSessions', $workSessions);
 
         $lastPm = PMSchedule::where('machine_number', $pmSchedule->machine_number)
             ->whereNotNull('actual_date')
@@ -292,6 +333,7 @@ class PMScheduleController extends Controller
             'pmMeasurements',
             'pmProblems',
             'pmSpareparts',
+            'sessions',
             'lastPm',
             'pics'
         ));
@@ -320,109 +362,220 @@ class PMScheduleController extends Controller
 
         // VALIDASI INPUT
         $request->validate([
-        'order_number' => 'required',
+            'order_number' => 'required',
 
-        'actual_date' => 'required|date',
+            'pic' => 'required',
 
-        'pic' => 'required',
+            'actual_date' => 'required_without:sessions|date',
 
-        'start_time' => 'required',
+            'start_time' => 'required_without:sessions',
 
-        'end_time' => 'nullable',
+            'end_time' => 'nullable',
 
-        'greasing' => 'nullable',
+            'greasing' => 'nullable',
 
-        'oil_change' => 'nullable',
+            'oil_change' => 'nullable',
 
-        'wo_zsbp' => 'nullable',
+            'wo_zsbp' => 'nullable',
 
-        'remarks' => 'nullable',
+            'remarks' => 'nullable',
 
-        'problems.*.problem' => 'nullable',
+            'problems.*.problem' => 'nullable',
 
-        'problems.*.finding' => 'nullable',
+            'problems.*.finding' => 'nullable',
 
-        'problems.*.severity' => 'nullable',
+            'problems.*.severity' => 'nullable',
 
-        'measurements.*.measurement_item' => 'nullable',
+            'measurements.*.measurement_item' => 'nullable',
 
-        'measurements.*.measurement_value' => 'nullable',
+            'measurements.*.measurement_value' => 'nullable',
 
-        'spareparts.*.sparepart_id' => 'nullable',
+            'spareparts.*.sparepart_id' => 'nullable',
 
-        'spareparts.*.qty' => 'nullable|integer|min:1',
+            'spareparts.*.qty' => 'nullable|integer|min:1',
 
-]);
-        // 1. hitung duration
-        $duration = null;
+            'sessions' => 'nullable|array|min:1',
+            'sessions.*.actual_date' => 'required|date',
+            'sessions.*.start_time' => 'required|date_format:H:i',
+            'sessions.*.end_time' => 'nullable|date_format:H:i',
+            'sessions.*.id' => 'nullable|integer',
+            'sessions.*.manpowers' => 'nullable|array',
+            'sessions.*.manpowers.*.id' => 'nullable|integer',
+            'sessions.*.manpowers.*.person' => 'required|string|max:255',
+            'sessions.*.manpowers.*.start_time' => 'required|date_format:H:i',
+            'sessions.*.manpowers.*.end_time' => 'nullable|date_format:H:i',
+        ]);
 
-        if ($request->start_time && $request->end_time) {
+        $sessionData = $request->input('sessions', []);
+        $processedSessions = [];
+        $totalDuration = null;
+        $actualDate = $request->actual_date;
+        $startTime = $request->start_time;
+        $endTime = $request->end_time;
 
-            $start = Carbon::createFromFormat('H:i', $request->start_time);
-            $end   = Carbon::createFromFormat('H:i', $request->end_time);
+        if (is_array($sessionData) && count($sessionData) > 0) {
+            $totalDuration = 0;
+            $actualDate = null;
+            $startTime = null;
+            $endTime = null;
+            foreach ($sessionData as $session) {
+                $sessionDuration = null;
 
-            if ($end->lessThan($start)) {
-                $end->addDay();
+                if (!empty($session['start_time']) && !empty($session['end_time'])) {
+                    $start = Carbon::createFromFormat('H:i', $session['start_time']);
+                    $end = Carbon::createFromFormat('H:i', $session['end_time']);
+
+                    if ($end->lessThan($start)) {
+                        $end->addDay();
+                    }
+
+                    $sessionDuration = $start->diffInMinutes($end);
+                    $totalDuration += $sessionDuration;
+                }
+
+                $processedSessions[] = [
+                    'id' => $session['id'] ?? null,
+                    'actual_date' => $session['actual_date'],
+                    'start_time' => $session['start_time'],
+                    'end_time' => $session['end_time'] ?? null,
+                    'duration' => $sessionDuration,
+                    'manpowers' => $session['manpowers'] ?? [],
+                ];
+
+                $actualDate = $actualDate
+                    ? max($actualDate, $session['actual_date'])
+                    : $session['actual_date'];
+
+                if (!$startTime && $session['start_time']) {
+                    $startTime = $session['start_time'];
+                }
+
+                if ($session['end_time']) {
+                    $endTime = $session['end_time'];
+                }
             }
+        } else {
+            if ($request->start_time && $request->end_time) {
+                $start = Carbon::createFromFormat('H:i', $request->start_time);
+                $end = Carbon::createFromFormat('H:i', $request->end_time);
 
-            $duration = $start->diffInMinutes($end);
+                if ($end->lessThan($start)) {
+                    $end->addDay();
+                }
+
+                $totalDuration = $start->diffInMinutes($end);
+            }
         }
-        DB::transaction(function () use ($request, $pmSchedule, $duration) {
-            // 2. update schedule (header)
+
+        DB::transaction(function () use ($request, $pmSchedule, $processedSessions, $totalDuration, $actualDate, $startTime, $endTime) {
             $pmSchedule->update([
                 'order_number' => $request->order_number,
-
-                'actual_date' => $request->actual_date,
-
+                'actual_date' => $actualDate,
                 'pic' => $request->pic,
-
-                'start_time' => $request->start_time,
-
-                'end_time' => $request->end_time,
-
-                'duration' => $duration,
-
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'duration' => $totalDuration,
                 'oil_change' => $pmSchedule->requiresOilChange()
-                ? $request->oil_change
-                : null,
-
+                    ? $request->oil_change
+                    : null,
                 'greasing' => $request->greasing,
-
                 'wo_zsbp' => $request->wo_zsbp,
-
                 'remarks' => $request->remarks,
-
                 'status' => 'IN_PROGRESS',
-
             ]);
 
-            // 3. update measurements
+            if (count($processedSessions) > 0) {
+                $existingSessions = $pmSchedule->workSessions()
+                    ->with('manpowers')
+                    ->get()
+                    ->keyBy('id');
+
+                $sessionIdsToKeep = [];
+
+                foreach ($processedSessions as $session) {
+                    $sessionAttributes = [
+                        'actual_date' => $session['actual_date'],
+                        'start_time' => $session['start_time'],
+                        'end_time' => $session['end_time'],
+                        'duration' => $session['duration'],
+                    ];
+
+                    if (!empty($session['id']) && $existingSessions->has($session['id'])) {
+                        $workSession = $existingSessions->get($session['id']);
+                        $workSession->update($sessionAttributes);
+                    } else {
+                        $workSession = PMWorkSession::create([
+                            'pm_schedule_id' => $pmSchedule->id,
+                            ...$sessionAttributes,
+                        ]);
+                    }
+
+                    $sessionIdsToKeep[] = $workSession->id;
+
+                    $existingManpowers = $workSession->manpowers()->get()->keyBy('id');
+                    $manpowerIdsToKeep = [];
+
+                    foreach ($session['manpowers'] as $manpower) {
+                        $manpowerDuration = null;
+                        $manHour = null;
+
+                        if (!empty($manpower['start_time']) && !empty($manpower['end_time'])) {
+                            $start = Carbon::createFromFormat('H:i', $manpower['start_time']);
+                            $end = Carbon::createFromFormat('H:i', $manpower['end_time']);
+
+                            if ($end->lessThan($start)) {
+                                $end->addDay();
+                            }
+
+                            $manpowerDuration = $start->diffInMinutes($end);
+                            $manHour = $manpowerDuration;
+                        }
+
+                        $manpowerAttributes = [
+                            'person' => $manpower['person'],
+                            'start_time' => $manpower['start_time'],
+                            'end_time' => $manpower['end_time'] ?? null,
+                            'duration' => $manpowerDuration,
+                            'man_hour' => $manHour,
+                        ];
+
+                        if (!empty($manpower['id']) && $existingManpowers->has($manpower['id'])) {
+                            $pmManpower = $existingManpowers->get($manpower['id']);
+                            $pmManpower->update($manpowerAttributes);
+                        } else {
+                            $pmManpower = PMManpower::create(array_merge([
+                                'pm_work_session_id' => $workSession->id,
+                            ], $manpowerAttributes));
+                        }
+
+                        $manpowerIdsToKeep[] = $pmManpower->id;
+                    }
+
+                    PMManpower::where('pm_work_session_id', $workSession->id)
+                        ->whereNotIn('id', $manpowerIdsToKeep)
+                        ->delete();
+                }
+
+                PMWorkSession::where('pm_schedule_id', $pmSchedule->id)
+                    ->whereNotIn('id', $sessionIdsToKeep)
+                    ->delete();
+            }
+
             PMMeasurement::where(
                 'pm_schedule_id',
                 $pmSchedule->id
             )->delete();
             if ($request->measurements) {
-
                 foreach ($request->measurements as $measurement) {
-
                     PMMeasurement::create([
-
-                    'pm_schedule_id' => $pmSchedule->id,
-
-                    'machine_measurement_id' => $measurement['machine_measurement_id'],
-
-                    'measurement_item' => $measurement['measurement_item'],
-
-                    'standard' => $measurement['standard'],
-
-                    'measurement_value' => $measurement['measurement_value'],
-
-                    'unit' => $measurement['unit'],
-
-                ]);
-
+                        'pm_schedule_id' => $pmSchedule->id,
+                        'machine_measurement_id' => $measurement['machine_measurement_id'],
+                        'measurement_item' => $measurement['measurement_item'],
+                        'standard' => $measurement['standard'],
+                        'measurement_value' => $measurement['measurement_value'],
+                        'unit' => $measurement['unit'],
+                    ]);
                 }
-
             }
 
             PMProblem::where(
@@ -431,27 +584,18 @@ class PMScheduleController extends Controller
             )->delete();
 
             if ($request->problems) {
-
                 foreach ($request->problems as $problem) {
-
                     if (empty($problem['problem'])) {
                         continue;
                     }
 
                     PMProblem::create([
-
                         'pm_schedule_id' => $pmSchedule->id,
-
                         'machine_problem_id' => $problem['problem'],
-
                         'machine_problem_finding_id' => $problem['finding'],
-
                         'severity' => $problem['severity'],
-
                     ]);
-
                 }
-
             }
 
             PMSparepart::where(
@@ -460,29 +604,21 @@ class PMScheduleController extends Controller
             )->delete();
 
             if ($request->spareparts) {
-
                 foreach ($request->spareparts as $item) {
-
                     if (empty($item['sparepart_id'])) {
                         continue;
                     }
 
                     PMSparepart::create([
-
                         'pm_schedule_id' => $pmSchedule->id,
-
                         'sparepart_id' => $item['sparepart_id'],
-
                         'qty' => $item['qty'] ?? 1,
-
                         'unit' => $item['unit'] ?? null,
-
                     ]);
-
                 }
-
             }
         });
+
 
         return redirect()
     ->route('pm-schedules.checklist', $pmSchedule->id)

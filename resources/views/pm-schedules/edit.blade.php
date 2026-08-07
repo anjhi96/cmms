@@ -18,6 +18,7 @@
         data-findings='@json($problemFindings)'
         data-spareparts='@json($spareparts)'
         data-big-problems='@json($bigProblems)'
+        data-sessions='@json(old('sessions', $sessions))'
         data-problem-index='@json(isset($pmProblems) ? $pmProblems->count() : 0)'
         data-sparepart-index='@json(isset($pmSpareparts) ? $pmSpareparts->count() : 0)'></div>
 
@@ -76,16 +77,6 @@
 
             <div>
                 <label class="block mb-2 text-sm font-medium">
-                    Actual Date
-                </label>
-
-                <input required name="actual_date" type="date"
-                    value="{{ old('actual_date', $pmSchedule->actual_date ?? date('Y-m-d')) }}"
-                    class="w-full border rounded-2xl p-3">
-            </div>
-
-            <div>
-                <label class="block mb-2 text-sm font-medium">
                     PIC PM
                 </label>
 
@@ -111,39 +102,33 @@
                 @endif
             </div>
 
-            <div>
-                <label class="block mb-2 text-sm font-medium">
-                    Start PM
-                </label>
+        </div>
 
-                <input required name="start_time" type="time" id="start_time"
-                    value="{{ $pmSchedule->start_time ? \Carbon\Carbon::parse($pmSchedule->start_time)->format('H:i') : '' }}"
-                    class="w-full border rounded-2xl p-3">
+        <div class="mt-6 bg-slate-50 rounded-2xl border border-slate-200 p-5">
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="text-lg font-semibold">PM Work Sessions</h4>
+                        <p class="text-sm text-slate-500">Add one or more work sessions for this PM.</p>
+                    </div>
+                    <button type="button" id="add-session" onclick="addSession()" class="inline-flex items-center rounded-2xl bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+                        + Add Day
+                    </button>
+                </div>
+
+                <div id="sessions-wrapper" class="space-y-4"></div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-200">
+                    <div class="rounded-2xl bg-white p-4 shadow-sm">
+                        <div class="text-sm text-slate-500">Total PM Duration</div>
+                        <div id="total-duration" class="mt-1 text-lg font-semibold text-slate-900">{{ $pmSchedule->totalDurationFormatted ?: '0 Hours 0 Minutes' }}</div>
+                    </div>
+                    <div class="rounded-2xl bg-white p-4 shadow-sm">
+                        <div class="text-sm text-slate-500">Total Man Hour</div>
+                        <div id="total-man-hour" class="mt-1 text-lg font-semibold text-slate-900">{{ $pmSchedule->totalManHourFormatted ?: '0 MH' }}</div>
+                    </div>
+                </div>
             </div>
-
-            <div>
-                <label class="block mb-2 text-sm font-medium">
-                    End PM
-                </label>
-
-                <input name="end_time" type="time" id="end_time"
-                    value="{{ $pmSchedule->end_time ? \Carbon\Carbon::parse($pmSchedule->end_time)->format('H:i') : '' }}"
-                    class="w-full border rounded-2xl p-3">
-            </div>
-
-            <div>
-                <label class="block mb-2 text-sm font-medium">
-                    Duration (Hours)
-                </label>
-
-                <input name="duration" type="text" id="duration" readonly value="{{ $pmSchedule->duration_formatted }}"
-                    class="w-full border rounded-2xl p-3 bg-gray-100">
-
-                <p id="duration_error" class="text-red-500 text-sm mt-1 hidden">
-                    End time cannot be earlier than start time
-                </p>
-            </div>
-
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">

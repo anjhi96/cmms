@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class PMSchedule extends Model
@@ -62,14 +63,74 @@ class PMSchedule extends Model
 
     public function getDurationFormattedAttribute()
     {
-        if (!$this->duration) {
+        $totalDuration = $this->duration;
+
+        if (!$totalDuration && $this->relationLoaded('workSessions')) {
+            $totalDuration = $this->workSessions->sum('duration');
+        }
+
+        if (!$totalDuration) {
             return '';
         }
 
-        $hours = floor($this->duration / 60);
-        $minutes = $this->duration % 60;
+        $hours = floor($totalDuration / 60);
+        $minutes = $totalDuration % 60;
 
         return "{$hours} Hours {$minutes} Minutes";
+    }
+
+    public function getTotalDurationAttribute()
+    {
+        if ($this->relationLoaded('workSessions')) {
+            return $this->workSessions->sum('duration');
+        }
+
+        return $this->duration ?? 0;
+    }
+
+    public function getTotalDurationFormattedAttribute()
+    {
+        $totalDuration = $this->totalDuration;
+
+        if (!$totalDuration) {
+            return '';
+        }
+
+        $hours = floor($totalDuration / 60);
+        $minutes = $totalDuration % 60;
+
+        return "{$hours} Hours {$minutes} Minutes";
+    }
+
+    public function getTotalManHourAttribute()
+    {
+        if ($this->relationLoaded('workSessions')) {
+            return $this->workSessions->sum(function ($session) {
+                return $session->manpowers->sum('man_hour');
+            });
+        }
+
+        return 0;
+    }
+
+    public function getTotalManHourFormattedAttribute()
+    {
+        $totalManHour = $this->totalManHour;
+
+        if (!$totalManHour) {
+            return '';
+        }
+
+        $hours = floor($totalManHour / 60);
+        $minutes = $totalManHour % 60;
+        $decimal = number_format($totalManHour / 60, 2);
+
+        return "{$decimal} MH ({$hours} Hours {$minutes} Minutes)";
+    }
+
+    public function workSessions()
+    {
+        return $this->hasMany(PMWorkSession::class, 'pm_schedule_id');
     }
 
     public function machine()

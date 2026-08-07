@@ -65,7 +65,7 @@
             <div>
                 <label class="mb-2 block text-sm font-medium">Duration (Hours)</label>
                 <div class="mt-1 rounded-lg border bg-slate-50 p-3 font-semibold">
-                    {{ $pmSchedule->duration }}
+                    {{ $pmSchedule->duration_formatted }}
                 </div>
             </div>
         </div>

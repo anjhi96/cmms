@@ -105,12 +105,23 @@
 
                         @if ($audit->needsFollowUp() && $audit->followUp)
                             <div class="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
-                                <div class="grid gap-3 text-sm sm:grid-cols-3">
+                                <div class="grid gap-3 text-sm sm:grid-cols-2">
                                     <div>
                                         <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Problem ditemukan</p>
-                                        <p class="mt-1 font-medium text-slate-800">{{ $audit->followUp->problem }}</p>
+                                        @if ($audit->followUp->problems->isNotEmpty())
+                                            <ul class="mt-2 space-y-1.5">
+                                                @foreach ($audit->followUp->problems as $problem)
+                                                    <li class="flex items-start gap-2 font-medium text-slate-800">
+                                                        <span class="mt-0.5 text-emerald-600">•</span>
+                                                        <span>{{ $problem->problem }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <p class="mt-1 font-medium text-slate-800">{{ $audit->followUp->problem }}</p>
+                                        @endif
                                     </div>
-                                    <div class="sm:col-span-2">
+                                    <div>
                                         <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Tindakan dilakukan</p>
                                         <p class="mt-1 whitespace-pre-line text-slate-700">{{ $audit->followUp->action_taken }}</p>
                                     </div>
@@ -125,28 +136,75 @@
                                 <div class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
                                         <h3 class="font-bold text-slate-900">Catat tindak lanjut</h3>
-                                        <p class="text-xs text-slate-600">PIC akan tercatat otomatis sebagai {{ auth()->user()->name }}.</p>
+                                        <p class="text-xs text-slate-600">Tambahkan semua problem yang ditemukan. PIC akan tercatat otomatis sebagai {{ auth()->user()->name }}.</p>
+                                    </div>
+                                    <button type="button" id="add-problem-{{ $audit->id }}" class="w-fit rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50">+ Add Problem</button>
+                                </div>
+
+                                <div id="problem-list-{{ $audit->id }}" class="space-y-2">
+                                    <div class="problem-row flex items-start gap-2">
+                                        <div class="min-w-0 flex-1">
+                                            <label class="mb-1.5 block text-xs font-semibold text-slate-700">Problem #1</label>
+                                            <select name="problems[]" required class="problem-select w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                                                <option value="">Pilih problem</option>
+                                                @foreach ($problemOptions as $problem)
+                                                    <option value="{{ $problem }}">{{ $problem }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="grid gap-3 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-                                    <div>
-                                        <label for="problem-{{ $audit->id }}" class="mb-1.5 block text-xs font-semibold text-slate-700">Problem ditemukan</label>
-                                        <select id="problem-{{ $audit->id }}" name="problem" required class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
-                                            <option value="">Pilih problem</option>
-                                            @foreach ($problemOptions as $problem)
-                                                <option value="{{ $problem }}">{{ $problem }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="action-{{ $audit->id }}" class="mb-1.5 block text-xs font-semibold text-slate-700">Tindakan yang dilakukan</label>
-                                        <textarea id="action-{{ $audit->id }}" name="action_taken" required rows="3" maxlength="2000" placeholder="Contoh: Repair kapstan dan tambah oli hingga batas aman." class="w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"></textarea>
-                                    </div>
+
+                                <div class="mt-3">
+                                    <label for="action-{{ $audit->id }}" class="mb-1.5 block text-xs font-semibold text-slate-700">Tindakan yang dilakukan</label>
+                                    <textarea id="action-{{ $audit->id }}" name="action_taken" required rows="3" maxlength="2000" placeholder="Contoh: Repair kapstan dan tambah oli hingga batas aman." class="w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"></textarea>
                                 </div>
                                 <div class="mt-3 flex justify-end">
                                     <button class="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 sm:w-auto">Simpan & tandai selesai</button>
                                 </div>
                             </form>
+
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    const addButton = document.getElementById('add-problem-{{ $audit->id }}');
+                                    const list = document.getElementById('problem-list-{{ $audit->id }}');
+                                    if (!addButton || !list) return;
+
+                                    const options = @json($problemOptions);
+
+                                    addButton.addEventListener('click', function () {
+                                        const count = list.querySelectorAll('.problem-row').length + 1;
+                                        const row = document.createElement('div');
+                                        row.className = 'problem-row flex items-start gap-2';
+                                        row.innerHTML = `
+                                            <div class="min-w-0 flex-1">
+                                                <label class="mb-1.5 block text-xs font-semibold text-slate-700">Problem #${count}</label>
+                                                <select name="problems[]" required class="problem-select w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                                                    <option value="">Pilih problem</option>
+                                                    ${options.map(problem => `<option value="${problem.replace(/"/g, '&quot;')}">${problem}</option>`).join('')}
+                                                </select>
+                                            </div>
+                                            <button type="button" class="remove-problem mt-6 rounded-lg border border-red-200 px-3 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50">Hapus</button>
+                                        `;
+                                        list.appendChild(row);
+                                        refreshRows();
+                                    });
+
+                                    function refreshRows() {
+                                        list.querySelectorAll('.problem-row').forEach((row, index) => {
+                                            const label = row.querySelector('label');
+                                            if (label) label.textContent = `Problem #${index + 1}`;
+                                        });
+                                        list.querySelectorAll('.remove-problem').forEach(button => {
+                                            button.onclick = function () {
+                                                if (list.querySelectorAll('.problem-row').length <= 1) return;
+                                                button.closest('.problem-row').remove();
+                                                refreshRows();
+                                            };
+                                        });
+                                    }
+                                });
+                            </script>
                         @endif
                     </div>
                 </article>

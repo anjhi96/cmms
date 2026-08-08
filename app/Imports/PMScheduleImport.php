@@ -4,22 +4,29 @@ namespace App\Imports;
 
 use App\Models\Machine;
 use App\Models\PMSchedule;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Carbon\Carbon;
 
 class PMScheduleImport implements ToCollection
 {
     public function collection(Collection $rows)
     {
+        $duplicateCount = 0;
+        $importedCount = 0;
 
-        // dd('PM IMPORT KEPAKE');
         foreach ($rows->skip(1) as $row) {
 
-            $machineNumber = trim($row[0]);
+            $machineNumber = trim((string) ($row[0] ?? ''));
+            $orderNumber = trim((string) ($row[5] ?? ''));
 
-            // skip kalau machine number kosong
-            if (!$machineNumber) {
+            // Skip kalau machine number kosong
+            if ($machineNumber === '') {
+                continue;
+            }
+
+            // Skip kalau order number kosong
+            if ($orderNumber === '') {
                 continue;
             }
 
@@ -28,48 +35,60 @@ class PMScheduleImport implements ToCollection
                 $machineNumber
             )->first();
 
-            // skip kalau machine tidak ada
-            if (!$machine) {
+            // Skip kalau machine tidak ada
+            if (! $machine) {
                 continue;
             }
 
-            // normalize date
+            // Normalize date
             try {
                 $planDate = Carbon::createFromFormat(
                     'd-m-y',
-                    trim($row[4])
-                );
+                    trim((string) $row[4])
+                )->startOfDay();
 
             } catch (\Exception $e) {
-
                 continue;
-
             }
 
-            // 🚨 CHECK DUPLICATE (INI INTI FIX)
+            // Pastikan hanya tanggal, tanpa jam
+            $planDateFormatted = $planDate->format('Y-m-d');
+
+        
             $exists = PMSchedule::where('machine_number', $machineNumber)
-                ->where('plan_date', $planDate)
+                ->whereDate('plan_date', $planDate)
+                ->where('order_number', $orderNumber)
                 ->exists();
 
             if ($exists) {
-                continue; // skip kalau sudah ada
+                continue;
             }
 
-            PMSchedule::updateOrCreate([
+            // HANYA DATA YANG BELUM ADA YANG DI-INSERT
+            PMSchedule::create([
+                'machine_id' => $machine->id,
                 'machine_number' => $machineNumber,
-                'plan_date' => $planDate->format('Y-m-d'),
-            ], [
-                'machine_id'     => $machine->id,
-                'machine_number' => $row[0],
-                'machine_type'   => $row[1],
-                'area'           => $machine->area,
-                'plan_year'      => $row[2],
-                'plan_month'     => $row[3],
-                'plan_date'      => $planDate->format('Y-m-d'),
-                'due_date'       => $planDate->copy()->addDays(14)->format('Y-m-d'),
-                'order_number'   => $row[5],
-                'status'         => $row[6] ?? 'OPEN',
+                'machine_type' => $row[1],
+                'area' => $machine->area,
+                'plan_year' => $row[2],
+                'plan_month' => $row[3],
+                'plan_date' => $planDate,
+                'due_date' => Carbon::parse($planDate)
+                    ->addDays(14)
+                    ->format('Y-m-d'),
+                'order_number' => $orderNumber,
+                'status' => $row[6] ?? 'OPEN',
             ]);
+            $importedCount++;
         }
+
+ 
+        session()->flash(
+            'import_result',
+            [
+                'imported' => $importedCount,
+                'duplicate' => $duplicateCount,
+            ]
+        );
     }
 }

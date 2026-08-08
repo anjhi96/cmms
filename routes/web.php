@@ -59,6 +59,7 @@ Route::middleware([
     Route::resource('machine-checklists', MachineChecklistController::class);
     Route::post('/machine-checklists/import', [MachineChecklistController::class, 'import'])->name('machine-checklists.import');
 
+    Route::resource('pm-schedules', PMScheduleController::class);
     Route::post('/pm-schedules/import', [PMScheduleController::class, 'import'])->name('pm-schedules.import');
     Route::post('/pm-schedules/{pmSchedule}/assign-pic', [PMScheduleController::class, 'assignPic'])->name('pm-schedules.assign-pic');
 
@@ -76,8 +77,7 @@ Route::middleware([
     
     Route::get('spareparts', [SparepartController::class, 'index'])->name('spareparts.index');
 
-    Route::resource('pm-schedules', PMScheduleController::class);
-    Route::resource('pm-schedules', PMScheduleController::class)->middleware('auth');
+    Route::resource('pm-schedules', PMScheduleController::class)->except(['create', 'store', 'destroy', 'import']);
     Route::get('/pm-schedules/{pmSchedule}/checklist', [PMScheduleController::class, 'checklist'])->name('pm-schedules.checklist');
     Route::post('/pm-schedules/{pmSchedule}/checklist', [PMScheduleController::class, 'saveChecklist'])->name('pm-schedules.checklist.save');
 

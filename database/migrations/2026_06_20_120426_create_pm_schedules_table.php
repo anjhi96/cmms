@@ -25,7 +25,7 @@ return new class () extends Migration {
             $table->string('machine_number');
 
             // Order
-            $table->string('order_number')->unique()->nullable();
+            $table->string('order_number')->nullable();
 
             // Planning
             $table->date('plan_date');

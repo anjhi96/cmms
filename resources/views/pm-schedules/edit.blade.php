@@ -489,10 +489,10 @@
 
         <div class="flex justify-end gap-3 mt-8 max-sm:flex-col">
 
-            <a href="{{ route('pm-schedules.checklist', $pmSchedule->id) }}"
+            {{-- <a href="{{ route('pm-schedules.checklist', $pmSchedule->id) }}"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-center max-sm:w-full">
                 Go To Checklist (Dev)
-            </a>
+            </a> --}}
 
             <button type="submit" class="bg-gray-500 hover:bg-green-700 text-white px-6 py-3 rounded-xl max-sm:w-full">
                 Lihat Checklist

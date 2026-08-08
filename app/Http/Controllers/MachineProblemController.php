@@ -24,7 +24,7 @@ class MachineProblemController extends Controller
         }
 
         // SORT
-        $sort = $request->get('sort');
+        $sort = $request->input('sort');
 
         switch ($sort) {
             case 'machine_type_asc':
@@ -183,7 +183,7 @@ class MachineProblemController extends Controller
 
         try {
             Excel::import(
-                new MachineProblemImport,
+                new MachineProblemImport(),
                 $request->file('file')
             );
         } catch (\Throwable $e) {
@@ -196,6 +196,14 @@ class MachineProblemController extends Controller
             'success',
             'Machine Problems imported successfully.'
         );
+    }
+
+    public function getByType($type)
+    {
+        // trim($type) berfungsi untuk menghapus spasi liar jika ada teks yang tidak rata
+        return MachineProblem::where('machine_type', trim($type))
+            ->orderBy('problem', 'asc')
+            ->get();
     }
 
     public function destroy(MachineProblem $machineProblem)

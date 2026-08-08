@@ -136,7 +136,8 @@
                                     $userRole === 'ADMIN' ||
                                     $userRole === 'PIC WWD' ||
                                     $userRole === 'PIC BUL' ||
-                                    $userRole === 'KOORDINATOR',
+                                    $userRole === 'KOORDINATOR WWD'||
+                                    $userRole === 'KOORDINATOR BUL',
                             ],
                             [
                                 'route' => route('oil-audits.scan'),
@@ -146,6 +147,10 @@
                                 'icon' => '
             <path d="M12 3s-5 5.5-5 10a5 5 0 0 0 10 0c0-4.5-5-10-5-10Z" />
             <path d="M9.5 15.5c.7.8 1.5 1.2 2.5 1.2" />',
+                                'visible' =>
+                                    $userRole === 'ADMIN' ||
+                                    $userRole === 'PIC WWD' ||
+                                    $userRole === 'KOORDINATOR WWD',
                             ],
                         ],
                     ],
@@ -173,7 +178,12 @@
             <path d="M4 19V9" />
             <path d="M20 19V5" />
             <path d="M12 19V13" />',
-                                'visible' => $userRole === 'ADMIN' || $userRole === 'KOORDINATOR',
+                                'visible' => 
+                                    $userRole === 'ADMIN' ||
+                                    $userRole === 'PIC WWD' ||
+                                    $userRole === 'PIC BUL' ||
+                                    $userRole === 'KOORDINATOR WWD'||
+                                    $userRole === 'KOORDINATOR BUL',
                             ],
                             [
                                 'route' => route('oil-audits.report'),
@@ -184,6 +194,10 @@
             <path d="M10 19V5" />
             <path d="M16 19v-7" />
             <path d="M22 19V3" />',
+                                'visible' =>
+                                    $userRole === 'ADMIN' ||
+                                    $userRole === 'PIC WWD' ||
+                                    $userRole === 'KOORDINATOR WWD',
                             ],
                         ],
                     ],
@@ -208,6 +222,10 @@
             <path d="M17 7v10" />
             <path d="M4 17h16" />
             <rect x="6" y="4" width="12" height="4" rx="1" />',
+                                'visible' => 
+                                    $userRole === 'ADMIN' || 
+                                    $userRole === 'KOORDINATOR WWD'||
+                                    $userRole === 'KOORDINATOR BUL',
                             ],
                             [
                                 'route' => route('spareparts.index'),
@@ -228,7 +246,10 @@
             <path d="M7 12V7" />
             <path d="M12 12v-3" />
             <path d="M17 12v-6" />',
-                                'visible' => $userRole === 'ADMIN',
+                                'visible' => 
+                                    $userRole === 'ADMIN' || 
+                                    $userRole === 'KOORDINATOR WWD'||
+                                    $userRole === 'KOORDINATOR BUL',
                             ],
                             [
                                 'route' => route('machine-checklists.index'),
@@ -237,7 +258,10 @@
                                 'icon' => '
             <path d="M9 11 11 13l4-4" />
             <rect x="4" y="4" width="16" height="16" rx="2" />',
-                                'visible' => $userRole === 'ADMIN',
+                                'visible' => 
+                                    $userRole === 'ADMIN' || 
+                                    $userRole === 'KOORDINATOR WWD'||
+                                    $userRole === 'KOORDINATOR BUL',
                             ],
                             [
                                 'route' => route('machine-problems.index'),
@@ -247,7 +271,10 @@
             <path d="M12 3 2 19h20L12 3Z" />
             <path d="M12 8v5" />
             <path d="M12 16h.01" />',
-                                'visible' => $userRole === 'ADMIN',
+                                'visible' => 
+                                    $userRole === 'ADMIN' || 
+                                    $userRole === 'KOORDINATOR WWD'||
+                                    $userRole === 'KOORDINATOR BUL',
                             ],
                             [
                                 'route' => route('machine-problem-findings.index'),
@@ -256,7 +283,10 @@
                                 'icon' => '
             <circle cx="11" cy="11" r="6" />
             <path d="m20 20-4.2-4.2" />',
-                                'visible' => $userRole === 'ADMIN',
+                                'visible' => 
+                                    $userRole === 'ADMIN' || 
+                                    $userRole === 'KOORDINATOR WWD'||
+                                    $userRole === 'KOORDINATOR BUL',
                             ],
                         ],
                     ],
@@ -276,7 +306,10 @@
             <path d="M12 3v12" />
             <path d="m6 9 6 6 6-6" />
             <path d="M5 19h14" />',
-                                'visible' => $userRole === 'ADMIN',
+                                'visible' => 
+                                    $userRole === 'ADMIN' || 
+                                    $userRole === 'KOORDINATOR WWD'||
+                                    $userRole === 'KOORDINATOR BUL',
                             ],
                             [
                                 'route' => route('users.index'),
@@ -287,14 +320,20 @@
             <circle cx="9.5" cy="7" r="3" />
             <path d="M17 8h4" />
             <path d="M19 6v4" />',
-                                'visible' => $userRole === 'ADMIN',
+                                'visible' => 
+                                    $userRole === 'ADMIN',
                             ],
                         ],
+                        'visible' => 
+                                    $userRole === 'ADMIN' || 
+                                    $userRole === 'KOORDINATOR WWD'||
+                                    $userRole === 'KOORDINATOR BUL',
                     ],
                 ];
             @endphp
 
             @foreach ($groups as $group)
+            @if (!isset($group['visible']) || $group['visible'])
                 <div class="mb-3 rounded-2xl border border-slate-800/70 bg-slate-900/70">
                     <button type="button"
                         @click="openGroup = (openGroup === '{{ $group['key'] }}') ? '' : '{{ $group['key'] }}'"
@@ -334,6 +373,7 @@
                         @endforeach
                     </div>
                 </div>
+            @endif
             @endforeach
         </nav>
 

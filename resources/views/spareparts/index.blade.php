@@ -7,6 +7,7 @@
             <p class="text-sm text-slate-500">Manage sparepart master data</p>
         </div>
 
+        @if (in_array(auth()->user()->role, ['ADMIN', 'KOORDINATOR WWD', 'KOORDINATOR BUL']))
         <form action="{{ route('spareparts.import') }}" method="POST" enctype="multipart/form-data"
             class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-sm sm:flex-row sm:items-center">
             @csrf
@@ -21,6 +22,7 @@
                 Import
             </button>
         </form>
+        @endif
     </div>
 
     @if ($errors->has('file'))

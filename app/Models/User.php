@@ -11,14 +11,21 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory;
+    use Notifiable;
 
     /**
      * Role constants
      */
     public const ROLE_ADMIN = 'ADMIN';
-    public const ROLE_KOORDINATOR = 'KOORDINATOR';
-    public const ROLE_PIC = 'PIC';
+
+    public const ROLE_KOORDINATOR_WWD = 'KOORDINATOR WWD';
+    public const ROLE_KOORDINATOR_BUL = 'KOORDINATOR BUL';
+
+    public const ROLE_PIC_WWD = 'PIC WWD';
+    public const ROLE_PIC_BUL = 'PIC BUL';
+
+    public const ROLE_GUEST = 'GUEST';
 
     /**
      * The attributes that are mass assignable.
@@ -68,12 +75,38 @@ class User extends Authenticatable
 
     public function isKoordinator(): bool
     {
-        return $this->role === self::ROLE_KOORDINATOR;
+        return in_array($this->role, [
+            self::ROLE_KOORDINATOR_WWD,
+            self::ROLE_KOORDINATOR_BUL,
+        ], true);
     }
 
     public function isPic(): bool
     {
-        return $this->role === self::ROLE_PIC;
+        return in_array($this->role, [
+            self::ROLE_PIC_WWD,
+            self::ROLE_PIC_BUL,
+        ], true);
+    }
+
+    public function isKoordinatorWwd(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_WWD;
+    }
+
+    public function isKoordinatorBul(): bool
+    {
+        return $this->role === self::ROLE_KOORDINATOR_BUL;
+    }
+
+    public function isPicWwd(): bool
+    {
+        return $this->role === self::ROLE_PIC_WWD;
+    }
+
+    public function isPicBul(): bool
+    {
+        return $this->role === self::ROLE_PIC_BUL;
     }
 
     public function hasRole(array $roles): bool

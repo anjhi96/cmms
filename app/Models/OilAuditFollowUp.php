@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OilAuditFollowUp extends Model
 {
@@ -31,5 +32,10 @@ class OilAuditFollowUp extends Model
     public function pic(): BelongsTo
     {
         return $this->belongsTo(User::class, 'pic_user_id');
+    }
+
+    public function problems(): HasMany
+    {
+        return $this->hasMany(OilAuditFollowUpProblem::class);
     }
 }

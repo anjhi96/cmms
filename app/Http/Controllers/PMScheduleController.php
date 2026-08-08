@@ -451,6 +451,9 @@ class PMScheduleController extends Controller
 
                 foreach ($request->measurements as $measurement) {
 
+
+                // dd($request->measurements);
+
                     PMMeasurement::create([
 
                     'pm_schedule_id' => $pmSchedule->id,

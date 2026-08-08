@@ -68,7 +68,7 @@ class OilAuditController extends Controller
         $machines = Machine::query()
             ->where('area', self::AUDIT_AREA)
             ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
-            ->with(['latestOilAudit.followUp'])
+            ->with(['latestOilAudit.followUp.problems'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->trim()->toString();
 
@@ -159,11 +159,11 @@ class OilAuditController extends Controller
             ->whereIn('machine_type', self::AUDIT_MACHINE_TYPES)
             ->firstOrFail();
         $audits = $machine->oilAudits()
-            ->with('followUp')
+            ->with('followUp.problems')
             ->latest('audited_at')
             ->paginate(15);
 
-        $latestAudit = $machine->latestOilAudit()->with('followUp')->first();
+        $latestAudit = $machine->latestOilAudit()->with('followUp.problems')->first();
         $recentAudits = $machine->oilAudits()
             ->latest('audited_at')
             ->limit(8)
@@ -198,7 +198,8 @@ class OilAuditController extends Controller
         }
 
         $validated = $request->validate([
-            'problem' => [
+            'problems' => ['required', 'array', 'min:1'],
+            'problems.*' => [
                 'required',
                 'in:'.implode(',', OilAudit::PROBLEM_OPTIONS),
             ],
@@ -207,14 +208,21 @@ class OilAuditController extends Controller
 
         $user = $request->user();
 
-        OilAuditFollowUp::create([
+        $followUp = OilAuditFollowUp::create([
             'oil_audit_id' => $oilAudit->id,
-            'problem' => $validated['problem'],
+            // Keep the legacy column populated for backward compatibility.
+            'problem' => $validated['problems'][0],
             'action_taken' => $validated['action_taken'],
             'pic_user_id' => $user->id,
             'pic_name' => $user->name,
             'actioned_at' => now(),
         ]);
+
+        $followUp->problems()->createMany(
+            collect($validated['problems'])
+                ->map(fn (string $problem) => ['problem' => $problem])
+                ->all()
+        );
 
         return back()->with('success', 'Tindak lanjut berhasil disimpan dan tercatat pada riwayat mesin.');
     }

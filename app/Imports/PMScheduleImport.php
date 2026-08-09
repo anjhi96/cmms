@@ -61,6 +61,7 @@ class PMScheduleImport implements ToCollection
                 ->exists();
 
             if ($exists) {
+                $duplicateCount++;
                 continue;
             }
 
@@ -72,7 +73,7 @@ class PMScheduleImport implements ToCollection
                 'area' => $machine->area,
                 'plan_year' => $row[2],
                 'plan_month' => $row[3],
-                'plan_date' => $planDate,
+                'plan_date' => $planDateFormatted,
                 'due_date' => Carbon::parse($planDate)
                     ->addDays(14)
                     ->format('Y-m-d'),

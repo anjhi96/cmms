@@ -1,30 +1,176 @@
 @extends('layouts.app')
 
 @section('content')
-<div>
-    <label class="mb-2 block text-sm font-medium text-slate-700">
-        Role
-    </label>
+<div class="mx-auto max-w-4xl">
 
-    <select
-        name="role"
-        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none"
-        required
-    >
-        <option value="">Select Role</option>
+    <div class="rounded-3xl border border-slate-200 bg-white shadow-sm">
 
-        @foreach ($roles as $role)
-            <option
-                value="{{ $role }}"
-                @selected(old('role') === $role)
-            >
-                {{ $role }}
-            </option>
-        @endforeach
-    </select>
+        {{-- Header --}}
+        <div class="border-b border-slate-200 px-6 py-5">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-semibold text-slate-800">
+                        Add User
+                    </h1>
 
-    @error('role')
-        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-    @enderror
+                    <p class="mt-1 text-sm text-slate-500">
+                        Create a new user account and assign its role.
+                    </p>
+                </div>
+
+                <a
+                    href="{{ route('users.index') }}"
+                    class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                >
+                    Back
+                </a>
+            </div>
+        </div>
+
+        {{-- Form --}}
+        <form
+            action="{{ route('users.store') }}"
+            method="POST"
+            class="space-y-5 p-6"
+        >
+            @csrf
+
+            {{-- Name --}}
+            <div>
+                <label
+                    for="name"
+                    class="mb-2 block text-sm font-medium text-slate-700"
+                >
+                    Name
+                </label>
+
+                <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    value="{{ old('name') }}"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="Enter full name"
+                    required
+                    autofocus
+                >
+
+                @error('name')
+                    <p class="mt-1 text-xs text-red-600">
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
+
+            {{-- Email --}}
+            <div>
+                <label
+                    for="email"
+                    class="mb-2 block text-sm font-medium text-slate-700"
+                >
+                    Email
+                </label>
+
+                <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value="{{ old('email') }}"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="user@example.com"
+                    required
+                >
+
+                @error('email')
+                    <p class="mt-1 text-xs text-red-600">
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
+
+            {{-- Password --}}
+            <div>
+                <label
+                    for="password"
+                    class="mb-2 block text-sm font-medium text-slate-700"
+                >
+                    Password
+                </label>
+
+                <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="Minimum 8 characters"
+                    required
+                >
+
+                @error('password')
+                    <p class="mt-1 text-xs text-red-600">
+                        {{ $message }}
+                    </p>
+                @enderror
+
+                <p class="mt-1 text-xs text-slate-500">
+                    The user can change their password later if that feature is enabled.
+                </p>
+            </div>
+
+            {{-- Role --}}
+            <div>
+                <label
+                    for="role"
+                    class="mb-2 block text-sm font-medium text-slate-700"
+                >
+                    Role
+                </label>
+
+                <select
+                    id="role"
+                    name="role"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    required
+                >
+                    <option value="">Select Role</option>
+
+                    @foreach ($roles as $role)
+                        <option
+                            value="{{ $role }}"
+                            @selected(old('role') === $role)
+                        >
+                            {{ $role }}
+                        </option>
+                    @endforeach
+                </select>
+
+                @error('role')
+                    <p class="mt-1 text-xs text-red-600">
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
+
+            {{-- Actions --}}
+            <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-5">
+
+                <button
+                    type="submit"
+                    class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                    Create User
+                </button>
+
+                <a
+                    href="{{ route('users.index') }}"
+                    class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                >
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+    </div>
 </div>
 @endsection

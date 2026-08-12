@@ -27,9 +27,17 @@ Route::get('/scan', [QrScannerController::class, 'index'])->name('qr.scan');
 
 
 Route::middleware([
-    'auth', 'role:ADMIN'
+    'auth',
+    'role:ADMIN',
 ])->group(function () {
-    Route::resource('users', UserController::class)->only(['index', 'create', 'store']);
+    Route::resource('users', UserController::class)
+        ->only([
+            'index',
+            'create',
+            'store',
+            'edit',
+            'update',
+        ]);
 });
 
 Route::middleware([

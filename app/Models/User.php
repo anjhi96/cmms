@@ -37,6 +37,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_active',
     ];
 
     /**
@@ -59,6 +60,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -107,6 +109,11 @@ class User extends Authenticatable
     public function isPicBul(): bool
     {
         return $this->role === self::ROLE_PIC_BUL;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->is_active === true;
     }
 
     public function hasRole(array $roles): bool

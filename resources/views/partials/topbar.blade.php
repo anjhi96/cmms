@@ -1,4 +1,5 @@
-<header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-4 shadow-sm backdrop-blur sm:px-6 lg:ml-72">
+<header
+    class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-4 shadow-sm backdrop-blur sm:px-6 lg:ml-72">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-4">
             {{-- Tombol Hamburger: cuma tampil di mobile --}}
@@ -24,13 +25,18 @@
 
         <div class="flex items-center justify-end gap-3">
             <div class="text-right">
-                <div class="text-sm font-medium text-slate-800">{{ auth()->user()->name }}</div>
-                <div class="text-xs text-slate-500">{{ auth()->user()->role }}</div>
+                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                    My Profile
+                    <div class="text-sm font-medium text-slate-800">{{ auth()->user()->name }}</div>
+                    <div class="text-xs text-slate-500">{{ auth()->user()->role }}</div>
+                </a>
+
             </div>
 
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button class="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-red-700">
+                <button
+                    class="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-red-700">
                     Logout
                 </button>
             </form>

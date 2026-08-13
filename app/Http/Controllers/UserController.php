@@ -54,6 +54,7 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
+            'is_active' => true,
         ]);
 
         return redirect()
@@ -77,6 +78,26 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        $isCurrentUser = auth()->id() === $user->id;
+        
+
+        // Admin tidak boleh mengubah role dirinya sendiri
+        if ($isCurrentUser && $request->input('role') !== $user->role) {
+            return back()
+                ->withErrors([
+                    'role' => 'You cannot change your own role.',
+                ])
+                ->withInput();
+        }
+
+        if ($isCurrentUser && ! $request->boolean('is_active')) {
+            return back()
+                ->withErrors([
+                    'is_active' => 'You cannot deactivate your own account.',
+                ])
+                ->withInput();
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -97,15 +118,16 @@ class UserController extends Controller
                     User::ROLE_PIC_BUL,
                 ]),
             ],
+            'is_active' => ['required', 'boolean'],
         ]);
 
         $data = [
             'name' => Str::title(strtolower(trim($validated['name']))),
             'email' => $validated['email'],
             'role' => $validated['role'],
+            'is_active' => $validated['is_active'],
         ];
 
-        // Password hanya diubah kalau Admin mengisinya
         if (! empty($validated['password'])) {
             $data['password'] = Hash::make($validated['password']);
         }

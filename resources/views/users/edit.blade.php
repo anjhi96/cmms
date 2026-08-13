@@ -84,23 +84,107 @@
                     Role
                 </label>
 
-                <select
-                    name="role"
-                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none"
-                    required
-                >
-                    @foreach ($roles as $role)
-                        <option
-                            value="{{ $role }}"
-                            @selected(old('role', $user->role) === $role)
-                        >
-                            {{ $role }}
-                        </option>
-                    @endforeach
-                </select>
+                @if (auth()->id() === $user->id)
+
+                    <input
+                        type="text"
+                        value="{{ $user->role }}"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm font-medium text-slate-500"
+                        disabled
+                    >
+
+                    <input
+                        type="hidden"
+                        name="role"
+                        value="{{ $user->role }}"
+                    >
+
+                    <p class="mt-1 text-xs text-slate-500">
+                        You cannot change your own role.
+                    </p>
+
+                @else
+
+                    <select
+                        name="role"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none"
+                        required
+                    >
+                        @foreach ($roles as $role)
+                            <option
+                                value="{{ $role }}"
+                                @selected(old('role', $user->role) === $role)
+                            >
+                                {{ $role }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                @endif
 
                 @error('role')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    <p class="mt-1 text-xs text-red-600">
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
+
+            <div>
+                <label
+                    for="is_active"
+                    class="mb-2 block text-sm font-medium text-slate-700"
+                >
+                    Status
+                </label>
+
+                @if (auth()->id() === $user->id)
+
+                    <input
+                        type="text"
+                        value="Active"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm font-medium text-slate-500"
+                        disabled
+                    >
+
+                    <input
+                        type="hidden"
+                        name="is_active"
+                        value="1"
+                    >
+
+                    <p class="mt-1 text-xs text-slate-500">
+                        You cannot deactivate your own account.
+                    </p>
+
+                @else
+
+                    <select
+                        id="is_active"
+                        name="is_active"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 focus:border-blue-500 focus:outline-none"
+                        required
+                    >
+                        <option
+                            value="1"
+                            @selected(old('is_active', $user->is_active) == true)
+                        >
+                            Active
+                        </option>
+
+                        <option
+                            value="0"
+                            @selected(old('is_active', $user->is_active) == false)
+                        >
+                            Inactive
+                        </option>
+                    </select>
+
+                @endif
+
+                @error('is_active')
+                    <p class="mt-1 text-xs text-red-600">
+                        {{ $message }}
+                    </p>
                 @enderror
             </div>
 

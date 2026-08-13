@@ -14,6 +14,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SparepartController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -25,6 +26,18 @@ Route::get('/m/{machine}', [MachineHistoryController::class,'show',]);
 
 Route::get('/scan', [QrScannerController::class, 'index'])->name('qr.scan');
 
+Route::middleware('auth')->group(function () {
+
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::put('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
+        ->name('profile.password.update');
+
+});
 
 Route::middleware([
     'auth',

@@ -96,22 +96,32 @@ class SparepartController extends Controller
             'file' => [
                 'required',
                 'file',
-                'max:20480',
+                'max:20480', // 20 MB
                 function ($attribute, $value, $fail) {
-                    $extension = strtolower($value->getClientOriginalExtension());
-                    $mime = strtolower($value->getClientMimeType());
-                    $allowedExtensions = ['csv', 'txt'];
+                    $extension = strtolower(
+                        $value->getClientOriginalExtension()
+                    );
+
+                    $mime = strtolower(
+                        $value->getMimeType()
+                    );
+
+                    $allowedExtensions = [
+                        'csv',
+                    ];
+
                     $allowedMimes = [
                         'text/csv',
                         'text/plain',
                         'application/csv',
-                        'application/excel',
                         'application/vnd.ms-excel',
-                        'application/octet-stream',
                     ];
 
-                    if (!in_array($extension, $allowedExtensions, true) && !in_array($mime, $allowedMimes, true)) {
-                        $fail('File must be a CSV file.');
+                    if (
+                        ! in_array($extension, $allowedExtensions, true)
+                        || ! in_array($mime, $allowedMimes, true)
+                    ) {
+                        $fail('File must be a valid CSV file.');
                     }
                 },
             ],

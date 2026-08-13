@@ -80,19 +80,57 @@ class MachineController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file'
+            'file' => [
+                'required',
+                'file',
+                'max:20480', // 20 MB
+                function ($attribute, $value, $fail) {
+                    $extension = strtolower(
+                        $value->getClientOriginalExtension()
+                    );
+
+                    $mime = strtolower(
+                        $value->getMimeType()
+                    );
+
+                    $allowedExtensions = [
+                        'csv',
+                    ];
+
+                    $allowedMimes = [
+                        'text/csv',
+                        'text/plain',
+                        'application/csv',
+                        'application/vnd.ms-excel',
+                    ];
+
+                    if (
+                        ! in_array($extension, $allowedExtensions, true)
+                        || ! in_array($mime, $allowedMimes, true)
+                    ) {
+                        $fail('File must be a valid CSV file.');
+                    }
+                },
+            ],
         ]);
 
-        $file = $request->file('file');
-        $ext = $file->getClientOriginalExtension();
+        try {
+            Excel::import(
+                new MachinesImport(),
+                $request->file('file')
+            );
+        } catch (\Throwable $e) {
+            report($e);
 
-        if ($ext !== 'csv') {
-            return back()->with('error', 'Only CSV file is allowed!');
+            return back()->withErrors([
+                'file' => 'Import failed. Please check the file format and data.',
+            ]);
         }
 
-        Excel::import(new MachinesImport(), $file);
-
-        return back()->with('success', 'Machine imported successfully');
+        return back()->with(
+            'success',
+            'Machine imported successfully'
+        );
     }
 
     public function importForm()

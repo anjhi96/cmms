@@ -72,7 +72,7 @@ class OilAudit extends Model
     public static function followUpConditions(): array
     {
         // Conditions that require follow up: include GLASS_BUREM as requested
-        return ['HAMPIR_GARIS', 'PAS_GARIS', 'KRITIS', 'GLASS_BUREM'];
+        return ['HAMPIR_GARIS', 'PAS_GARIS', 'KRITIS', 'OLI_KERUH', 'GLASS_BUREM'];
     }
 
     public function needsFollowUp(): bool
